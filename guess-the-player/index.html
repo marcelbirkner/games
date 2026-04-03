@@ -109,13 +109,16 @@
     .correct-count { color: #10b981; }
 
     .player-display {
-      text-align: center;
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
       margin-bottom: 28px;
     }
 
     .player-display img {
-      width: 220px;
-      height: 280px;
+      width: 180px;
+      min-width: 180px;
+      height: 230px;
       object-fit: cover;
       object-position: top;
       border-radius: 16px;
@@ -124,14 +127,9 @@
       background: rgba(255,255,255,0.05);
     }
 
-    .player-hint {
-      margin-top: 12px;
-      font-size: 0.9rem;
-      color: #a5b4fc;
-    }
-
     .options {
       display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
 
@@ -252,6 +250,68 @@
       color: #666;
       font-size: 4rem;
     }
+
+    .player-info {
+      margin-top: 16px;
+      padding: 16px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      display: none;
+      text-align: left;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .player-info .info-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #a5b4fc;
+    }
+
+    .player-info .info-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .player-info .info-label {
+      color: #888;
+      white-space: nowrap;
+      min-width: 55px;
+    }
+
+    .player-info .info-value {
+      color: #ddd;
+    }
+
+    .player-info .info-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .player-info .tag {
+      padding: 2px 10px;
+      border-radius: 99px;
+      font-size: 0.78rem;
+      background: rgba(99, 102, 241, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #c4b5fd;
+    }
+
+    .player-info .tag.title-tag {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+    }
   </style>
 </head>
 <body>
@@ -291,6 +351,12 @@
         <div class="player-hint" id="player-hint"></div>
       </div>
       <div class="options" id="options"></div>
+      <div class="player-info" id="player-info">
+        <div class="info-name" id="info-name"></div>
+        <div class="info-row"><span class="info-label">Born:</span><span class="info-value" id="info-born"></span></div>
+        <div class="info-row"><span class="info-label">Teams:</span><div class="info-tags" id="info-teams"></div></div>
+        <div class="info-row"><span class="info-label">Titles:</span><div class="info-tags" id="info-titles"></div></div>
+      </div>
     </div>
 
     <!-- Result -->
@@ -308,129 +374,129 @@
 <script>
 const PLAYERS = [
   // Argentina
-  {name:"Lionel Messi",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Lionel_Messi_NE_Revolution_Inter_Miami_7.9.25-178.jpg/330px-Lionel_Messi_NE_Revolution_Inter_Miami_7.9.25-178.jpg"},
-  {name:"Diego Maradona",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Argentina_celebrando_copa_%28cropped%29.jpg/330px-Argentina_celebrando_copa_%28cropped%29.jpg"},
-  {name:"Ángel Di María",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/NIG-ARG_%285%29.jpg/330px-NIG-ARG_%285%29.jpg"},
-  {name:"Sergio Agüero",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Ag%C3%BCero_in_2018.jpg/330px-Ag%C3%BCero_in_2018.jpg"},
-  {name:"Javier Zanetti",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Javier_Adelmar_Zanetti.jpg/330px-Javier_Adelmar_Zanetti.jpg"},
-  {name:"Gabriel Batistuta",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Omar_Batistuta_%282%29.jpg/330px-Omar_Batistuta_%282%29.jpg"},
-  {name:"Julián Álvarez",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/0/03/Argentina_national_football_team_-_2_-_2022_%28Juli%C3%A1n_%C3%81lvarez%29.jpg"},
-  {name:"Paulo Dybala",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/%D0%9C%D0%B0%D1%82%D1%87_%C2%AB%D0%94%D0%B8%D0%BD%D0%B0%D0%BC%D0%BE%C2%BB_-_%C2%AB%D0%AE%D0%B2%D0%B5%D0%BD%D1%82%D1%83%D1%81%C2%BB_0-2._20_%D0%BE%D0%BA%D1%82%D1%8F%D0%B1%D1%80%D1%8F_2020_%D0%B3%D0%BE%D0%B4%D0%B0_%E2%80%94_1153905_%28cropped%29.jpg/330px-%D0%9C%D0%B0%D1%82%D1%87_%C2%AB%D0%94%D0%B8%D0%BD%D0%B0%D0%BC%D0%BE%C2%BB_-_%C2%AB%D0%AE%D0%B2%D0%B5%D0%BD%D1%82%D1%83%D1%81%C2%BB_0-2._20_%D0%BE%D0%BA%D1%82%D1%8F%D0%B1%D1%80%D1%8F_2020_%D0%B3%D0%BE%D0%B4%D0%B0_%E2%80%94_1153905_%28cropped%29.jpg"},
-  {name:"Lautaro Martínez",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Lautaro_Martinez_ARGENTINA_VS_VENEZUELA_2017.jpg/330px-Lautaro_Martinez_ARGENTINA_VS_VENEZUELA_2017.jpg"},
-  {name:"Emiliano Martínez",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/St._Louis_City_vs_Aston_Villa_%28Jul_2025%29_14_%28Emiliano_Mart%C3%ADnez%29.jpg/330px-St._Louis_City_vs_Aston_Villa_%28Jul_2025%29_14_%28Emiliano_Mart%C3%ADnez%29.jpg"},
+  {name:"Lionel Messi",country:"Argentina",born:"Rosario, Argentina",teams:["Barcelona","PSG","Inter Miami"],titles:["World Cup 2022","8x Ballon d'Or","4x Champions League"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Lionel_Messi_NE_Revolution_Inter_Miami_7.9.25-178.jpg/330px-Lionel_Messi_NE_Revolution_Inter_Miami_7.9.25-178.jpg"},
+  {name:"Diego Maradona",country:"Argentina",born:"Lanús, Argentina",teams:["Boca Juniors","Barcelona","Napoli"],titles:["World Cup 1986","2x Serie A","UEFA Cup 1989"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Argentina_celebrando_copa_%28cropped%29.jpg/330px-Argentina_celebrando_copa_%28cropped%29.jpg"},
+  {name:"Ángel Di María",country:"Argentina",born:"Rosario, Argentina",teams:["Benfica","Real Madrid","PSG"],titles:["World Cup 2022","Champions League 2014","Copa América 2021"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/NIG-ARG_%285%29.jpg/330px-NIG-ARG_%285%29.jpg"},
+  {name:"Sergio Agüero",country:"Argentina",born:"Buenos Aires, Argentina",teams:["Independiente","Atlético Madrid","Manchester City"],titles:["5x Premier League","Europa League 2010","Copa América 2021"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Ag%C3%BCero_in_2018.jpg/330px-Ag%C3%BCero_in_2018.jpg"},
+  {name:"Javier Zanetti",country:"Argentina",born:"Buenos Aires, Argentina",teams:["Banfield","Inter Milan"],titles:["Champions League 2010","5x Serie A","UEFA Cup 1998"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Javier_Adelmar_Zanetti.jpg/330px-Javier_Adelmar_Zanetti.jpg"},
+  {name:"Gabriel Batistuta",country:"Argentina",born:"Reconquista, Argentina",teams:["River Plate","Fiorentina","Roma"],titles:["Serie A 2001","2x Copa América","Copa Italia 1996"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Omar_Batistuta_%282%29.jpg/330px-Omar_Batistuta_%282%29.jpg"},
+  {name:"Julián Álvarez",country:"Argentina",born:"Calchín, Argentina",teams:["River Plate","Manchester City","Atlético Madrid"],titles:["World Cup 2022","Premier League 2024","Champions League 2023"],img:"https://upload.wikimedia.org/wikipedia/commons/0/03/Argentina_national_football_team_-_2_-_2022_%28Juli%C3%A1n_%C3%81lvarez%29.jpg"},
+  {name:"Paulo Dybala",country:"Argentina",born:"Laguna Larga, Argentina",teams:["Palermo","Juventus","Roma"],titles:["World Cup 2022","5x Serie A","Copa Italia"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/%D0%9C%D0%B0%D1%82%D1%87_%C2%AB%D0%94%D0%B8%D0%BD%D0%B0%D0%BC%D0%BE%C2%BB_-_%C2%AB%D0%AE%D0%B2%D0%B5%D0%BD%D1%82%D1%83%D1%81%C2%BB_0-2._20_%D0%BE%D0%BA%D1%82%D1%8F%D0%B1%D1%80%D1%8F_2020_%D0%B3%D0%BE%D0%B4%D0%B0_%E2%80%94_1153905_%28cropped%29.jpg/330px-%D0%9C%D0%B0%D1%82%D1%87_%C2%AB%D0%94%D0%B8%D0%BD%D0%B0%D0%BC%D0%BE%C2%BB_-_%C2%AB%D0%AE%D0%B2%D0%B5%D0%BD%D1%82%D1%83%D1%81%C2%BB_0-2._20_%D0%BE%D0%BA%D1%82%D1%8F%D0%B1%D1%80%D1%8F_2020_%D0%B3%D0%BE%D0%B4%D0%B0_%E2%80%94_1153905_%28cropped%29.jpg"},
+  {name:"Lautaro Martínez",country:"Argentina",born:"Bahía Blanca, Argentina",teams:["Racing Club","Inter Milan"],titles:["World Cup 2022","Serie A 2024","Copa América 2021"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Lautaro_Martinez_ARGENTINA_VS_VENEZUELA_2017.jpg/330px-Lautaro_Martinez_ARGENTINA_VS_VENEZUELA_2017.jpg"},
+  {name:"Emiliano Martínez",country:"Argentina",born:"Mar del Plata, Argentina",teams:["Arsenal","Aston Villa"],titles:["World Cup 2022","Copa América 2021","Copa América 2024"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/St._Louis_City_vs_Aston_Villa_%28Jul_2025%29_14_%28Emiliano_Mart%C3%ADnez%29.jpg/330px-St._Louis_City_vs_Aston_Villa_%28Jul_2025%29_14_%28Emiliano_Mart%C3%ADnez%29.jpg"},
 
   // Brazil
-  {name:"Pelé",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Pele_con_brasil_%28cropped%29.jpg/330px-Pele_con_brasil_%28cropped%29.jpg"},
-  {name:"Ronaldinho",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Ronaldinho_in_2019.jpg/330px-Ronaldinho_in_2019.jpg"},
-  {name:"Neymar",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Neymar_Jr._with_Al_Hilal%2C_3_October_2023_-_03_%28cropped%29.jpg/330px-Neymar_Jr._with_Al_Hilal%2C_3_October_2023_-_03_%28cropped%29.jpg"},
-  {name:"Ronaldo Nazário",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Ronaldo_Lu%C3%ADs_Naz%C3%A1rio_de_Lima_2019_%283x4_cropped%29.jpg/330px-Ronaldo_Lu%C3%ADs_Naz%C3%A1rio_de_Lima_2019_%283x4_cropped%29.jpg"},
-  {name:"Kaká",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Kak%C3%A1_visited_Stadium_St._Petersburg.jpg/330px-Kak%C3%A1_visited_Stadium_St._Petersburg.jpg"},
-  {name:"Rivaldo",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Rivaldo_bunyodkor_2010.jpg/330px-Rivaldo_bunyodkor_2010.jpg"},
-  {name:"Roberto Carlos",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/LS3_1288_%2853332367864%29_%28cropped%29.jpg/330px-LS3_1288_%2853332367864%29_%28cropped%29.jpg"},
-  {name:"Cafu",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/14_06_2019_Abertura_da_Copa_Am%C3%A9rica_Brasil_2019_%2848064408836%29_%28cropped%29.jpg/330px-14_06_2019_Abertura_da_Copa_Am%C3%A9rica_Brasil_2019_%2848064408836%29_%28cropped%29.jpg"},
-  {name:"Vinícius Júnior",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/2023_05_06_Final_de_la_Copa_del_Rey_-_52879242230_%28cropped%29.jpg/330px-2023_05_06_Final_de_la_Copa_del_Rey_-_52879242230_%28cropped%29.jpg"},
-  {name:"Romário",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Senadores_da_57%C2%AA_Legislatura_%2852689451805%29.jpg/330px-Senadores_da_57%C2%AA_Legislatura_%2852689451805%29.jpg"},
+  {name:"Pelé",country:"Brazil",born:"Três Corações, Brazil",teams:["Santos","New York Cosmos"],titles:["3x World Cup","2x Copa Libertadores","6x Campeonato Brasileiro"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Pele_con_brasil_%28cropped%29.jpg/330px-Pele_con_brasil_%28cropped%29.jpg"},
+  {name:"Ronaldinho",country:"Brazil",born:"Porto Alegre, Brazil",teams:["Grêmio","PSG","Barcelona","AC Milan"],titles:["World Cup 2002","Champions League 2006","Ballon d'Or 2005"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Ronaldinho_in_2019.jpg/330px-Ronaldinho_in_2019.jpg"},
+  {name:"Neymar",country:"Brazil",born:"Mogi das Cruzes, Brazil",teams:["Santos","Barcelona","PSG","Al-Hilal"],titles:["Champions League 2015","Copa Libertadores 2011","4x Ligue 1"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Neymar_Jr._with_Al_Hilal%2C_3_October_2023_-_03_%28cropped%29.jpg/330px-Neymar_Jr._with_Al_Hilal%2C_3_October_2023_-_03_%28cropped%29.jpg"},
+  {name:"Ronaldo Nazário",country:"Brazil",born:"Rio de Janeiro, Brazil",teams:["Cruzeiro","Barcelona","Inter Milan","Real Madrid"],titles:["2x World Cup","2x Ballon d'Or","UEFA Cup 1998"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Ronaldo_Lu%C3%ADs_Naz%C3%A1rio_de_Lima_2019_%283x4_cropped%29.jpg/330px-Ronaldo_Lu%C3%ADs_Naz%C3%A1rio_de_Lima_2019_%283x4_cropped%29.jpg"},
+  {name:"Kaká",country:"Brazil",born:"Brasília, Brazil",teams:["São Paulo","AC Milan","Real Madrid"],titles:["World Cup 2002","Champions League 2007","Ballon d'Or 2007"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Kak%C3%A1_visited_Stadium_St._Petersburg.jpg/330px-Kak%C3%A1_visited_Stadium_St._Petersburg.jpg"},
+  {name:"Rivaldo",country:"Brazil",born:"Recife, Brazil",teams:["Palmeiras","Deportivo","Barcelona","AC Milan"],titles:["World Cup 2002","Ballon d'Or 1999","Copa América 1999"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Rivaldo_bunyodkor_2010.jpg/330px-Rivaldo_bunyodkor_2010.jpg"},
+  {name:"Roberto Carlos",country:"Brazil",born:"Garça, Brazil",teams:["Palmeiras","Inter Milan","Real Madrid"],titles:["3x Champions League","World Cup 2002","4x La Liga"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/LS3_1288_%2853332367864%29_%28cropped%29.jpg/330px-LS3_1288_%2853332367864%29_%28cropped%29.jpg"},
+  {name:"Cafu",country:"Brazil",born:"São Paulo, Brazil",teams:["São Paulo","Roma","AC Milan"],titles:["2x World Cup","Champions League 2007","2x Copa Libertadores"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/14_06_2019_Abertura_da_Copa_Am%C3%A9rica_Brasil_2019_%2848064408836%29_%28cropped%29.jpg/330px-14_06_2019_Abertura_da_Copa_Am%C3%A9rica_Brasil_2019_%2848064408836%29_%28cropped%29.jpg"},
+  {name:"Vinícius Júnior",country:"Brazil",born:"São Gonçalo, Brazil",teams:["Flamengo","Real Madrid"],titles:["2x Champions League","3x La Liga","Ballon d'Or 2024"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/2023_05_06_Final_de_la_Copa_del_Rey_-_52879242230_%28cropped%29.jpg/330px-2023_05_06_Final_de_la_Copa_del_Rey_-_52879242230_%28cropped%29.jpg"},
+  {name:"Romário",country:"Brazil",born:"Rio de Janeiro, Brazil",teams:["Vasco da Gama","PSV","Barcelona","Flamengo"],titles:["World Cup 1994","Ballon d'Or 1994","Copa América 1997"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Senadores_da_57%C2%AA_Legislatura_%2852689451805%29.jpg/330px-Senadores_da_57%C2%AA_Legislatura_%2852689451805%29.jpg"},
 
   // France
-  {name:"Zinedine Zidane",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Zinedine_Zidane_by_Tasnim_03.jpg/330px-Zinedine_Zidane_by_Tasnim_03.jpg"},
-  {name:"Kylian Mbappé",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Picture_with_Mbapp%C3%A9_%28cropped_and_rotated%29.jpg/330px-Picture_with_Mbapp%C3%A9_%28cropped_and_rotated%29.jpg"},
-  {name:"Thierry Henry",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Thierry_Henry_%2851649035951%29_%28cropped%29.jpg/330px-Thierry_Henry_%2851649035951%29_%28cropped%29.jpg"},
-  {name:"Michel Platini",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/6/66/Michel_Platini_2010_%28cropped%29.jpg"},
-  {name:"Antoine Griezmann",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/FRA-ARG_%2810%29_%28cropped%29.jpg/330px-FRA-ARG_%2810%29_%28cropped%29.jpg"},
-  {name:"Paul Pogba",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Paul_Pogba_at_the_2025_Cannes_Film_Festival_02.jpg/330px-Paul_Pogba_at_the_2025_Cannes_Film_Festival_02.jpg"},
-  {name:"N'Golo Kanté",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/0/05/N%27Golo_Kant%C3%A9_%28cropped%29.jpg"},
-  {name:"Karim Benzema",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Karim_Benzema_Pick.jpg/330px-Karim_Benzema_Pick.jpg"},
-  {name:"Patrick Vieira",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Patrick_Vieira_NYCFC_%28cropped%29.JPG/330px-Patrick_Vieira_NYCFC_%28cropped%29.JPG"},
-  {name:"Hugo Lloris",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Lloris_2018_%28cropped%29.jpg/330px-Lloris_2018_%28cropped%29.jpg"},
+  {name:"Zinedine Zidane",country:"France",born:"Marseille, France",teams:["Bordeaux","Juventus","Real Madrid"],titles:["World Cup 1998","Euro 2000","Champions League 2002"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Zinedine_Zidane_by_Tasnim_03.jpg/330px-Zinedine_Zidane_by_Tasnim_03.jpg"},
+  {name:"Kylian Mbappé",country:"France",born:"Paris, France",teams:["Monaco","PSG","Real Madrid"],titles:["World Cup 2018","4x Ligue 1","Nations League 2021"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Picture_with_Mbapp%C3%A9_%28cropped_and_rotated%29.jpg/330px-Picture_with_Mbapp%C3%A9_%28cropped_and_rotated%29.jpg"},
+  {name:"Thierry Henry",country:"France",born:"Les Ulis, France",teams:["Monaco","Juventus","Arsenal","Barcelona"],titles:["World Cup 1998","Premier League 2003-04","Euro 2000"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Thierry_Henry_%2851649035951%29_%28cropped%29.jpg/330px-Thierry_Henry_%2851649035951%29_%28cropped%29.jpg"},
+  {name:"Michel Platini",country:"France",born:"Joeuf, France",teams:["Nancy","Saint-Étienne","Juventus"],titles:["Euro 1984","European Cup 1985","3x Ballon d'Or"],img:"https://upload.wikimedia.org/wikipedia/commons/6/66/Michel_Platini_2010_%28cropped%29.jpg"},
+  {name:"Antoine Griezmann",country:"France",born:"Mâcon, France",teams:["Real Sociedad","Atlético Madrid","Barcelona"],titles:["World Cup 2018","Europa League 2018","UEFA Super Cup 2018"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/FRA-ARG_%2810%29_%28cropped%29.jpg/330px-FRA-ARG_%2810%29_%28cropped%29.jpg"},
+  {name:"Paul Pogba",country:"France",born:"Lagny-sur-Marne, France",teams:["Manchester United","Juventus"],titles:["World Cup 2018","4x Serie A","Europa League 2017"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Paul_Pogba_at_the_2025_Cannes_Film_Festival_02.jpg/330px-Paul_Pogba_at_the_2025_Cannes_Film_Festival_02.jpg"},
+  {name:"N'Golo Kanté",country:"France",born:"Paris, France",teams:["Leicester City","Chelsea","Al-Ittihad"],titles:["World Cup 2018","Premier League 2015-16","Champions League 2021"],img:"https://upload.wikimedia.org/wikipedia/commons/0/05/N%27Golo_Kant%C3%A9_%28cropped%29.jpg"},
+  {name:"Karim Benzema",country:"France",born:"Lyon, France",teams:["Lyon","Real Madrid","Al-Ittihad"],titles:["Champions League 2022","Ballon d'Or 2022","5x La Liga"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Karim_Benzema_Pick.jpg/330px-Karim_Benzema_Pick.jpg"},
+  {name:"Patrick Vieira",country:"France",born:"Dakar, Senegal",teams:["AC Milan","Arsenal","Juventus","Inter Milan"],titles:["World Cup 1998","Premier League 2003-04","Euro 2000"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Patrick_Vieira_NYCFC_%28cropped%29.JPG/330px-Patrick_Vieira_NYCFC_%28cropped%29.JPG"},
+  {name:"Hugo Lloris",country:"France",born:"Nice, France",teams:["Nice","Lyon","Tottenham"],titles:["World Cup 2018","Nations League 2021"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Lloris_2018_%28cropped%29.jpg/330px-Lloris_2018_%28cropped%29.jpg"},
 
   // Germany
-  {name:"Franz Beckenbauer",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Franz_Beckenbauer_%281975%29.jpg/330px-Franz_Beckenbauer_%281975%29.jpg"},
-  {name:"Gerd Müller",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Gerd_M%C3%BCller_c1973_%28cropped%29.jpg/330px-Gerd_M%C3%BCller_c1973_%28cropped%29.jpg"},
-  {name:"Thomas Müller",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/FC_Red_Bull_Salzburg_gegen_Bayern_M%C3%BCnchen_%282025-01-06_Testspiel%29_19.jpg/330px-FC_Red_Bull_Salzburg_gegen_Bayern_M%C3%BCnchen_%282025-01-06_Testspiel%29_19.jpg"},
-  {name:"Manuel Neuer",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/20180602_FIFA_Friendly_Match_Austria_vs._Germany_Manuel_Neuer_850_0723.jpg/330px-20180602_FIFA_Friendly_Match_Austria_vs._Germany_Manuel_Neuer_850_0723.jpg"},
-  {name:"Toni Kroos",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Toni_Kroos_Real_Madrid_2021.jpg/330px-Toni_Kroos_Real_Madrid_2021.jpg"},
-  {name:"Miroslav Klose",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/2016209185719_2016-07-27_Champions_for_Charity_-_Sven_-_1D_X_-_0149_-_DV3P4742_mod.jpg/330px-2016209185719_2016-07-27_Champions_for_Charity_-_Sven_-_1D_X_-_0149_-_DV3P4742_mod.jpg"},
-  {name:"Bastian Schweinsteiger",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Re-publica_23_-_Tag_3_%2852957826298%29_%28cropped%29.jpg/330px-Re-publica_23_-_Tag_3_%2852957826298%29_%28cropped%29.jpg"},
-  {name:"Philipp Lahm",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Philipp_Lahm_auf_der_Berlinale_2024%2C_Ausschnitt.jpg/330px-Philipp_Lahm_auf_der_Berlinale_2024%2C_Ausschnitt.jpg"},
-  {name:"Lothar Matthäus",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/2019_Lothar_Matth%C3%A4us.jpg/330px-2019_Lothar_Matth%C3%A4us.jpg"},
-  {name:"Joshua Kimmich",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/2019-06-11_Fu%C3%9Fball%2C_M%C3%A4nner%2C_L%C3%A4nderspiel%2C_Deutschland-Estland_StP_2078_LR10_by_Stepro_%28cropped%29.jpg/330px-2019-06-11_Fu%C3%9Fball%2C_M%C3%A4nner%2C_L%C3%A4nderspiel%2C_Deutschland-Estland_StP_2078_LR10_by_Stepro_%28cropped%29.jpg"},
+  {name:"Franz Beckenbauer",country:"Germany",born:"Munich, Germany",teams:["Bayern Munich","New York Cosmos","Hamburg"],titles:["World Cup 1974","European Cup 1974","Ballon d'Or 1972"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Franz_Beckenbauer_%281975%29.jpg/330px-Franz_Beckenbauer_%281975%29.jpg"},
+  {name:"Gerd Müller",country:"Germany",born:"Nördlingen, Germany",teams:["Bayern Munich","Fort Lauderdale Strikers"],titles:["World Cup 1974","European Cup 1974","Ballon d'Or 1970"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Gerd_M%C3%BCller_c1973_%28cropped%29.jpg/330px-Gerd_M%C3%BCller_c1973_%28cropped%29.jpg"},
+  {name:"Thomas Müller",country:"Germany",born:"Weilheim, Germany",teams:["Bayern Munich"],titles:["World Cup 2014","Champions League 2013","11x Bundesliga"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/FC_Red_Bull_Salzburg_gegen_Bayern_M%C3%BCnchen_%282025-01-06_Testspiel%29_19.jpg/330px-FC_Red_Bull_Salzburg_gegen_Bayern_M%C3%BCnchen_%282025-01-06_Testspiel%29_19.jpg"},
+  {name:"Manuel Neuer",country:"Germany",born:"Gelsenkirchen, Germany",teams:["Schalke 04","Bayern Munich"],titles:["World Cup 2014","Champions League 2013","10x Bundesliga"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/20180602_FIFA_Friendly_Match_Austria_vs._Germany_Manuel_Neuer_850_0723.jpg/330px-20180602_FIFA_Friendly_Match_Austria_vs._Germany_Manuel_Neuer_850_0723.jpg"},
+  {name:"Toni Kroos",country:"Germany",born:"Greifswald, Germany",teams:["Bayern Munich","Bayer Leverkusen","Real Madrid"],titles:["World Cup 2014","6x Champions League","4x La Liga"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Toni_Kroos_Real_Madrid_2021.jpg/330px-Toni_Kroos_Real_Madrid_2021.jpg"},
+  {name:"Miroslav Klose",country:"Germany",born:"Opole, Poland",teams:["Kaiserslautern","Werder Bremen","Bayern Munich","Lazio"],titles:["World Cup 2014","Bundesliga 2007-08","DFB-Pokal"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/2016209185719_2016-07-27_Champions_for_Charity_-_Sven_-_1D_X_-_0149_-_DV3P4742_mod.jpg/330px-2016209185719_2016-07-27_Champions_for_Charity_-_Sven_-_1D_X_-_0149_-_DV3P4742_mod.jpg"},
+  {name:"Bastian Schweinsteiger",country:"Germany",born:"Kolbermoor, Germany",teams:["Bayern Munich","Manchester United","Chicago Fire"],titles:["World Cup 2014","Champions League 2013","8x Bundesliga"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Re-publica_23_-_Tag_3_%2852957826298%29_%28cropped%29.jpg/330px-Re-publica_23_-_Tag_3_%2852957826298%29_%28cropped%29.jpg"},
+  {name:"Philipp Lahm",country:"Germany",born:"Munich, Germany",teams:["Bayern Munich","VfB Stuttgart"],titles:["World Cup 2014","Champions League 2013","8x Bundesliga"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Philipp_Lahm_auf_der_Berlinale_2024%2C_Ausschnitt.jpg/330px-Philipp_Lahm_auf_der_Berlinale_2024%2C_Ausschnitt.jpg"},
+  {name:"Lothar Matthäus",country:"Germany",born:"Erlangen, Germany",teams:["Gladbach","Bayern Munich","Inter Milan"],titles:["World Cup 1990","Serie A 1988-89","Ballon d'Or 1990"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/2019_Lothar_Matth%C3%A4us.jpg/330px-2019_Lothar_Matth%C3%A4us.jpg"},
+  {name:"Joshua Kimmich",country:"Germany",born:"Rottweil, Germany",teams:["VfB Stuttgart","RB Leipzig","Bayern Munich"],titles:["Champions League 2020","9x Bundesliga","DFB-Pokal"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/2019-06-11_Fu%C3%9Fball%2C_M%C3%A4nner%2C_L%C3%A4nderspiel%2C_Deutschland-Estland_StP_2078_LR10_by_Stepro_%28cropped%29.jpg/330px-2019-06-11_Fu%C3%9Fball%2C_M%C3%A4nner%2C_L%C3%A4nderspiel%2C_Deutschland-Estland_StP_2078_LR10_by_Stepro_%28cropped%29.jpg"},
 
   // Spain
-  {name:"Andrés Iniesta",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Andr%C3%A9s_Iniesta_%28cropped%29.jpg/330px-Andr%C3%A9s_Iniesta_%28cropped%29.jpg"},
-  {name:"Xavi Hernández",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Xavi_13981129001173637176666027076571.jpg/330px-Xavi_13981129001173637176666027076571.jpg"},
-  {name:"Sergio Ramos",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Sergio_Ramos_Interview_2021_%28cropped%29.jpg/330px-Sergio_Ramos_Interview_2021_%28cropped%29.jpg"},
-  {name:"Iker Casillas",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Iker-Casillas-SportsTrade-2021-cropped.jpg/330px-Iker-Casillas-SportsTrade-2021-cropped.jpg"},
-  {name:"David Villa",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Spain-Tahiti%2C_Confederations_Cup_2013_%2802%29_%28Villa_crop%29.jpg/330px-Spain-Tahiti%2C_Confederations_Cup_2013_%2802%29_%28Villa_crop%29.jpg"},
-  {name:"Raúl González",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/25th_Laureus_World_Sports_Awards_-_Ra%C3%BAl_-_240422_132916-2_%28cropped%29.jpg/330px-25th_Laureus_World_Sports_Awards_-_Ra%C3%BAl_-_240422_132916-2_%28cropped%29.jpg"},
-  {name:"Fernando Torres",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/5/57/Fernando_Torres_2017.jpg"},
-  {name:"Gerard Piqué",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Gerard_Piqu%C3%A9_Euro_2012_vs_France_01.jpg/330px-Gerard_Piqu%C3%A9_Euro_2012_vs_France_01.jpg"},
-  {name:"Pedri",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Pedri.jpg/330px-Pedri.jpg"},
-  {name:"Gavi",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/1/1e/Jugadors_pretemporada_pels_Estats_Units_%28cropped%292.jpg"},
+  {name:"Andrés Iniesta",country:"Spain",born:"Fuentealbilla, Spain",teams:["Barcelona","Vissel Kobe"],titles:["World Cup 2010","Champions League","Euro 2012"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Andr%C3%A9s_Iniesta_%28cropped%29.jpg/330px-Andr%C3%A9s_Iniesta_%28cropped%29.jpg"},
+  {name:"Xavi Hernández",country:"Spain",born:"Terrassa, Spain",teams:["Barcelona","Al Sadd"],titles:["World Cup 2010","4x Champions League","Euro 2008"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Xavi_13981129001173637176666027076571.jpg/330px-Xavi_13981129001173637176666027076571.jpg"},
+  {name:"Sergio Ramos",country:"Spain",born:"Camas, Spain",teams:["Sevilla","Real Madrid","PSG"],titles:["World Cup 2010","4x Champions League","Euro 2012"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Sergio_Ramos_Interview_2021_%28cropped%29.jpg/330px-Sergio_Ramos_Interview_2021_%28cropped%29.jpg"},
+  {name:"Iker Casillas",country:"Spain",born:"Móstoles, Spain",teams:["Real Madrid","Porto"],titles:["World Cup 2010","3x Champions League","Euro 2008"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Iker-Casillas-SportsTrade-2021-cropped.jpg/330px-Iker-Casillas-SportsTrade-2021-cropped.jpg"},
+  {name:"David Villa",country:"Spain",born:"Tuilla, Spain",teams:["Valencia","Barcelona","Atlético Madrid"],titles:["World Cup 2010","Euro 2008","Champions League 2011"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Spain-Tahiti%2C_Confederations_Cup_2013_%2802%29_%28Villa_crop%29.jpg/330px-Spain-Tahiti%2C_Confederations_Cup_2013_%2802%29_%28Villa_crop%29.jpg"},
+  {name:"Raúl González",country:"Spain",born:"Madrid, Spain",teams:["Real Madrid","Schalke 04","Al Sadd"],titles:["3x Champions League","6x La Liga","2x Supercopa"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/25th_Laureus_World_Sports_Awards_-_Ra%C3%BAl_-_240422_132916-2_%28cropped%29.jpg/330px-25th_Laureus_World_Sports_Awards_-_Ra%C3%BAl_-_240422_132916-2_%28cropped%29.jpg"},
+  {name:"Fernando Torres",country:"Spain",born:"Fuenlabrada, Spain",teams:["Atlético Madrid","Liverpool","Chelsea"],titles:["World Cup 2010","Euro 2012","Champions League 2012"],img:"https://upload.wikimedia.org/wikipedia/commons/5/57/Fernando_Torres_2017.jpg"},
+  {name:"Gerard Piqué",country:"Spain",born:"Barcelona, Spain",teams:["Manchester United","Barcelona"],titles:["World Cup 2010","4x Champions League","Euro 2012"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Gerard_Piqu%C3%A9_Euro_2012_vs_France_01.jpg/330px-Gerard_Piqu%C3%A9_Euro_2012_vs_France_01.jpg"},
+  {name:"Pedri",country:"Spain",born:"Tegueste, Spain",teams:["Las Palmas","Barcelona"],titles:["La Liga","Euro 2024"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Pedri.jpg/330px-Pedri.jpg"},
+  {name:"Gavi",country:"Spain",born:"Los Palacios, Spain",teams:["Barcelona"],titles:["La Liga","Euro 2024"],img:"https://upload.wikimedia.org/wikipedia/commons/1/1e/Jugadors_pretemporada_pels_Estats_Units_%28cropped%292.jpg"},
 
   // England
-  {name:"David Beckham",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/David_Beckham_UNICEF_%28cropped2%29.jpg/330px-David_Beckham_UNICEF_%28cropped2%29.jpg"},
-  {name:"Wayne Rooney",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Wayne_Rooney_%2850121495731%29_%28cropped%29.jpg/330px-Wayne_Rooney_%2850121495731%29_%28cropped%29.jpg"},
-  {name:"Steven Gerrard",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Steven_Gerrard_2018.jpg/330px-Steven_Gerrard_2018.jpg"},
-  {name:"Frank Lampard",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Frank_Lampard_2019.jpg/330px-Frank_Lampard_2019.jpg"},
-  {name:"Harry Kane",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Harry_Kane_on_October_10%2C_2023.jpg/330px-Harry_Kane_on_October_10%2C_2023.jpg"},
-  {name:"Gary Lineker",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Prime_Minister_Keir_Starmer_hosts_St_George%27s_Day_Reception_%2854470857860%29_%28cropped%29.jpg/330px-Prime_Minister_Keir_Starmer_hosts_St_George%27s_Day_Reception_%2854470857860%29_%28cropped%29.jpg"},
-  {name:"Bobby Moore",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Bobby_Moore_1969.jpg/330px-Bobby_Moore_1969.jpg"},
-  {name:"Alan Shearer",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/b/ba/Alan_Shearer_2008.jpg"},
-  {name:"Jude Bellingham",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/25th_Laureus_World_Sports_Awards_-_240422_205212_%28cropped%29.jpg/330px-25th_Laureus_World_Sports_Awards_-_240422_205212_%28cropped%29.jpg"},
-  {name:"Phil Foden",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/2023-10-04_Fu%C3%9Fball%2C_M%C3%A4nner%2C_UEFA_Champions_League%2C_RB_Leipzig_-_Manchester_City_FC_1DX_2613%2C_Phil_Foden.jpg/330px-2023-10-04_Fu%C3%9Fball%2C_M%C3%A4nner%2C_UEFA_Champions_League%2C_RB_Leipzig_-_Manchester_City_FC_1DX_2613%2C_Phil_Foden.jpg"},
+  {name:"David Beckham",country:"England",born:"Leytonstone, England",teams:["Manchester United","Real Madrid","LA Galaxy","PSG"],titles:["6x Premier League","Champions League 1999","La Liga"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/David_Beckham_UNICEF_%28cropped2%29.jpg/330px-David_Beckham_UNICEF_%28cropped2%29.jpg"},
+  {name:"Wayne Rooney",country:"England",born:"Liverpool, England",teams:["Everton","Manchester United","D.C. United"],titles:["5x Premier League","Champions League 2008","Club World Cup"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Wayne_Rooney_%2850121495731%29_%28cropped%29.jpg/330px-Wayne_Rooney_%2850121495731%29_%28cropped%29.jpg"},
+  {name:"Steven Gerrard",country:"England",born:"Whiston, England",teams:["Liverpool","LA Galaxy"],titles:["Champions League 2005","FA Cup","League Cup"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Steven_Gerrard_2018.jpg/330px-Steven_Gerrard_2018.jpg"},
+  {name:"Frank Lampard",country:"England",born:"Romford, England",teams:["West Ham","Chelsea","Manchester City","New York City FC"],titles:["3x Premier League","Champions League 2012","FA Cup"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Frank_Lampard_2019.jpg/330px-Frank_Lampard_2019.jpg"},
+  {name:"Harry Kane",country:"England",born:"Walthamstow, England",teams:["Tottenham","Bayern Munich"],titles:["Bundesliga 2024","DFB-Pokal"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Harry_Kane_on_October_10%2C_2023.jpg/330px-Harry_Kane_on_October_10%2C_2023.jpg"},
+  {name:"Gary Lineker",country:"England",born:"Leicester, England",teams:["Leicester City","Everton","Barcelona","Tottenham"],titles:["FA Cup","Copa del Rey","World Cup Golden Boot 1986"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Prime_Minister_Keir_Starmer_hosts_St_George%27s_Day_Reception_%2854470857860%29_%28cropped%29.jpg/330px-Prime_Minister_Keir_Starmer_hosts_St_George%27s_Day_Reception_%2854470857860%29_%28cropped%29.jpg"},
+  {name:"Bobby Moore",country:"England",born:"Barking, England",teams:["West Ham","Fulham"],titles:["World Cup 1966","FA Cup","Cup Winners' Cup"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Bobby_Moore_1969.jpg/330px-Bobby_Moore_1969.jpg"},
+  {name:"Alan Shearer",country:"England",born:"Newcastle, England",teams:["Southampton","Blackburn Rovers","Newcastle United"],titles:["Premier League 1995","3x Premier League Golden Boot"],img:"https://upload.wikimedia.org/wikipedia/commons/b/ba/Alan_Shearer_2008.jpg"},
+  {name:"Jude Bellingham",country:"England",born:"Stourbridge, England",teams:["Birmingham City","Borussia Dortmund","Real Madrid"],titles:["La Liga","Champions League 2024"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/25th_Laureus_World_Sports_Awards_-_240422_205212_%28cropped%29.jpg/330px-25th_Laureus_World_Sports_Awards_-_240422_205212_%28cropped%29.jpg"},
+  {name:"Phil Foden",country:"England",born:"Stockport, England",teams:["Manchester City"],titles:["6x Premier League","Champions League 2023","FA Cup"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/2023-10-04_Fu%C3%9Fball%2C_M%C3%A4nner%2C_UEFA_Champions_League%2C_RB_Leipzig_-_Manchester_City_FC_1DX_2613%2C_Phil_Foden.jpg/330px-2023-10-04_Fu%C3%9Fball%2C_M%C3%A4nner%2C_UEFA_Champions_League%2C_RB_Leipzig_-_Manchester_City_FC_1DX_2613%2C_Phil_Foden.jpg"},
 
   // Portugal
-  {name:"Cristiano Ronaldo",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Cristiano_Ronaldo_2275_%28cropped%29.jpg/330px-Cristiano_Ronaldo_2275_%28cropped%29.jpg"},
-  {name:"Eusébio",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Eusebio_en_1973.jpg/330px-Eusebio_en_1973.jpg"},
-  {name:"Luís Figo",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Luis_Figo_2023.jpg/330px-Luis_Figo_2023.jpg"},
-  {name:"Bernardo Silva",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Bernardo_Silva_%28Isto_%C3%89_Gozar_Com_Quem_Trabalha%2C_2024%29.png/330px-Bernardo_Silva_%28Isto_%C3%89_Gozar_Com_Quem_Trabalha%2C_2024%29.png"},
-  {name:"Bruno Fernandes",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Bruno_Fernandes_Portugal%2C_2018.jpg/330px-Bruno_Fernandes_Portugal%2C_2018.jpg"},
-  {name:"Rui Costa",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/e/ea/Rui_Costa_2019.png"},
-  {name:"Pepe",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Pepe_2018.jpg/330px-Pepe_2018.jpg"},
-  {name:"Deco",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Deco_com_o_Fluminense_em_2013_%28cropped%29.jpg/330px-Deco_com_o_Fluminense_em_2013_%28cropped%29.jpg"},
-  {name:"João Félix",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Portugal_national_football_team_0866_%28Jo%C3%A3o_F%C3%A9lix%29.jpg/330px-Portugal_national_football_team_0866_%28Jo%C3%A3o_F%C3%A9lix%29.jpg"},
-  {name:"Ricardo Carvalho",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/7/74/Ricardo_Carvalho.jpg"},
+  {name:"Cristiano Ronaldo",country:"Portugal",born:"Funchal, Portugal",teams:["Sporting CP","Manchester United","Real Madrid","Juventus"],titles:["5x Champions League","Euro 2016","5x Ballon d'Or"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Cristiano_Ronaldo_2275_%28cropped%29.jpg/330px-Cristiano_Ronaldo_2275_%28cropped%29.jpg"},
+  {name:"Eusébio",country:"Portugal",born:"Lourenço Marques, Mozambique",teams:["Benfica"],titles:["European Cup 1962","Ballon d'Or 1965","11x Primeira Liga"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Eusebio_en_1973.jpg/330px-Eusebio_en_1973.jpg"},
+  {name:"Luís Figo",country:"Portugal",born:"Almada, Portugal",teams:["Sporting CP","Barcelona","Real Madrid","Inter Milan"],titles:["Ballon d'Or 2000","4x La Liga","Champions League"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Luis_Figo_2023.jpg/330px-Luis_Figo_2023.jpg"},
+  {name:"Bernardo Silva",country:"Portugal",born:"Lisbon, Portugal",teams:["Benfica","Monaco","Manchester City"],titles:["5x Premier League","Champions League 2023","FA Cup"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Bernardo_Silva_%28Isto_%C3%89_Gozar_Com_Quem_Trabalha%2C_2024%29.png/330px-Bernardo_Silva_%28Isto_%C3%89_Gozar_Com_Quem_Trabalha%2C_2024%29.png"},
+  {name:"Bruno Fernandes",country:"Portugal",born:"Maia, Portugal",teams:["Udinese","Sporting CP","Manchester United"],titles:["Primeira Liga","EFL Cup"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Bruno_Fernandes_Portugal%2C_2018.jpg/330px-Bruno_Fernandes_Portugal%2C_2018.jpg"},
+  {name:"Rui Costa",country:"Portugal",born:"Amadora, Portugal",teams:["Benfica","Fiorentina","AC Milan"],titles:["Primeira Liga","Champions League 2007"],img:"https://upload.wikimedia.org/wikipedia/commons/e/ea/Rui_Costa_2019.png"},
+  {name:"Pepe",country:"Portugal",born:"Maceió, Brazil",teams:["Porto","Real Madrid","Beşiktaş"],titles:["3x Champions League","3x La Liga","Euro 2016"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Pepe_2018.jpg/330px-Pepe_2018.jpg"},
+  {name:"Deco",country:"Portugal",born:"São Bernardo do Campo, Brazil",teams:["Porto","Barcelona","Chelsea"],titles:["Champions League 2004","La Liga","Primeira Liga"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Deco_com_o_Fluminense_em_2013_%28cropped%29.jpg/330px-Deco_com_o_Fluminense_em_2013_%28cropped%29.jpg"},
+  {name:"João Félix",country:"Portugal",born:"Viseu, Portugal",teams:["Benfica","Atlético Madrid","Chelsea","Barcelona"],titles:["Primeira Liga"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Portugal_national_football_team_0866_%28Jo%C3%A3o_F%C3%A9lix%29.jpg/330px-Portugal_national_football_team_0866_%28Jo%C3%A3o_F%C3%A9lix%29.jpg"},
+  {name:"Ricardo Carvalho",country:"Portugal",born:"Amarante, Portugal",teams:["Porto","Chelsea","Real Madrid","Monaco"],titles:["Champions League 2004","3x Premier League","La Liga"],img:"https://upload.wikimedia.org/wikipedia/commons/7/74/Ricardo_Carvalho.jpg"},
 
   // Italy
-  {name:"Paolo Maldini",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Paolo_Maldini_AC_Milan_Technical_director_2018.jpg/330px-Paolo_Maldini_AC_Milan_Technical_director_2018.jpg"},
-  {name:"Francesco Totti",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/KL-2018_%284%29.jpg/330px-KL-2018_%284%29.jpg"},
-  {name:"Andrea Pirlo",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/20150616_-_Portugal_-_Italie_-_Gen%C3%A8ve_-_Andrea_Pirlo_%28cropped%29.jpg/330px-20150616_-_Portugal_-_Italie_-_Gen%C3%A8ve_-_Andrea_Pirlo_%28cropped%29.jpg"},
-  {name:"Gianluigi Buffon",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Norway_Italy_-_June_2025_A_44_%28Gianluigi_Buffon%29.jpg/330px-Norway_Italy_-_June_2025_A_44_%28Gianluigi_Buffon%29.jpg"},
-  {name:"Alessandro Del Piero",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/25th_Laureus_World_Sports_Awards_-_Alessandro_Del_Piero_-_240421_155220_%28cropped%29.jpg/330px-25th_Laureus_World_Sports_Awards_-_Alessandro_Del_Piero_-_240421_155220_%28cropped%29.jpg"},
-  {name:"Roberto Baggio",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/%D8%B1%D9%88%D8%A8%D8%B1%D8%AA%D9%88_%D8%A8%D8%A7%D8%AC%D9%88_%28cropped%29.jpg/330px-%D8%B1%D9%88%D8%A8%D8%B1%D8%AA%D9%88_%D8%A8%D8%A7%D8%AC%D9%88_%28cropped%29.jpg"},
-  {name:"Fabio Cannavaro",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Fabio_Cannavaro_2011.jpg/330px-Fabio_Cannavaro_2011.jpg"},
-  {name:"Marco Verratti",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Verratti-2019-07-17_SG_Dynamo_Dresden_vs._Paris_Saint-Germain_by_Sandro_Halank%E2%80%93126.jpg/330px-Verratti-2019-07-17_SG_Dynamo_Dresden_vs._Paris_Saint-Germain_by_Sandro_Halank%E2%80%93126.jpg"},
-  {name:"Giorgio Chiellini",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Chiellini_Mancini_Gravina_Mattarella_2021_%28Giorgio_Chiellini%29.jpg/330px-Chiellini_Mancini_Gravina_Mattarella_2021_%28Giorgio_Chiellini%29.jpg"},
-  {name:"Franco Baresi",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Franco_Baresi_2012.jpg/330px-Franco_Baresi_2012.jpg"},
+  {name:"Paolo Maldini",country:"Italy",born:"Milan, Italy",teams:["AC Milan"],titles:["5x Champions League","7x Serie A","Club World Cup"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Paolo_Maldini_AC_Milan_Technical_director_2018.jpg/330px-Paolo_Maldini_AC_Milan_Technical_director_2018.jpg"},
+  {name:"Francesco Totti",country:"Italy",born:"Rome, Italy",teams:["AS Roma"],titles:["World Cup 2006","Serie A 2001","Coppa Italia"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/KL-2018_%284%29.jpg/330px-KL-2018_%284%29.jpg"},
+  {name:"Andrea Pirlo",country:"Italy",born:"Flero, Italy",teams:["Inter Milan","AC Milan","Juventus"],titles:["World Cup 2006","2x Champions League","6x Serie A"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/20150616_-_Portugal_-_Italie_-_Gen%C3%A8ve_-_Andrea_Pirlo_%28cropped%29.jpg/330px-20150616_-_Portugal_-_Italie_-_Gen%C3%A8ve_-_Andrea_Pirlo_%28cropped%29.jpg"},
+  {name:"Gianluigi Buffon",country:"Italy",born:"Carrara, Italy",teams:["Parma","Juventus","PSG"],titles:["World Cup 2006","10x Serie A","Coppa Italia"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Norway_Italy_-_June_2025_A_44_%28Gianluigi_Buffon%29.jpg/330px-Norway_Italy_-_June_2025_A_44_%28Gianluigi_Buffon%29.jpg"},
+  {name:"Alessandro Del Piero",country:"Italy",born:"Conegliano, Italy",teams:["Juventus","Sydney FC"],titles:["World Cup 2006","Champions League 1996","6x Serie A"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/25th_Laureus_World_Sports_Awards_-_Alessandro_Del_Piero_-_240421_155220_%28cropped%29.jpg/330px-25th_Laureus_World_Sports_Awards_-_Alessandro_Del_Piero_-_240421_155220_%28cropped%29.jpg"},
+  {name:"Roberto Baggio",country:"Italy",born:"Caldogno, Italy",teams:["Fiorentina","Juventus","AC Milan","Inter Milan"],titles:["Ballon d'Or 1993","UEFA Cup 1993","Serie A"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/%D8%B1%D9%88%D8%A8%D8%B1%D8%AA%D9%88_%D8%A8%D8%A7%D8%AC%D9%88_%28cropped%29.jpg/330px-%D8%B1%D9%88%D8%A8%D8%B1%D8%AA%D9%88_%D8%A8%D8%A7%D8%AC%D9%88_%28cropped%29.jpg"},
+  {name:"Fabio Cannavaro",country:"Italy",born:"Naples, Italy",teams:["Napoli","Parma","Inter Milan","Real Madrid"],titles:["World Cup 2006","Ballon d'Or 2006","La Liga"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Fabio_Cannavaro_2011.jpg/330px-Fabio_Cannavaro_2011.jpg"},
+  {name:"Marco Verratti",country:"Italy",born:"Pescara, Italy",teams:["Pescara","PSG"],titles:["9x Ligue 1","Coupe de France","Euro 2020"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Verratti-2019-07-17_SG_Dynamo_Dresden_vs._Paris_Saint-Germain_by_Sandro_Halank%E2%80%93126.jpg/330px-Verratti-2019-07-17_SG_Dynamo_Dresden_vs._Paris_Saint-Germain_by_Sandro_Halank%E2%80%93126.jpg"},
+  {name:"Giorgio Chiellini",country:"Italy",born:"Pisa, Italy",teams:["Fiorentina","Juventus","LAFC"],titles:["9x Serie A","Euro 2020","Coppa Italia"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Chiellini_Mancini_Gravina_Mattarella_2021_%28Giorgio_Chiellini%29.jpg/330px-Chiellini_Mancini_Gravina_Mattarella_2021_%28Giorgio_Chiellini%29.jpg"},
+  {name:"Franco Baresi",country:"Italy",born:"Travagliato, Italy",teams:["AC Milan"],titles:["3x Champions League","6x Serie A","Intercontinental Cup"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Franco_Baresi_2012.jpg/330px-Franco_Baresi_2012.jpg"},
 
   // Netherlands
-  {name:"Johan Cruyff",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Johan_Cruijff_%281974%29.jpg/330px-Johan_Cruijff_%281974%29.jpg"},
-  {name:"Marco van Basten",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Marco_van_Basten_%282%29_%28cropped%29.jpg/330px-Marco_van_Basten_%282%29_%28cropped%29.jpg"},
-  {name:"Ruud Gullit",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/25th_Laureus_World_Sports_Awards_-_Ruud_Gullit_-_240422_131911_%28cropped%29.jpg/330px-25th_Laureus_World_Sports_Awards_-_Ruud_Gullit_-_240422_131911_%28cropped%29.jpg"},
-  {name:"Dennis Bergkamp",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/7/75/Dennis_Bergkamp_2014_%28cropped%29.jpg"},
-  {name:"Robin van Persie",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Loco-Fener_%2810%29.jpg/330px-Loco-Fener_%2810%29.jpg"},
-  {name:"Arjen Robben",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Arjen_Robben_v_Shakhtar_2015_%28cropped%29.jpg/330px-Arjen_Robben_v_Shakhtar_2015_%28cropped%29.jpg"},
-  {name:"Wesley Sneijder",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Wesley_Sneijder_%2815487233555%29_%28cropped%29.jpg/330px-Wesley_Sneijder_%2815487233555%29_%28cropped%29.jpg"},
-  {name:"Frank Rijkaard",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/FrankRijkaard2.jpg/330px-FrankRijkaard2.jpg"},
-  {name:"Virgil van Dijk",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/20160604_AUT_NED_8876_%28cropped%29.jpg/330px-20160604_AUT_NED_8876_%28cropped%29.jpg"},
-  {name:"Frenkie de Jong",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/4/42/%D0%9C%D0%B0%D1%82%D1%87_%C2%AB%D0%94%D0%B8%D0%BD%D0%B0%D0%BC%D0%BE%C2%BB_-_%C2%AB%D0%91%D0%B0%D1%80%D1%81%D0%B5%D0%BB%D0%BE%D0%BD%D0%B0%C2%BB_0-1._2_%D0%BD%D0%BE%D1%8F%D0%B1%D1%80%D1%8F_2021_%D0%B3%D0%BE%D0%B4%D0%B0._II_%E2%80%94_1289671_%28cropped%29.jpg"},
+  {name:"Johan Cruyff",country:"Netherlands",born:"Amsterdam, Netherlands",teams:["Ajax","Barcelona","Feyenoord"],titles:["3x Ballon d'Or","3x European Cup","La Liga"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Johan_Cruijff_%281974%29.jpg/330px-Johan_Cruijff_%281974%29.jpg"},
+  {name:"Marco van Basten",country:"Netherlands",born:"Utrecht, Netherlands",teams:["Ajax","AC Milan"],titles:["3x Ballon d'Or","2x European Cup","Serie A"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Marco_van_Basten_%282%29_%28cropped%29.jpg/330px-Marco_van_Basten_%282%29_%28cropped%29.jpg"},
+  {name:"Ruud Gullit",country:"Netherlands",born:"Amsterdam, Netherlands",teams:["Feyenoord","PSV","AC Milan","Chelsea"],titles:["Ballon d'Or 1987","2x European Cup","Serie A"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/25th_Laureus_World_Sports_Awards_-_Ruud_Gullit_-_240422_131911_%28cropped%29.jpg/330px-25th_Laureus_World_Sports_Awards_-_Ruud_Gullit_-_240422_131911_%28cropped%29.jpg"},
+  {name:"Dennis Bergkamp",country:"Netherlands",born:"Amsterdam, Netherlands",teams:["Ajax","Inter Milan","Arsenal"],titles:["3x Premier League","Eredivisie","UEFA Cup"],img:"https://upload.wikimedia.org/wikipedia/commons/7/75/Dennis_Bergkamp_2014_%28cropped%29.jpg"},
+  {name:"Robin van Persie",country:"Netherlands",born:"Rotterdam, Netherlands",teams:["Feyenoord","Arsenal","Manchester United"],titles:["Premier League 2013","FA Cup","Community Shield"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Loco-Fener_%2810%29.jpg/330px-Loco-Fener_%2810%29.jpg"},
+  {name:"Arjen Robben",country:"Netherlands",born:"Bedum, Netherlands",teams:["PSV","Chelsea","Real Madrid","Bayern Munich"],titles:["Champions League 2013","8x Bundesliga","Premier League"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Arjen_Robben_v_Shakhtar_2015_%28cropped%29.jpg/330px-Arjen_Robben_v_Shakhtar_2015_%28cropped%29.jpg"},
+  {name:"Wesley Sneijder",country:"Netherlands",born:"Utrecht, Netherlands",teams:["Ajax","Real Madrid","Inter Milan","Galatasaray"],titles:["Champions League 2010","La Liga","Serie A"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Wesley_Sneijder_%2815487233555%29_%28cropped%29.jpg/330px-Wesley_Sneijder_%2815487233555%29_%28cropped%29.jpg"},
+  {name:"Frank Rijkaard",country:"Netherlands",born:"Amsterdam, Netherlands",teams:["Ajax","AC Milan"],titles:["2x European Cup","Serie A","Eredivisie"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/FrankRijkaard2.jpg/330px-FrankRijkaard2.jpg"},
+  {name:"Virgil van Dijk",country:"Netherlands",born:"Breda, Netherlands",teams:["Groningen","Celtic","Southampton","Liverpool"],titles:["Champions League 2019","Premier League 2020"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/20160604_AUT_NED_8876_%28cropped%29.jpg/330px-20160604_AUT_NED_8876_%28cropped%29.jpg"},
+  {name:"Frenkie de Jong",country:"Netherlands",born:"Arkel, Netherlands",teams:["Willem II","Ajax","Barcelona"],titles:["Eredivisie","La Liga"],img:"https://upload.wikimedia.org/wikipedia/commons/4/42/%D0%9C%D0%B0%D1%82%D1%87_%C2%AB%D0%94%D0%B8%D0%BD%D0%B0%D0%BC%D0%BE%C2%BB_-_%C2%AB%D0%91%D0%B0%D1%80%D1%81%D0%B5%D0%BB%D0%BE%D0%BD%D0%B0%C2%BB_0-1._2_%D0%BD%D0%BE%D1%8F%D0%B1%D1%80%D1%8F_2021_%D0%B3%D0%BE%D0%B4%D0%B0._II_%E2%80%94_1289671_%28cropped%29.jpg"},
 
   // Other countries
-  {name:"Luka Modrić",country:"Croatia",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Ofrenda_de_la_Liga_y_la_Champions-57-L.Mill%C3%A1n_%2852109310843%29_%28Luka_Modri%C4%87%29.jpg/330px-Ofrenda_de_la_Liga_y_la_Champions-57-L.Mill%C3%A1n_%2852109310843%29_%28Luka_Modri%C4%87%29.jpg"},
-  {name:"Robert Lewandowski",country:"Poland",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/2019147183134_2019-05-27_Fussball_1.FC_Kaiserslautern_vs_FC_Bayern_M%C3%BCnchen_-_Sven_-_1D_X_MK_II_-_0228_-_B70I8527_%28cropped%29.jpg/330px-2019147183134_2019-05-27_Fussball_1.FC_Kaiserslautern_vs_FC_Bayern_M%C3%BCnchen_-_Sven_-_1D_X_MK_II_-_0228_-_B70I8527_%28cropped%29.jpg"},
-  {name:"Erling Haaland",country:"Norway",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Erling_Haaland_June_2025.jpg/330px-Erling_Haaland_June_2025.jpg"},
-  {name:"Mohamed Salah",country:"Egypt",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Mohamed_Salah_2018.jpg/330px-Mohamed_Salah_2018.jpg"},
-  {name:"Sadio Mané",country:"Senegal",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Esteghlal_F.C._v_Al_Nassr_FC%2C_3_March_2025%2C_Sadio_Man%C3%A9.jpg/330px-Esteghlal_F.C._v_Al_Nassr_FC%2C_3_March_2025%2C_Sadio_Man%C3%A9.jpg"},
-  {name:"Zlatan Ibrahimović",country:"Sweden",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Zlatan_Ibrahimovi%C4%87_June_2018.jpg/330px-Zlatan_Ibrahimovi%C4%87_June_2018.jpg"},
-  {name:"George Weah",country:"Liberia",img:"https://upload.wikimedia.org/wikipedia/commons/5/53/Clar_Weah%2C_George_Weah%2C_Joe_Biden%2C_Jill_Biden_%28cropped%29.jpg"},
-  {name:"Samuel Eto'o",country:"Cameroon",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Samuel_2011.jpg/330px-Samuel_2011.jpg"},
-  {name:"Didier Drogba",country:"Ivory Coast",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Didier_Drogba_%282019%29_%28cropped2%29.jpg/330px-Didier_Drogba_%282019%29_%28cropped2%29.jpg"},
-  {name:"Son Heung-min",country:"South Korea",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/BFA_2023_-2_Heung-Min_Son_%28cropped%29.jpg/330px-BFA_2023_-2_Heung-Min_Son_%28cropped%29.jpg"},
-  {name:"Keylor Navas",country:"Costa Rica",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Keylor_Navas_2018_%28cropped%29.jpg/330px-Keylor_Navas_2018_%28cropped%29.jpg"},
-  {name:"Luis Suárez",country:"Uruguay",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Luis_Su%C3%A1rez_NE_Revolution_Inter_Miami_7.9.25-053_%28cropped%29.jpg/330px-Luis_Su%C3%A1rez_NE_Revolution_Inter_Miami_7.9.25-053_%28cropped%29.jpg"},
-  {name:"Edinson Cavani",country:"Uruguay",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Edinson_Cavani_2018_%28cropped%29.jpg/330px-Edinson_Cavani_2018_%28cropped%29.jpg"},
-  {name:"James Rodríguez",country:"Colombia",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/James_Rodriguez_2018.jpg/330px-James_Rodriguez_2018.jpg"},
-  {name:"Alexis Sánchez",country:"Chile",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Alexis_S%C3%A1nchez_2017.jpg/330px-Alexis_S%C3%A1nchez_2017.jpg"},
+  {name:"Luka Modrić",country:"Croatia",born:"Zadar, Croatia",teams:["Dinamo Zagreb","Tottenham","Real Madrid"],titles:["Ballon d'Or 2018","5x Champions League","4x La Liga"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Ofrenda_de_la_Liga_y_la_Champions-57-L.Mill%C3%A1n_%2852109310843%29_%28Luka_Modri%C4%87%29.jpg/330px-Ofrenda_de_la_Liga_y_la_Champions-57-L.Mill%C3%A1n_%2852109310843%29_%28Luka_Modri%C4%87%29.jpg"},
+  {name:"Robert Lewandowski",country:"Poland",born:"Warsaw, Poland",teams:["Lech Poznań","Borussia Dortmund","Bayern Munich","Barcelona"],titles:["Champions League 2020","8x Bundesliga","La Liga"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/2019147183134_2019-05-27_Fussball_1.FC_Kaiserslautern_vs_FC_Bayern_M%C3%BCnchen_-_Sven_-_1D_X_MK_II_-_0228_-_B70I8527_%28cropped%29.jpg/330px-2019147183134_2019-05-27_Fussball_1.FC_Kaiserslautern_vs_FC_Bayern_M%C3%BCnchen_-_Sven_-_1D_X_MK_II_-_0228_-_B70I8527_%28cropped%29.jpg"},
+  {name:"Erling Haaland",country:"Norway",born:"Leeds, England",teams:["Molde","RB Salzburg","Borussia Dortmund","Manchester City"],titles:["Premier League","Champions League 2023"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Erling_Haaland_June_2025.jpg/330px-Erling_Haaland_June_2025.jpg"},
+  {name:"Mohamed Salah",country:"Egypt",born:"Nagrig, Egypt",teams:["Basel","Fiorentina","Roma","Liverpool"],titles:["Champions League 2019","Premier League 2020"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Mohamed_Salah_2018.jpg/330px-Mohamed_Salah_2018.jpg"},
+  {name:"Sadio Mané",country:"Senegal",born:"Sédhiou, Senegal",teams:["RB Salzburg","Southampton","Liverpool","Bayern Munich"],titles:["Champions League 2019","Premier League 2020","Africa Cup of Nations 2022"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Esteghlal_F.C._v_Al_Nassr_FC%2C_3_March_2025%2C_Sadio_Man%C3%A9.jpg/330px-Esteghlal_F.C._v_Al_Nassr_FC%2C_3_March_2025%2C_Sadio_Man%C3%A9.jpg"},
+  {name:"Zlatan Ibrahimović",country:"Sweden",born:"Malmö, Sweden",teams:["Ajax","Inter Milan","Barcelona","PSG"],titles:["13x League Titles","Serie A","Ligue 1"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Zlatan_Ibrahimovi%C4%87_June_2018.jpg/330px-Zlatan_Ibrahimovi%C4%87_June_2018.jpg"},
+  {name:"George Weah",country:"Liberia",born:"Monrovia, Liberia",teams:["Monaco","PSG","AC Milan","Chelsea"],titles:["Ballon d'Or 1995","Ligue 1","Serie A"],img:"https://upload.wikimedia.org/wikipedia/commons/5/53/Clar_Weah%2C_George_Weah%2C_Joe_Biden%2C_Jill_Biden_%28cropped%29.jpg"},
+  {name:"Samuel Eto'o",country:"Cameroon",born:"Douala, Cameroon",teams:["Real Madrid","Mallorca","Barcelona","Inter Milan"],titles:["3x Champions League","La Liga","2x Africa Cup of Nations"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Samuel_2011.jpg/330px-Samuel_2011.jpg"},
+  {name:"Didier Drogba",country:"Ivory Coast",born:"Abidjan, Ivory Coast",teams:["Marseille","Chelsea","Galatasaray"],titles:["Champions League 2012","4x Premier League","FA Cup"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Didier_Drogba_%282019%29_%28cropped2%29.jpg/330px-Didier_Drogba_%282019%29_%28cropped2%29.jpg"},
+  {name:"Son Heung-min",country:"South Korea",born:"Chuncheon, South Korea",teams:["Hamburger SV","Bayer Leverkusen","Tottenham"],titles:["Asian Games Gold Medal 2018"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/BFA_2023_-2_Heung-Min_Son_%28cropped%29.jpg/330px-BFA_2023_-2_Heung-Min_Son_%28cropped%29.jpg"},
+  {name:"Keylor Navas",country:"Costa Rica",born:"San Isidro, Costa Rica",teams:["Saprissa","Levante","Real Madrid","PSG"],titles:["3x Champions League","La Liga","Ligue 1"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Keylor_Navas_2018_%28cropped%29.jpg/330px-Keylor_Navas_2018_%28cropped%29.jpg"},
+  {name:"Luis Suárez",country:"Uruguay",born:"Salto, Uruguay",teams:["Ajax","Liverpool","Barcelona","Atlético Madrid"],titles:["La Liga","Copa América 2011","Eredivisie"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Luis_Su%C3%A1rez_NE_Revolution_Inter_Miami_7.9.25-053_%28cropped%29.jpg/330px-Luis_Su%C3%A1rez_NE_Revolution_Inter_Miami_7.9.25-053_%28cropped%29.jpg"},
+  {name:"Edinson Cavani",country:"Uruguay",born:"Salto, Uruguay",teams:["Palermo","Napoli","PSG","Manchester United"],titles:["6x Ligue 1","Copa América 2011"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Edinson_Cavani_2018_%28cropped%29.jpg/330px-Edinson_Cavani_2018_%28cropped%29.jpg"},
+  {name:"James Rodríguez",country:"Colombia",born:"Cúcuta, Colombia",teams:["Porto","Monaco","Real Madrid","Bayern Munich"],titles:["Primeira Liga","La Liga","World Cup Golden Boot 2014"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/James_Rodriguez_2018.jpg/330px-James_Rodriguez_2018.jpg"},
+  {name:"Alexis Sánchez",country:"Chile",born:"Tocopilla, Chile",teams:["Udinese","Barcelona","Arsenal","Inter Milan"],titles:["2x Copa América","La Liga","Serie A"],img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Alexis_S%C3%A1nchez_2017.jpg/330px-Alexis_S%C3%A1nchez_2017.jpg"},
 ];
 
 const MAIN_COUNTRIES = ["Argentina","Brazil","France","Germany","Spain","England","Portugal","Italy","Netherlands"];
@@ -461,7 +527,7 @@ function startQuiz(region) {
     pool = PLAYERS.filter(p => p.country === region);
   }
 
-  if (pool.length < 4) return;
+  if (pool.length < 8) return;
 
   totalQuestions = Math.min(pool.length, region === 'all' ? 20 : 10);
   questions = shuffle([...pool]).slice(0, totalQuestions);
@@ -505,15 +571,16 @@ function showQuestion() {
   if (oldErr) oldErr.remove();
 
   document.getElementById('player-hint').textContent = `Country: ${q.country}`;
+  document.getElementById('player-info').style.display = 'none';
 
-  // Build 4 options: 1 correct + 3 wrong from full PLAYERS list (same country preferred)
+  // Build 8 options: 1 correct + 7 wrong from full PLAYERS list (same country preferred)
   const sameCountry = PLAYERS.filter(p => p.name !== q.name && p.country === q.country);
   const diffCountry = PLAYERS.filter(p => p.name !== q.name && p.country !== q.country);
-  let wrongPool = shuffle([...sameCountry]).slice(0, 2);
-  if (wrongPool.length < 3) {
-    wrongPool = wrongPool.concat(shuffle([...diffCountry]).slice(0, 3 - wrongPool.length));
+  let wrongPool = shuffle([...sameCountry]).slice(0, 3);
+  if (wrongPool.length < 7) {
+    wrongPool = wrongPool.concat(shuffle([...diffCountry]).slice(0, 7 - wrongPool.length));
   }
-  const wrong = wrongPool.slice(0, 3);
+  const wrong = wrongPool.slice(0, 7);
   const options = shuffle([q, ...wrong]);
 
   const optionsEl = document.getElementById('options');
@@ -550,6 +617,29 @@ function handleAnswer(btn, isCorrect, correctName) {
   document.getElementById('score').textContent = score;
   document.getElementById('streak').textContent = streak;
 
+  // Show player info card
+  const q = questions[currentQ];
+  const infoEl = document.getElementById('player-info');
+  document.getElementById('info-name').textContent = q.name;
+  document.getElementById('info-born').textContent = q.born || '';
+  const teamsEl = document.getElementById('info-teams');
+  teamsEl.innerHTML = '';
+  (q.teams || []).forEach(t => {
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.textContent = t;
+    teamsEl.appendChild(tag);
+  });
+  const titlesEl = document.getElementById('info-titles');
+  titlesEl.innerHTML = '';
+  (q.titles || []).forEach(t => {
+    const tag = document.createElement('span');
+    tag.className = 'tag title-tag';
+    tag.textContent = t;
+    titlesEl.appendChild(tag);
+  });
+  infoEl.style.display = 'block';
+
   setTimeout(() => {
     currentQ++;
     if (currentQ < totalQuestions) {
@@ -557,7 +647,7 @@ function handleAnswer(btn, isCorrect, correctName) {
     } else {
       showResult();
     }
-  }, 1500);
+  }, 3000);
 }
 
 function showResult() {
