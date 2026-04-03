@@ -52,6 +52,25 @@
 
     .btn-group { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 
+    .lang-btn {
+      padding: 10px 28px;
+      border-radius: 99px;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+      color: #ccc;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .lang-btn:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+    .lang-btn.active {
+      border-color: #06b6d4;
+      background: rgba(6,182,212,0.15);
+      color: #67e8f9;
+      box-shadow: 0 0 12px rgba(6,182,212,0.3);
+    }
+
     .pick-btn {
       padding: 12px 20px;
       border-radius: 12px;
@@ -340,13 +359,15 @@
   <!-- MENU -->
   <div id="menu">
     <div class="menu-section">
-      <h2>Category</h2>
-      <div class="btn-group" id="cat-btns">
-        <button class="pick-btn active" data-cat="animals">🐾 Animals</button>
-        <button class="pick-btn" data-cat="countries">🌍 Countries</button>
-        <button class="pick-btn" data-cat="food">🍕 Food</button>
-        <button class="pick-btn" data-cat="nature">🌿 Nature</button>
+      <h2>Language</h2>
+      <div class="btn-group">
+        <button id="lang-en" class="lang-btn active" onclick="setLang('en')">🇬🇧 English</button>
+        <button id="lang-de" class="lang-btn"        onclick="setLang('de')">🇩🇪 Deutsch</button>
       </div>
+    </div>
+    <div class="menu-section">
+      <h2>Category</h2>
+      <div class="btn-group" id="cat-btns"></div>
     </div>
     <div class="menu-section">
       <h2>Speed</h2>
@@ -415,6 +436,22 @@
 </div>
 
 <script>
+// ─── Categories per language ─────────────────────────────────────────────────
+const CATEGORIES = {
+  en: [
+    { key:'animals',   label:'🐾 Animals'   },
+    { key:'countries', label:'🌍 Countries'  },
+    { key:'food',      label:'🍕 Food'       },
+    { key:'nature',    label:'🌿 Nature'     },
+  ],
+  de: [
+    { key:'de_tiere',   label:'🐾 Tiere'    },
+    { key:'de_laender', label:'🌍 Länder'   },
+    { key:'de_essen',   label:'🍕 Essen'    },
+    { key:'de_natur',   label:'🌿 Natur'    },
+  ],
+};
+
 // ─── Word lists ───────────────────────────────────────────────────────────────
 const WORD_LISTS = {
   animals: [
@@ -517,20 +554,119 @@ const WORD_LISTS = {
     "TIDE","TORNADO","TUNDRA","TAIGA",
     "VALLEY","VOLCANO",
     "WATERFALL","WETLAND","WIND","WAVE"
+  ],
+
+  // ── German lists (A-Z only, no umlauts) ─────────────────────────────────────
+  de_tiere: [
+    "ADLER","AMEISE","AXOLOTL",
+    "BIBER","BIENE",
+    "DACHS","DELFIN",
+    "EICHHORNCHEN","ELEFANT","ENTE",
+    "FALKE","FISCH","FROSCH","FUCHS",
+    "GECKO","GEPARD","GIRAFFE","GORILLA",
+    "HASE","HUND","HYAENE",
+    "IGEL",
+    "JAGUAR",
+    "KATZE","KOALA","KROKODIL",
+    "LIBELLE","LOEWE","LUCHS",
+    "MARDER","MAUS",
+    "NASHORN","NILPFERD",
+    "OTTER",
+    "PAPAGEI","PFERD","PINGUIN",
+    "RABE","RATTE",
+    "SCHAF","SCHLANGE","SCHMETTERLING","SEEHUND","SPINNE","STORCH",
+    "TIGER","TINTENFISCH",
+    "UHU",
+    "VOGEL",
+    "WASCHBAER","WOLF",
+    "ZEBRA","ZIEGE"
+  ],
+  de_laender: [
+    "AEGYPTEN","AETHIOPIEN","ALBANIEN","ALGERIEN","ANGOLA","ARGENTINIEN","AUSTRALIEN","AUSTRIA",
+    "BELGIEN","BOLIVIEN","BRASILIEN","BULGARIEN",
+    "CHILE","CHINA","DAENEMARK","DEUTSCHLAND",
+    "ECUADOR","ENGLAND",
+    "FINNLAND","FRANKREICH",
+    "GEORGIEN","GHANA","GRIECHENLAND","GUATEMALA",
+    "INDIEN","INDONESIEN","IRAK","IRAN","IRLAND","ISLAND","ISRAEL","ITALIEN",
+    "JAMAIKA","JAPAN","JORDANIEN",
+    "KAMERUN","KANADA","KENIA","KOLUMBIEN","KROATIEN","KUBA",
+    "LAOS","LETTLAND","LIBYEN","LITAUEN","LUXEMBURG",
+    "MALI","MEXIKO","MOLDAWIEN","MONGOLEI","MAROKKO",
+    "NAMIBIA","NEPAL","NIEDERLANDE","NIGERIA","NORWEGEN",
+    "OMAN",
+    "PAKISTAN","PANAMA","PERU","PHILIPPINEN","POLEN","PORTUGAL",
+    "RUMAENIEN","RUSSLAND","RUANDA",
+    "SAMBIA","SCHWEDEN","SERBIEN","SIMBABWE","SOMALIA","SPANIEN","SUDAN","SYRIEN",
+    "TAIWAN","TANSANIA","THAILAND","TUNESIEN","TUERKEI",
+    "UGANDA","UKRAINE","UNGARN","URUGUAY","USBEKISTAN",
+    "VENEZUELA","VIETNAM",
+    "WALES",
+    "JEMEN"
+  ],
+  de_essen: [
+    "APFEL","ARTISCHOCKE","AVOCADO",
+    "BANANE","BIRNE","BOHNE","BROCCOLI","BROT","BUTTER",
+    "DATTEL",
+    "EI","ERBSE",
+    "FEIGE","FISCH","FLEISCH",
+    "GEMUESE","GURKE",
+    "HONIG",
+    "INGWER",
+    "JOGHURT",
+    "KAROTTE","KARTOFFEL","KAESE","KIRSCHE","KNOBLAUCH","KOHL","KUCHEN",
+    "LACHS","LAUCH","LINSE",
+    "MAIS","MANGO","MELONE","MILCH",
+    "NUDELN","NUSS",
+    "OBST","OLIVE","ORANGE",
+    "PFIRSICH","PFLAUME","PILZ","PIZZA",
+    "QUARK",
+    "RADIESCHEN","REIS","ROSENKOHL","ROSINE",
+    "SALAT","SALZ","SCHINKEN","SCHOKOLADE","SENF","SPINAT","SUPPE",
+    "THYMIAN","TOMATE",
+    "VANILLE",
+    "WASSERMELONE","WEIZEN","WURST",
+    "ZITRONE","ZUCCHINI","ZWIEBEL"
+  ],
+  de_natur: [
+    "ALPEN","AUEN",
+    "BACH","BERG","BODEN",
+    "DELTA","DUENE",
+    "EBENE","EIS",
+    "FELS","FLUSS",
+    "GEBIRGE","GIPFEL","GLETSCHER",
+    "HUEGEL",
+    "INSEL",
+    "KANAL","KLIPPE","KUESTE",
+    "LANDSCHAFT","LAVA",
+    "MEER","MONSUN","MOOR",
+    "NEBEL",
+    "OASE",
+    "PLATEAU",
+    "REGEN","RIFF",
+    "SCHNEE","SEE","STEPPE","STURM",
+    "TAL","TAIGA","TORNADO",
+    "WALD","WASSER","WELLE","WUESTE"
   ]
 };
 
+// Label lookup used in feedback messages
 const CAT_LABELS = {
-  animals: "Animals 🐾",
-  countries: "Countries 🌍",
-  food: "Food 🍕",
-  nature: "Nature 🌿"
+  animals:    "Animals 🐾",
+  countries:  "Countries 🌍",
+  food:       "Food 🍕",
+  nature:     "Nature 🌿",
+  de_tiere:   "Tiere 🐾",
+  de_laender: "Länder 🌍",
+  de_essen:   "Essen 🍕",
+  de_natur:   "Natur 🌿",
 };
 
 // Letters considered "safe" to end a starting word on (have multiple followers)
 const SAFE_END = new Set('AEILNORSTGY');
 
 // ─── State ────────────────────────────────────────────────────────────────────
+let language      = 'en';
 let selectedCat   = 'animals';
 let selectedSpeed = 25;
 let wordList      = [];
@@ -542,14 +678,35 @@ let totalTime     = 25;
 let timerInterval = null;
 let gameActive    = false;
 
-// ─── Menu setup ───────────────────────────────────────────────────────────────
-document.querySelectorAll('[data-cat]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedCat = btn.dataset.cat;
+// ─── Language toggle ──────────────────────────────────────────────────────────
+function setLang(lang) {
+  language = lang;
+  document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+  document.getElementById('lang-de').classList.toggle('active', lang === 'de');
+  buildCatButtons();
+}
+
+function buildCatButtons() {
+  const cats = CATEGORIES[language];
+  selectedCat = cats[0].key;
+  const container = document.getElementById('cat-btns');
+  container.innerHTML = '';
+  cats.forEach((cat, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'pick-btn' + (i === 0 ? ' active' : '');
+    btn.dataset.cat = cat.key;
+    btn.textContent = cat.label;
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.pick-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedCat = cat.key;
+    });
+    container.appendChild(btn);
   });
-});
+}
+
+// Build initial English buttons
+buildCatButtons();
 
 document.querySelectorAll('[data-speed]').forEach(btn => {
   btn.addEventListener('click', () => {
