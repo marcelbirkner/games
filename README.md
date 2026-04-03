@@ -14,6 +14,7 @@ A collection of small, fun browser games built for my kids. No backend, no accou
 | 🌍 Geography | **Fun with Flags** | Identify country flags from 249 nations across the globe | 🇬🇧 🇩🇪 |
 | 🌍 Geography | **Guess the Capital** | Name the capital city of countries, pick by continent or all | 🇬🇧 🇩🇪 |
 | 🌍 Geography | **Guess the River** | Which country do the world's 50 largest rivers flow through? | 🇬🇧 🇩🇪 |
+| 🔤 Words | **Scattergories** | A random letter drops — fill 9 categories with words starting with that letter | 🇬🇧 🇩🇪 |
 | 🔤 Words | **Word Hunt** | Find all hidden words in the letter grid before time runs out | 🇬🇧 |
 | 🔤 Words | **Word Chain** | Each word must start with the last letter of the previous | 🇬🇧 🇩🇪 |
 | 🔤 Words | **Hangman** | Classic word-guessing — reveal the hidden word before it's too late | 🇬🇧 🇩🇪 |

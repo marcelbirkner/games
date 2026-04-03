@@ -643,18 +643,21 @@ function loadWord() {
   setFeedback('', '');
 }
 
+const hintEl = document.getElementById('answer-hint');
+
 function renderTiles() {
   const pool   = document.getElementById('pool-zone');
   const answer = document.getElementById('answer-zone');
-  const hint   = document.getElementById('answer-hint');
-  pool.innerHTML   = '';
-  answer.innerHTML = '';
+
+  // Remove only tile elements, keeping hintEl in the answer zone
+  pool.querySelectorAll('.tile').forEach(t => t.remove());
+  answer.querySelectorAll('.tile').forEach(t => t.remove());
 
   if (answerOrder.length === 0) {
-    answer.appendChild(hint);
-    hint.style.display = '';
+    hintEl.style.display = '';
+    if (!hintEl.parentNode || hintEl.parentNode !== answer) answer.appendChild(hintEl);
   } else {
-    hint.style.display = 'none';
+    hintEl.style.display = 'none';
   }
 
   answerOrder.forEach(id => {

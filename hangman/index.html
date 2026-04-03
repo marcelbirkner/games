@@ -752,7 +752,7 @@
   /* ─── SCREEN SWITCHER ────────────────────────────────────────────────── */
   function show(screen) {
     ['menu','game','result'].forEach(id => {
-      document.getElementById(id).style.display = id === screen ? '' : 'none';
+      document.getElementById(id).style.display = id === screen ? 'block' : 'none';
     });
   }
 
