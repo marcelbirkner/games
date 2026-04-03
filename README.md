@@ -12,6 +12,7 @@ A collection of small, fun browser games built for my kids. No backend, no accou
 | ⚽ **Guess the Player** | Recognize famous soccer players from their photos       |
 | 🔢 **Math Blitz** | 60-second math quiz with age-appropriate difficulty levels |
 | ⭕ **Tic Tac Toe** | Play against a friend or the computer (Easy / Medium / Hard AI) |
+| 🧩 **Puzzle Rush** | Classic sliding tile puzzle in 3×3, 4×4 or 5×5 — race the countdown |
 
 More games coming soon!
 
