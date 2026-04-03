@@ -16,10 +16,9 @@
       justify-content: center;
       align-items: flex-start;
       padding: 20px;
-      touch-action: none;
     }
 
-    .container { max-width: 640px; width: 100%; }
+    .container { max-width: 640px; width: 100%; padding-bottom: 40px; }
 
     .back-link {
       display: inline-block;
@@ -119,6 +118,7 @@
       gap: 3px;
       user-select: none;
       -webkit-user-select: none;
+      touch-action: none;
     }
 
     .cell {
@@ -226,11 +226,6 @@
         <div class="dc-title">Expert</div>
         <div class="dc-info">16×16 grid<br>14 words<br>2.5 minutes</div>
       </div>
-      <div class="diff-card" style="--c:#f43f5e" onclick="startGame('master')">
-        <div class="dc-icon">💥</div>
-        <div class="dc-title">Master</div>
-        <div class="dc-info">24×24 grid<br>20 words<br>2 minutes</div>
-      </div>
     </div>
   </div>
 
@@ -313,12 +308,6 @@ const THEMES = {
     { name:"Science 🔬",  words:["PHOTOSYNTHESIS","ELECTROMAGNETIC","THERMODYNAMICS","RADIOACTIVITY","ASTROPHYSICS","MICROORGANISM","SPECTROSCOPY","BIOCHEMISTRY","NEUROSCIENCE","PALEONTOLOGY","GEOPHYSICS","CRYSTALLINE","RELATIVITY","ATMOSPHERE","CHROMOSOME","NANOTECHNOLOGY"] },
     { name:"Big Words 📚", words:["EXTRAORDINARY","PHILOSOPHICAL","COMMUNICATION","INTERNATIONAL","REVOLUTIONARY","COLLABORATION","ENTERTAINMENT","SOPHISTICATED","ORGANIZATION","ACCOMPLISHED","CATASTROPHIC","PROFESSIONAL","DEMONSTRATION","APPRECIATION","INDEPENDENT","CONSTITUTIONAL"] },
   ],
-  master: [
-    { name:"Dinosaurs 🦕", words:["TYRANNOSAURUS","VELOCIRAPTOR","TRICERATOPS","STEGOSAURUS","BRACHIOSAURUS","PTERODACTYL","ANKYLOSAURUS","DIPLODOCUS","IGUANODON","ALLOSAURUS","SPINOSAURUS","OVIRAPTOR","ARCHAEOPTERYX","MEGALOSAURUS","DIMETRODON","PROTOCERATOPS","PACHYCEPHALOSAURUS","PARASAUROLOPHUS","EDMONTOSAURUS","CARNOTAURUS"] },
-    { name:"Geography 🗺️",words:["MEDITERRANEAN","SCANDINAVIA","KILIMANJARO","MESOPOTAMIA","YELLOWSTONE","BOSPHORUS","EVERGLADES","HIGHLANDS","WATERSHED","LANDLOCKED","CONTINENTAL","SUBTROPICAL","ARCHIPELAGO","EQUATORIAL","RAINFOREST","PENINSULAR","TRANSCONTINENTAL","CIRCUMNAVIGATION","INTERMOUNTAIN","STRATOSPHERE"] },
-    { name:"Science 🔬",  words:["PHOTOSYNTHESIS","ELECTROMAGNETIC","THERMODYNAMICS","RADIOACTIVITY","ASTROPHYSICS","MICROORGANISM","SPECTROSCOPY","BIOCHEMISTRY","NEUROSCIENCE","PALEONTOLOGY","NANOTECHNOLOGY","CRYSTALLOGRAPHY","BIOLUMINESCENCE","SEMICONDUCTORS","PHARMACOLOGY","BIOTECHNOLOGY","METEOROLOGY","OCEANOGRAPHY","IMMUNODEFICIENCY","NEUROPSYCHOLOGY"] },
-    { name:"Big Words 📚", words:["EXTRAORDINARY","PHILOSOPHICAL","COMMUNICATION","INTERNATIONAL","REVOLUTIONARY","COLLABORATION","ENTERTAINMENT","SOPHISTICATED","ORGANIZATION","CATASTROPHIC","UNCONSTITUTIONAL","MULTIDISCIPLINARY","COUNTERINTELLIGENCE","ANTIESTABLISHMENT","CIRCUMFERENCE","ARCHAEOLOGICAL","ENTREPRENEURSHIP","INDUSTRIALIZATION","INCOMPREHENSIBLE","ELECTROMAGNETIC"] },
-  ],
 };
 
 const WORD_COLORS = [
@@ -332,7 +321,6 @@ const CONFIG = {
   medium: { n: 10, count: 10, time: 240 },
   hard:   { n: 12, count: 12, time: 180 },
   expert: { n: 16, count: 14, time: 150 },
-  master: { n: 24, count: 20, time: 120 },
 };
 
 const DIRS = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
