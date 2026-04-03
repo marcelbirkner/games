@@ -15,4 +15,4 @@ More games coming soon!
 
 ## How it works
 
-Everything runs directly in the browser — plain HTML, CSS, and JavaScript. No server, no database, no dependencies to install.
+Everything runs directly in the browser - plain HTML, CSS, and JavaScript. No server, no database, no dependencies to install.
