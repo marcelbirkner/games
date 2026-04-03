@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guess the Capital</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      padding: 20px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 16px;
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    h1 { text-align: center; font-size: 2rem; margin-bottom: 8px; }
+
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 32px;
+      font-size: 0.95rem;
+    }
+
+    /* ── MENU ──────────────────────────────── */
+    #menu { text-align: center; }
+
+    #menu h2 {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      color: #ccc;
+    }
+
+    .continent-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .continent-btn {
+      padding: 14px 10px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .continent-btn:hover {
+      background: rgba(255,255,255,0.15);
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    .continent-btn.all {
+      grid-column: 1 / -1;
+      background: rgba(20,184,166,0.2);
+      border-color: rgba(20,184,166,0.45);
+    }
+    .continent-btn.all:hover { background: rgba(20,184,166,0.35); }
+
+    /* ── QUIZ ──────────────────────────────── */
+    #quiz { display: none; }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #14b8a6, #6366f1);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+
+    .score-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      font-size: 0.95rem;
+    }
+    .score-bar .label  { color: #aaa; }
+    .score-bar .value  { font-weight: 700; font-size: 1.1rem; }
+    .score-bar .streak { color: #f59e0b; }
+    .score-bar .correct-count { color: #10b981; }
+
+    /* Country display */
+    .country-display {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .flag-img {
+      width: 240px;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.5);
+      border: 3px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      display: block;
+      margin: 0 auto 16px;
+    }
+
+    .country-name {
+      font-size: 1.7rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .question-label {
+      margin-top: 6px;
+      font-size: 0.9rem;
+      color: #a5b4fc;
+    }
+
+    /* Options */
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .option-btn {
+      padding: 16px 12px;
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .option-btn:hover:not(.disabled) {
+      background: rgba(255,255,255,0.13);
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    .option-btn.correct  { background: rgba(16,185,129,0.3); border-color: #10b981; }
+    .option-btn.wrong    { background: rgba(239,68,68,0.25);  border-color: #ef4444; }
+    .option-btn.reveal   { border-color: #10b981; opacity: 0.8; }
+    .option-btn.disabled { cursor: default; pointer-events: none; }
+
+    /* ── RESULT ────────────────────────────── */
+    #result { display: none; text-align: center; }
+
+    .result-card {
+      background: rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 40px 30px;
+      margin-bottom: 24px;
+    }
+    .result-card .big-score {
+      font-size: 4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #14b8a6, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .result-card .out-of   { font-size: 1.2rem; color: #aaa; margin-top: 4px; }
+    .result-card .percentage { font-size: 1.5rem; margin-top: 12px; color: #e2e8f0; }
+    .result-card .best-streak { margin-top: 12px; color: #f59e0b; font-size: 1rem; }
+
+    .play-again-btn {
+      padding: 14px 40px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #14b8a6, #0d9488);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .play-again-btn:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="../index.html" class="back-link">← Back to Arcade</a>
+  <h1>🌐 Guess the Capital</h1>
+  <p class="subtitle">Can you name the capital of every country?</p>
+
+  <!-- MENU -->
+  <div id="menu">
+    <h2>Choose a region</h2>
+    <div class="continent-grid">
+      <button class="continent-btn all" onclick="startQuiz('all')">🌍 All Countries</button>
+      <button class="continent-btn" onclick="startQuiz('Africa')">🌍 Africa</button>
+      <button class="continent-btn" onclick="startQuiz('Asia')">🌏 Asia</button>
+      <button class="continent-btn" onclick="startQuiz('Europe')">🌍 Europe</button>
+      <button class="continent-btn" onclick="startQuiz('North America')">🌎 North America</button>
+      <button class="continent-btn" onclick="startQuiz('South America')">🌎 South America</button>
+      <button class="continent-btn" onclick="startQuiz('Oceania')">🌏 Oceania</button>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz">
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+    <div class="score-bar">
+      <div><span class="label">Score: </span><span class="value correct-count" id="score">0</span></div>
+      <div><span class="label">Question: </span><span class="value" id="qnum">1/10</span></div>
+      <div><span class="label">Streak: </span><span class="value streak" id="streak">0</span></div>
+    </div>
+    <div class="country-display">
+      <img class="flag-img" id="flag-img" src="" alt="Country flag">
+      <div class="country-name" id="country-name"></div>
+      <div class="question-label">What is the capital city?</div>
+    </div>
+    <div class="options" id="options"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result">
+    <div class="result-card">
+      <div class="big-score" id="final-score">0</div>
+      <div class="out-of" id="final-total">out of 10</div>
+      <div class="percentage" id="final-pct">0%</div>
+      <div class="best-streak" id="final-streak">Best streak: 0</div>
+    </div>
+    <button class="play-again-btn" onclick="backToMenu()">Play Again</button>
+  </div>
+</div>
+
+<script>
+const COUNTRIES = [
+  // Africa
+  {name:"Algeria",       code:"dz", continent:"Africa",        capital:"Algiers"},
+  {name:"Angola",        code:"ao", continent:"Africa",        capital:"Luanda"},
+  {name:"Benin",         code:"bj", continent:"Africa",        capital:"Porto-Novo"},
+  {name:"Botswana",      code:"bw", continent:"Africa",        capital:"Gaborone"},
+  {name:"Burkina Faso",  code:"bf", continent:"Africa",        capital:"Ouagadougou"},
+  {name:"Burundi",       code:"bi", continent:"Africa",        capital:"Gitega"},
+  {name:"Cameroon",      code:"cm", continent:"Africa",        capital:"Yaoundé"},
+  {name:"Cape Verde",    code:"cv", continent:"Africa",        capital:"Praia"},
+  {name:"Central African Republic", code:"cf", continent:"Africa", capital:"Bangui"},
+  {name:"Chad",          code:"td", continent:"Africa",        capital:"N'Djamena"},
+  {name:"Comoros",       code:"km", continent:"Africa",        capital:"Moroni"},
+  {name:"Congo",         code:"cg", continent:"Africa",        capital:"Brazzaville"},
+  {name:"DR Congo",      code:"cd", continent:"Africa",        capital:"Kinshasa"},
+  {name:"Djibouti",      code:"dj", continent:"Africa",        capital:"Djibouti City"},
+  {name:"Egypt",         code:"eg", continent:"Africa",        capital:"Cairo"},
+  {name:"Equatorial Guinea", code:"gq", continent:"Africa",    capital:"Malabo"},
+  {name:"Eritrea",       code:"er", continent:"Africa",        capital:"Asmara"},
+  {name:"Eswatini",      code:"sz", continent:"Africa",        capital:"Mbabane"},
+  {name:"Ethiopia",      code:"et", continent:"Africa",        capital:"Addis Ababa"},
+  {name:"Gabon",         code:"ga", continent:"Africa",        capital:"Libreville"},
+  {name:"Gambia",        code:"gm", continent:"Africa",        capital:"Banjul"},
+  {name:"Ghana",         code:"gh", continent:"Africa",        capital:"Accra"},
+  {name:"Guinea",        code:"gn", continent:"Africa",        capital:"Conakry"},
+  {name:"Guinea-Bissau", code:"gw", continent:"Africa",        capital:"Bissau"},
+  {name:"Ivory Coast",   code:"ci", continent:"Africa",        capital:"Yamoussoukro"},
+  {name:"Kenya",         code:"ke", continent:"Africa",        capital:"Nairobi"},
+  {name:"Lesotho",       code:"ls", continent:"Africa",        capital:"Maseru"},
+  {name:"Liberia",       code:"lr", continent:"Africa",        capital:"Monrovia"},
+  {name:"Libya",         code:"ly", continent:"Africa",        capital:"Tripoli"},
+  {name:"Madagascar",    code:"mg", continent:"Africa",        capital:"Antananarivo"},
+  {name:"Malawi",        code:"mw", continent:"Africa",        capital:"Lilongwe"},
+  {name:"Mali",          code:"ml", continent:"Africa",        capital:"Bamako"},
+  {name:"Mauritania",    code:"mr", continent:"Africa",        capital:"Nouakchott"},
+  {name:"Mauritius",     code:"mu", continent:"Africa",        capital:"Port Louis"},
+  {name:"Morocco",       code:"ma", continent:"Africa",        capital:"Rabat"},
+  {name:"Mozambique",    code:"mz", continent:"Africa",        capital:"Maputo"},
+  {name:"Namibia",       code:"na", continent:"Africa",        capital:"Windhoek"},
+  {name:"Niger",         code:"ne", continent:"Africa",        capital:"Niamey"},
+  {name:"Nigeria",       code:"ng", continent:"Africa",        capital:"Abuja"},
+  {name:"Rwanda",        code:"rw", continent:"Africa",        capital:"Kigali"},
+  {name:"Senegal",       code:"sn", continent:"Africa",        capital:"Dakar"},
+  {name:"Seychelles",    code:"sc", continent:"Africa",        capital:"Victoria"},
+  {name:"Sierra Leone",  code:"sl", continent:"Africa",        capital:"Freetown"},
+  {name:"Somalia",       code:"so", continent:"Africa",        capital:"Mogadishu"},
+  {name:"South Africa",  code:"za", continent:"Africa",        capital:"Pretoria"},
+  {name:"South Sudan",   code:"ss", continent:"Africa",        capital:"Juba"},
+  {name:"Sudan",         code:"sd", continent:"Africa",        capital:"Khartoum"},
+  {name:"Tanzania",      code:"tz", continent:"Africa",        capital:"Dodoma"},
+  {name:"Togo",          code:"tg", continent:"Africa",        capital:"Lomé"},
+  {name:"Tunisia",       code:"tn", continent:"Africa",        capital:"Tunis"},
+  {name:"Uganda",        code:"ug", continent:"Africa",        capital:"Kampala"},
+  {name:"Zambia",        code:"zm", continent:"Africa",        capital:"Lusaka"},
+  {name:"Zimbabwe",      code:"zw", continent:"Africa",        capital:"Harare"},
+  // Asia
+  {name:"Afghanistan",   code:"af", continent:"Asia",          capital:"Kabul"},
+  {name:"Armenia",       code:"am", continent:"Asia",          capital:"Yerevan"},
+  {name:"Azerbaijan",    code:"az", continent:"Asia",          capital:"Baku"},
+  {name:"Bahrain",       code:"bh", continent:"Asia",          capital:"Manama"},
+  {name:"Bangladesh",    code:"bd", continent:"Asia",          capital:"Dhaka"},
+  {name:"Bhutan",        code:"bt", continent:"Asia",          capital:"Thimphu"},
+  {name:"Brunei",        code:"bn", continent:"Asia",          capital:"Bandar Seri Begawan"},
+  {name:"Cambodia",      code:"kh", continent:"Asia",          capital:"Phnom Penh"},
+  {name:"China",         code:"cn", continent:"Asia",          capital:"Beijing"},
+  {name:"Georgia",       code:"ge", continent:"Asia",          capital:"Tbilisi"},
+  {name:"India",         code:"in", continent:"Asia",          capital:"New Delhi"},
+  {name:"Indonesia",     code:"id", continent:"Asia",          capital:"Jakarta"},
+  {name:"Iran",          code:"ir", continent:"Asia",          capital:"Tehran"},
+  {name:"Iraq",          code:"iq", continent:"Asia",          capital:"Baghdad"},
+  {name:"Israel",        code:"il", continent:"Asia",          capital:"Jerusalem"},
+  {name:"Japan",         code:"jp", continent:"Asia",          capital:"Tokyo"},
+  {name:"Jordan",        code:"jo", continent:"Asia",          capital:"Amman"},
+  {name:"Kazakhstan",    code:"kz", continent:"Asia",          capital:"Astana"},
+  {name:"Kuwait",        code:"kw", continent:"Asia",          capital:"Kuwait City"},
+  {name:"Kyrgyzstan",    code:"kg", continent:"Asia",          capital:"Bishkek"},
+  {name:"Laos",          code:"la", continent:"Asia",          capital:"Vientiane"},
+  {name:"Lebanon",       code:"lb", continent:"Asia",          capital:"Beirut"},
+  {name:"Malaysia",      code:"my", continent:"Asia",          capital:"Kuala Lumpur"},
+  {name:"Maldives",      code:"mv", continent:"Asia",          capital:"Malé"},
+  {name:"Mongolia",      code:"mn", continent:"Asia",          capital:"Ulaanbaatar"},
+  {name:"Myanmar",       code:"mm", continent:"Asia",          capital:"Naypyidaw"},
+  {name:"Nepal",         code:"np", continent:"Asia",          capital:"Kathmandu"},
+  {name:"North Korea",   code:"kp", continent:"Asia",          capital:"Pyongyang"},
+  {name:"Oman",          code:"om", continent:"Asia",          capital:"Muscat"},
+  {name:"Pakistan",      code:"pk", continent:"Asia",          capital:"Islamabad"},
+  {name:"Philippines",   code:"ph", continent:"Asia",          capital:"Manila"},
+  {name:"Qatar",         code:"qa", continent:"Asia",          capital:"Doha"},
+  {name:"Saudi Arabia",  code:"sa", continent:"Asia",          capital:"Riyadh"},
+  {name:"Singapore",     code:"sg", continent:"Asia",          capital:"Singapore"},
+  {name:"South Korea",   code:"kr", continent:"Asia",          capital:"Seoul"},
+  {name:"Sri Lanka",     code:"lk", continent:"Asia",          capital:"Sri Jayawardenepura Kotte"},
+  {name:"Syria",         code:"sy", continent:"Asia",          capital:"Damascus"},
+  {name:"Taiwan",        code:"tw", continent:"Asia",          capital:"Taipei"},
+  {name:"Tajikistan",    code:"tj", continent:"Asia",          capital:"Dushanbe"},
+  {name:"Thailand",      code:"th", continent:"Asia",          capital:"Bangkok"},
+  {name:"Timor-Leste",   code:"tl", continent:"Asia",          capital:"Dili"},
+  {name:"Turkey",        code:"tr", continent:"Asia",          capital:"Ankara"},
+  {name:"Turkmenistan",  code:"tm", continent:"Asia",          capital:"Ashgabat"},
+  {name:"UAE",           code:"ae", continent:"Asia",          capital:"Abu Dhabi"},
+  {name:"Uzbekistan",    code:"uz", continent:"Asia",          capital:"Tashkent"},
+  {name:"Vietnam",       code:"vn", continent:"Asia",          capital:"Hanoi"},
+  {name:"Yemen",         code:"ye", continent:"Asia",          capital:"Sana'a"},
+  // Europe
+  {name:"Albania",       code:"al", continent:"Europe",        capital:"Tirana"},
+  {name:"Andorra",       code:"ad", continent:"Europe",        capital:"Andorra la Vella"},
+  {name:"Austria",       code:"at", continent:"Europe",        capital:"Vienna"},
+  {name:"Belarus",       code:"by", continent:"Europe",        capital:"Minsk"},
+  {name:"Belgium",       code:"be", continent:"Europe",        capital:"Brussels"},
+  {name:"Bosnia and Herzegovina", code:"ba", continent:"Europe", capital:"Sarajevo"},
+  {name:"Bulgaria",      code:"bg", continent:"Europe",        capital:"Sofia"},
+  {name:"Croatia",       code:"hr", continent:"Europe",        capital:"Zagreb"},
+  {name:"Cyprus",        code:"cy", continent:"Europe",        capital:"Nicosia"},
+  {name:"Czech Republic",code:"cz", continent:"Europe",        capital:"Prague"},
+  {name:"Denmark",       code:"dk", continent:"Europe",        capital:"Copenhagen"},
+  {name:"Estonia",       code:"ee", continent:"Europe",        capital:"Tallinn"},
+  {name:"Finland",       code:"fi", continent:"Europe",        capital:"Helsinki"},
+  {name:"France",        code:"fr", continent:"Europe",        capital:"Paris"},
+  {name:"Germany",       code:"de", continent:"Europe",        capital:"Berlin"},
+  {name:"Greece",        code:"gr", continent:"Europe",        capital:"Athens"},
+  {name:"Hungary",       code:"hu", continent:"Europe",        capital:"Budapest"},
+  {name:"Iceland",       code:"is", continent:"Europe",        capital:"Reykjavik"},
+  {name:"Ireland",       code:"ie", continent:"Europe",        capital:"Dublin"},
+  {name:"Italy",         code:"it", continent:"Europe",        capital:"Rome"},
+  {name:"Kosovo",        code:"xk", continent:"Europe",        capital:"Pristina"},
+  {name:"Latvia",        code:"lv", continent:"Europe",        capital:"Riga"},
+  {name:"Liechtenstein", code:"li", continent:"Europe",        capital:"Vaduz"},
+  {name:"Lithuania",     code:"lt", continent:"Europe",        capital:"Vilnius"},
+  {name:"Luxembourg",    code:"lu", continent:"Europe",        capital:"Luxembourg City"},
+  {name:"Malta",         code:"mt", continent:"Europe",        capital:"Valletta"},
+  {name:"Moldova",       code:"md", continent:"Europe",        capital:"Chișinău"},
+  {name:"Monaco",        code:"mc", continent:"Europe",        capital:"Monaco"},
+  {name:"Montenegro",    code:"me", continent:"Europe",        capital:"Podgorica"},
+  {name:"Netherlands",   code:"nl", continent:"Europe",        capital:"Amsterdam"},
+  {name:"North Macedonia",code:"mk",continent:"Europe",        capital:"Skopje"},
+  {name:"Norway",        code:"no", continent:"Europe",        capital:"Oslo"},
+  {name:"Poland",        code:"pl", continent:"Europe",        capital:"Warsaw"},
+  {name:"Portugal",      code:"pt", continent:"Europe",        capital:"Lisbon"},
+  {name:"Romania",       code:"ro", continent:"Europe",        capital:"Bucharest"},
+  {name:"Russia",        code:"ru", continent:"Europe",        capital:"Moscow"},
+  {name:"San Marino",    code:"sm", continent:"Europe",        capital:"San Marino"},
+  {name:"Serbia",        code:"rs", continent:"Europe",        capital:"Belgrade"},
+  {name:"Slovakia",      code:"sk", continent:"Europe",        capital:"Bratislava"},
+  {name:"Slovenia",      code:"si", continent:"Europe",        capital:"Ljubljana"},
+  {name:"Spain",         code:"es", continent:"Europe",        capital:"Madrid"},
+  {name:"Sweden",        code:"se", continent:"Europe",        capital:"Stockholm"},
+  {name:"Switzerland",   code:"ch", continent:"Europe",        capital:"Bern"},
+  {name:"Ukraine",       code:"ua", continent:"Europe",        capital:"Kyiv"},
+  {name:"United Kingdom",code:"gb", continent:"Europe",        capital:"London"},
+  {name:"Vatican City",  code:"va", continent:"Europe",        capital:"Vatican City"},
+  // North America
+  {name:"Antigua and Barbuda", code:"ag", continent:"North America", capital:"Saint John's"},
+  {name:"Bahamas",       code:"bs", continent:"North America", capital:"Nassau"},
+  {name:"Barbados",      code:"bb", continent:"North America", capital:"Bridgetown"},
+  {name:"Belize",        code:"bz", continent:"North America", capital:"Belmopan"},
+  {name:"Canada",        code:"ca", continent:"North America", capital:"Ottawa"},
+  {name:"Costa Rica",    code:"cr", continent:"North America", capital:"San José"},
+  {name:"Cuba",          code:"cu", continent:"North America", capital:"Havana"},
+  {name:"Dominica",      code:"dm", continent:"North America", capital:"Roseau"},
+  {name:"Dominican Republic", code:"do", continent:"North America", capital:"Santo Domingo"},
+  {name:"El Salvador",   code:"sv", continent:"North America", capital:"San Salvador"},
+  {name:"Grenada",       code:"gd", continent:"North America", capital:"Saint George's"},
+  {name:"Guatemala",     code:"gt", continent:"North America", capital:"Guatemala City"},
+  {name:"Haiti",         code:"ht", continent:"North America", capital:"Port-au-Prince"},
+  {name:"Honduras",      code:"hn", continent:"North America", capital:"Tegucigalpa"},
+  {name:"Jamaica",       code:"jm", continent:"North America", capital:"Kingston"},
+  {name:"Mexico",        code:"mx", continent:"North America", capital:"Mexico City"},
+  {name:"Nicaragua",     code:"ni", continent:"North America", capital:"Managua"},
+  {name:"Panama",        code:"pa", continent:"North America", capital:"Panama City"},
+  {name:"Saint Kitts and Nevis", code:"kn", continent:"North America", capital:"Basseterre"},
+  {name:"Saint Lucia",   code:"lc", continent:"North America", capital:"Castries"},
+  {name:"Saint Vincent", code:"vc", continent:"North America", capital:"Kingstown"},
+  {name:"Trinidad and Tobago", code:"tt", continent:"North America", capital:"Port of Spain"},
+  {name:"United States", code:"us", continent:"North America", capital:"Washington, D.C."},
+  // South America
+  {name:"Argentina",     code:"ar", continent:"South America", capital:"Buenos Aires"},
+  {name:"Bolivia",       code:"bo", continent:"South America", capital:"Sucre"},
+  {name:"Brazil",        code:"br", continent:"South America", capital:"Brasília"},
+  {name:"Chile",         code:"cl", continent:"South America", capital:"Santiago"},
+  {name:"Colombia",      code:"co", continent:"South America", capital:"Bogotá"},
+  {name:"Ecuador",       code:"ec", continent:"South America", capital:"Quito"},
+  {name:"Guyana",        code:"gy", continent:"South America", capital:"Georgetown"},
+  {name:"Paraguay",      code:"py", continent:"South America", capital:"Asunción"},
+  {name:"Peru",          code:"pe", continent:"South America", capital:"Lima"},
+  {name:"Suriname",      code:"sr", continent:"South America", capital:"Paramaribo"},
+  {name:"Uruguay",       code:"uy", continent:"South America", capital:"Montevideo"},
+  {name:"Venezuela",     code:"ve", continent:"South America", capital:"Caracas"},
+  // Oceania
+  {name:"Australia",     code:"au", continent:"Oceania",       capital:"Canberra"},
+  {name:"Fiji",          code:"fj", continent:"Oceania",       capital:"Suva"},
+  {name:"Kiribati",      code:"ki", continent:"Oceania",       capital:"Tarawa"},
+  {name:"Marshall Islands", code:"mh", continent:"Oceania",    capital:"Majuro"},
+  {name:"Micronesia",    code:"fm", continent:"Oceania",       capital:"Palikir"},
+  {name:"Nauru",         code:"nr", continent:"Oceania",       capital:"Yaren"},
+  {name:"New Zealand",   code:"nz", continent:"Oceania",       capital:"Wellington"},
+  {name:"Palau",         code:"pw", continent:"Oceania",       capital:"Ngerulmud"},
+  {name:"Papua New Guinea", code:"pg", continent:"Oceania",    capital:"Port Moresby"},
+  {name:"Samoa",         code:"ws", continent:"Oceania",       capital:"Apia"},
+  {name:"Solomon Islands", code:"sb", continent:"Oceania",     capital:"Honiara"},
+  {name:"Tonga",         code:"to", continent:"Oceania",       capital:"Nuku'alofa"},
+  {name:"Tuvalu",        code:"tv", continent:"Oceania",       capital:"Funafuti"},
+  {name:"Vanuatu",       code:"vu", continent:"Oceania",       capital:"Port Vila"},
+];
+
+let pool = [], questions = [], currentQ = 0;
+let score = 0, streak = 0, bestStreak = 0, totalQuestions = 10;
+let answered = false;
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function startQuiz(region) {
+  pool = region === 'all' ? [...COUNTRIES] : COUNTRIES.filter(c => c.continent === region);
+  if (pool.length < 4) return;
+
+  totalQuestions = Math.min(pool.length, region === 'all' ? 20 : 10);
+  questions = shuffle([...pool]).slice(0, totalQuestions);
+  currentQ = 0; score = 0; streak = 0; bestStreak = 0;
+
+  document.getElementById('menu').style.display  = 'none';
+  document.getElementById('quiz').style.display  = 'block';
+  document.getElementById('result').style.display = 'none';
+
+  showQuestion();
+}
+
+function showQuestion() {
+  answered = false;
+  const q = questions[currentQ];
+
+  document.getElementById('score').textContent    = score;
+  document.getElementById('qnum').textContent     = `${currentQ + 1}/${totalQuestions}`;
+  document.getElementById('streak').textContent   = streak;
+  document.getElementById('progress').style.width = `${(currentQ / totalQuestions) * 100}%`;
+
+  document.getElementById('flag-img').src         = `https://flagcdn.com/w320/${q.code}.png`;
+  document.getElementById('country-name').textContent = q.name;
+
+  // Build 4 options: 1 correct + 3 wrong (prefer same continent for harder choices)
+  const sameContinent = COUNTRIES.filter(c => c.name !== q.name && c.continent === q.continent);
+  const otherContinent = COUNTRIES.filter(c => c.name !== q.name && c.continent !== q.continent);
+
+  let wrongPool = shuffle([...sameContinent]).slice(0, 3);
+  if (wrongPool.length < 3) {
+    wrongPool = wrongPool.concat(shuffle([...otherContinent]).slice(0, 3 - wrongPool.length));
+  }
+  const options = shuffle([q, ...wrongPool.slice(0, 3)]);
+
+  const optionsEl = document.getElementById('options');
+  optionsEl.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt.capital;
+    btn.addEventListener('click', () => handleAnswer(btn, opt.capital === q.capital, q.capital));
+    optionsEl.appendChild(btn);
+  });
+}
+
+function handleAnswer(btn, isCorrect, correctCapital) {
+  if (answered) return;
+  answered = true;
+
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    score++; streak++;
+    if (streak > bestStreak) bestStreak = streak;
+  } else {
+    btn.classList.add('wrong');
+    streak = 0;
+    document.querySelectorAll('.option-btn').forEach(b => {
+      if (b.textContent === correctCapital) b.classList.add('reveal');
+    });
+  }
+
+  document.getElementById('score').textContent  = score;
+  document.getElementById('streak').textContent = streak;
+
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ < totalQuestions) showQuestion();
+    else showResult();
+  }, 1200);
+}
+
+function showResult() {
+  document.getElementById('quiz').style.display   = 'none';
+  document.getElementById('result').style.display = 'block';
+  const pct = Math.round((score / totalQuestions) * 100);
+  document.getElementById('final-score').textContent  = score;
+  document.getElementById('final-total').textContent  = `out of ${totalQuestions}`;
+  document.getElementById('final-pct').textContent    = `${pct}%`;
+  document.getElementById('final-streak').textContent = `Best streak: ${bestStreak} 🔥`;
+}
+
+function backToMenu() {
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('quiz').style.display   = 'none';
+  document.getElementById('menu').style.display   = 'block';
+}
+</script>
+</body>
+</html>
