@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guess the Player</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 32px;
+      font-size: 0.95rem;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 16px;
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    /* Menu screen */
+    #menu { text-align: center; }
+
+    #menu h2 {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      color: #ccc;
+    }
+
+    .country-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .country-btn {
+      padding: 14px 10px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .country-btn:hover {
+      background: rgba(255,255,255,0.15);
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+
+    .country-btn.all {
+      grid-column: 1 / -1;
+      background: rgba(16, 185, 129, 0.25);
+      border-color: rgba(16, 185, 129, 0.5);
+    }
+
+    .country-btn.all:hover {
+      background: rgba(16, 185, 129, 0.4);
+    }
+
+    /* Quiz screen */
+    #quiz { display: none; }
+
+    .score-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      font-size: 0.95rem;
+    }
+
+    .score-bar .label { color: #aaa; }
+    .score-bar .value { font-weight: 700; font-size: 1.1rem; }
+    .streak { color: #f59e0b; }
+    .correct-count { color: #10b981; }
+
+    .player-display {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .player-display img {
+      width: 220px;
+      height: 280px;
+      object-fit: cover;
+      object-position: top;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      border: 3px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .player-hint {
+      margin-top: 12px;
+      font-size: 0.9rem;
+      color: #a5b4fc;
+    }
+
+    .options {
+      display: grid;
+      gap: 12px;
+    }
+
+    .option-btn {
+      padding: 16px;
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 1.05rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .option-btn:hover:not(.disabled) {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.25);
+    }
+
+    .option-btn.correct {
+      background: rgba(16, 185, 129, 0.3);
+      border-color: #10b981;
+    }
+
+    .option-btn.wrong {
+      background: rgba(239, 68, 68, 0.3);
+      border-color: #ef4444;
+    }
+
+    .option-btn.disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+
+    .option-btn.reveal {
+      border-color: #10b981;
+      opacity: 1;
+    }
+
+    /* Result screen */
+    #result { display: none; text-align: center; }
+
+    .result-card {
+      background: rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 40px 30px;
+      margin-bottom: 24px;
+    }
+
+    .result-card .big-score {
+      font-size: 4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #10b981, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .result-card .out-of {
+      font-size: 1.2rem;
+      color: #aaa;
+      margin-top: 4px;
+    }
+
+    .result-card .percentage {
+      font-size: 1.5rem;
+      margin-top: 12px;
+      color: #e2e8f0;
+    }
+
+    .result-card .best-streak {
+      margin-top: 12px;
+      color: #f59e0b;
+      font-size: 1rem;
+    }
+
+    .play-again-btn {
+      padding: 14px 40px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .play-again-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #6366f1);
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+
+    .img-error {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 220px;
+      height: 280px;
+      margin: 0 auto;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 3px solid rgba(255,255,255,0.1);
+      color: #666;
+      font-size: 4rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="../index.html" class="back-link">← Back to Arcade</a>
+    <h1>⚽ Guess the Player</h1>
+    <p class="subtitle">Can you identify these soccer legends and stars?</p>
+
+    <!-- Menu -->
+    <div id="menu">
+      <h2>Choose a country or play all</h2>
+      <div class="country-grid">
+        <button class="country-btn all" onclick="startQuiz('all')">All Players</button>
+        <button class="country-btn" onclick="startQuiz('Argentina')">🇦🇷 Argentina</button>
+        <button class="country-btn" onclick="startQuiz('Brazil')">🇧🇷 Brazil</button>
+        <button class="country-btn" onclick="startQuiz('France')">🇫🇷 France</button>
+        <button class="country-btn" onclick="startQuiz('Germany')">🇩🇪 Germany</button>
+        <button class="country-btn" onclick="startQuiz('Spain')">🇪🇸 Spain</button>
+        <button class="country-btn" onclick="startQuiz('England')">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</button>
+        <button class="country-btn" onclick="startQuiz('Portugal')">🇵🇹 Portugal</button>
+        <button class="country-btn" onclick="startQuiz('Italy')">🇮🇹 Italy</button>
+        <button class="country-btn" onclick="startQuiz('Netherlands')">🇳🇱 Netherlands</button>
+        <button class="country-btn" onclick="startQuiz('Other')">🌍 Other Countries</button>
+      </div>
+    </div>
+
+    <!-- Quiz -->
+    <div id="quiz">
+      <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+      <div class="score-bar">
+        <div><span class="label">Score: </span><span class="value correct-count" id="score">0</span></div>
+        <div><span class="label">Question: </span><span class="value" id="qnum">1/10</span></div>
+        <div><span class="label">Streak: </span><span class="value streak" id="streak">0</span></div>
+      </div>
+      <div class="player-display">
+        <img id="player-img" src="" alt="Soccer player" referrerpolicy="no-referrer">
+        <div class="player-hint" id="player-hint"></div>
+      </div>
+      <div class="options" id="options"></div>
+    </div>
+
+    <!-- Result -->
+    <div id="result">
+      <div class="result-card">
+        <div class="big-score" id="final-score">0</div>
+        <div class="out-of" id="final-total">out of 10</div>
+        <div class="percentage" id="final-pct">0%</div>
+        <div class="best-streak" id="final-streak">Best streak: 0</div>
+      </div>
+      <button class="play-again-btn" onclick="backToMenu()">Play Again</button>
+    </div>
+  </div>
+
+<script>
+const PLAYERS = [
+  // Argentina
+  {name:"Lionel Messi",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/b/b4/Lionel-Messi-Argentina-2022-FIFA-World-Cup_%28cropped%29.jpg"},
+  {name:"Diego Maradona",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/2/2c/Maradona-Mundial_86_con_la_copa.JPG"},
+  {name:"Ángel Di María",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/4/4f/Angel_di_Maria_2022.jpg"},
+  {name:"Sergio Agüero",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/8/80/Sergio_Ag%C3%BCero_2014.jpg"},
+  {name:"Javier Zanetti",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/3/30/Javier_Zanetti_-_Inter_Mailand_%281%29.jpg"},
+  {name:"Gabriel Batistuta",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/5/5a/Batistuta.JPG"},
+  {name:"Julián Álvarez",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/1/1a/Juli%C3%A1n_%C3%81lvarez_2022.jpg"},
+  {name:"Paulo Dybala",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/1/10/20180601_FIFA_Friendly_Match_Austria_vs._Brazil_Paulo_Dybala_850_1592.jpg"},
+  {name:"Lautaro Martínez",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/2/21/Lautaro_Mart%C3%ADnez_2022.jpg"},
+  {name:"Emiliano Martínez",country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/5/5a/Emiliano_Mart%C3%ADnez_2022.jpg"},
+
+  // Brazil
+  {name:"Pelé",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/5/5e/Pele_con_brasil_%28cropped%29.jpg"},
+  {name:"Ronaldinho",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/2/26/Ronaldinho_2012.jpg"},
+  {name:"Neymar",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/6/65/20180610_FIFA_Friendly_Match_Austria_vs._Brazil_Neymar_850_5765.jpg"},
+  {name:"Ronaldo Nazário",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/c/c8/Ronaldo_2012.jpg"},
+  {name:"Kaká",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/6/6d/Kak%C3%A1_visited_Real_Madrid.jpg"},
+  {name:"Rivaldo",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/3/3e/Rivaldo_in_Belo_Horizonte_%28cropped%29.jpg"},
+  {name:"Roberto Carlos",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/c/c4/Roberto_Carlos_2011.jpg"},
+  {name:"Cafu",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/b/b8/Cafu_2006.jpg"},
+  {name:"Vinícius Júnior",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/e/e0/Vinicius_Junior_2022.jpg"},
+  {name:"Romário",country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/1/14/Rom%C3%A1rio_%28cropped%29.jpg"},
+
+  // France
+  {name:"Zinedine Zidane",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/f/f3/Zinedine_Zidane_by_Tasnim_03.jpg"},
+  {name:"Kylian Mbappé",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/5/57/2019-07-17_SG_Dynamo_Dresden_vs._Paris_Saint-Germain_by_Sandro_Halank%E2%80%93129_%28cropped%29.jpg"},
+  {name:"Thierry Henry",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/7/76/Thierry_Henry_2012_%28cropped%29.jpg"},
+  {name:"Michel Platini",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/4/4e/Michel_Platini_2010.jpg"},
+  {name:"Antoine Griezmann",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/f/f7/Griezmann_2018.jpg"},
+  {name:"Paul Pogba",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/b/be/Paul_Pogba_2018.jpg"},
+  {name:"N'Golo Kanté",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/0/07/Ngolo_Kant%C3%A9_2018.jpg"},
+  {name:"Karim Benzema",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/e/e4/Karim_Benzema_2018.jpg"},
+  {name:"Patrick Vieira",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/7/78/Patrick_Vieira_2014.jpg"},
+  {name:"Hugo Lloris",country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/e/e6/Hugo_Lloris_2018.jpg"},
+
+  // Germany
+  {name:"Franz Beckenbauer",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/6/6f/Beckenbauer_2007.jpg"},
+  {name:"Gerd Müller",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/d/db/Gerd_M%C3%BCller_%281978%29.jpg"},
+  {name:"Thomas Müller",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/b/b2/20180602_FIFA_Friendly_Match_Austria_vs._Germany_Thomas_M%C3%BCller_850_0667.jpg"},
+  {name:"Manuel Neuer",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/1/10/20180602_FIFA_Friendly_Match_Austria_vs._Germany_Manuel_Neuer_850_0723.jpg"},
+  {name:"Toni Kroos",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/6/63/20180602_FIFA_Friendly_Match_Austria_vs._Germany_Toni_Kroos_850_0585.jpg"},
+  {name:"Miroslav Klose",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/f/fa/Miroslav_Klose%2C_2012.jpg"},
+  {name:"Bastian Schweinsteiger",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/1/14/Bastian_Schweinsteiger_2011.jpg"},
+  {name:"Philipp Lahm",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/2/2a/Philipp_Lahm_%282011%29.jpg"},
+  {name:"Lothar Matthäus",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/1/1a/Lothar_Matth%C3%A4us_2019_%28cropped%29.jpg"},
+  {name:"Joshua Kimmich",country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/e/e1/20180602_FIFA_Friendly_Match_Austria_vs._Germany_Joshua_Kimmich_850_0358.jpg"},
+
+  // Spain
+  {name:"Andrés Iniesta",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/7/78/Andr%C3%A9s_Iniesta.jpg"},
+  {name:"Xavi Hernández",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/b/b8/Xavi_2011.jpg"},
+  {name:"Sergio Ramos",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/8/8f/Sergio_Ramos_2018.jpg"},
+  {name:"Iker Casillas",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/3/3e/Iker_Casillas_2012.jpg"},
+  {name:"David Villa",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/c/cd/David_Villa_2018.jpg"},
+  {name:"Raúl González",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/d/d2/Ra%C3%BAl_Gonz%C3%A1lez_2011.jpg"},
+  {name:"Fernando Torres",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/3/3e/Fernando_Torres_2012.jpg"},
+  {name:"Gerard Piqué",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/a/a4/Gerard_Piqu%C3%A92018.jpg"},
+  {name:"Pedri",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/a/a5/Pedri_2022.jpg"},
+  {name:"Gavi",country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/e/e7/Gavi_2022.jpg"},
+
+  // England
+  {name:"David Beckham",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/9/9a/David_Beckham_Nov_11_2007.jpg"},
+  {name:"Wayne Rooney",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/3/39/Wayne_Rooney_2018.jpg"},
+  {name:"Steven Gerrard",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/e/ec/Steven_Gerrard_2014.jpg"},
+  {name:"Frank Lampard",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/5/55/Frank_Lampard_2014.jpg"},
+  {name:"Harry Kane",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/3/32/Harry_Kane_2018.jpg"},
+  {name:"Gary Lineker",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/b/be/Gary_Lineker_2017.jpg"},
+  {name:"Bobby Moore",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/c/cc/Bobby_Moore.jpg"},
+  {name:"Alan Shearer",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/a/a8/Alan_Shearer_2015.jpg"},
+  {name:"Jude Bellingham",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/b/b4/Jude_Bellingham_2022.jpg"},
+  {name:"Phil Foden",country:"England",img:"https://upload.wikimedia.org/wikipedia/commons/d/d5/Phil_Foden_2022.jpg"},
+
+  // Portugal
+  {name:"Cristiano Ronaldo",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/8/8c/Cristiano_Ronaldo_2018.jpg"},
+  {name:"Eusébio",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/7/72/Eus%C3%A9bio_%281963%29.jpg"},
+  {name:"Luís Figo",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/6/63/Luis_Figo_2012.jpg"},
+  {name:"Bernardo Silva",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/c/cb/Bernardo_Silva_2018.jpg"},
+  {name:"Bruno Fernandes",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/2/20/Bruno_Fernandes_2022.jpg"},
+  {name:"Rui Costa",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/8/89/Rui_Costa_%282012%29.jpg"},
+  {name:"Pepe",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/6/67/Pepe_2018.jpg"},
+  {name:"Deco",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/f/f1/Deco_2008.jpg"},
+  {name:"João Félix",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/7/70/Jo%C3%A3o_F%C3%A9lix_2022.jpg"},
+  {name:"Ricardo Carvalho",country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/7/73/Ricardo_Carvalho.jpg"},
+
+  // Italy
+  {name:"Paolo Maldini",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/c/c5/Paolo_Maldini_2012.jpg"},
+  {name:"Francesco Totti",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/a/ae/Francesco_Totti_2012.jpg"},
+  {name:"Andrea Pirlo",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/a/a1/Andrea_Pirlo_2012.jpg"},
+  {name:"Gianluigi Buffon",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/9/99/Gianluigi_Buffon_%282017%29.jpg"},
+  {name:"Alessandro Del Piero",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/1/17/Alessandro_Del_Piero_2012.jpg"},
+  {name:"Roberto Baggio",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/1/14/Roberto_Baggio_-_Juventus_FC_1990-91.jpg"},
+  {name:"Fabio Cannavaro",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/5/5b/Fabio_Cannavaro_2012.jpg"},
+  {name:"Marco Verratti",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/5/58/Marco_Verratti_2018.jpg"},
+  {name:"Giorgio Chiellini",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/d/d2/Giorgio_Chiellini_2018.jpg"},
+  {name:"Franco Baresi",country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/e/ec/Franco_Baresi_-_AC_Milan_%28cropped%29.jpg"},
+
+  // Netherlands
+  {name:"Johan Cruyff",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/4/43/Johan_Cruijff_1974c.jpg"},
+  {name:"Marco van Basten",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/7/74/Marco_van_Basten_2011.jpg"},
+  {name:"Ruud Gullit",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/1/14/Ruud_Gullit_2013.jpg"},
+  {name:"Dennis Bergkamp",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/4/4a/Dennis_Bergkamp_2012.jpg"},
+  {name:"Robin van Persie",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/d/d7/Robin_van_Persie_2014.jpg"},
+  {name:"Arjen Robben",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/3/32/Arjen_Robben_2014.jpg"},
+  {name:"Wesley Sneijder",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/3/3a/Wesley_Sneijder_2012.jpg"},
+  {name:"Frank Rijkaard",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/5/5e/Frank_Rijkaard_2014.jpg"},
+  {name:"Virgil van Dijk",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/4/44/Virgil_van_Dijk_2018.jpg"},
+  {name:"Frenkie de Jong",country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/2/2f/Frenkie_de_Jong_2022.jpg"},
+
+  // Other countries
+  {name:"Luka Modrić",country:"Croatia",img:"https://upload.wikimedia.org/wikipedia/commons/e/e9/ISL-CRO_%286%29.jpg"},
+  {name:"Robert Lewandowski",country:"Poland",img:"https://upload.wikimedia.org/wikipedia/commons/0/03/Robert_Lewandowski%2C_FC_Bayern_M%C3%BCnchen_%28by_Sven_Mandel%2C_2019-05-27%29_01.jpg"},
+  {name:"Erling Haaland",country:"Norway",img:"https://upload.wikimedia.org/wikipedia/commons/6/6e/Erling_Haaland_2022.jpg"},
+  {name:"Mohamed Salah",country:"Egypt",img:"https://upload.wikimedia.org/wikipedia/commons/4/4a/Mohamed_Salah_2018.jpg"},
+  {name:"Sadio Mané",country:"Senegal",img:"https://upload.wikimedia.org/wikipedia/commons/1/10/Sadio_Man%C3%A9_2018.jpg"},
+  {name:"Zlatan Ibrahimović",country:"Sweden",img:"https://upload.wikimedia.org/wikipedia/commons/c/c0/Zlatan_Ibrahimovi%C4%87_2018.jpg"},
+  {name:"George Weah",country:"Liberia",img:"https://upload.wikimedia.org/wikipedia/commons/8/87/George_Weah_2018.jpg"},
+  {name:"Samuel Eto'o",country:"Cameroon",img:"https://upload.wikimedia.org/wikipedia/commons/c/c6/Samuel_Eto%27o_2014.jpg"},
+  {name:"Didier Drogba",country:"Ivory Coast",img:"https://upload.wikimedia.org/wikipedia/commons/5/51/Didier_Drogba_2014.jpg"},
+  {name:"Son Heung-min",country:"South Korea",img:"https://upload.wikimedia.org/wikipedia/commons/6/6a/Son_Heung-min_2018.jpg"},
+  {name:"Keylor Navas",country:"Costa Rica",img:"https://upload.wikimedia.org/wikipedia/commons/5/56/Keylor_Navas_2018.jpg"},
+  {name:"Luis Suárez",country:"Uruguay",img:"https://upload.wikimedia.org/wikipedia/commons/4/4e/Luis_Su%C3%A1rez_2018.jpg"},
+  {name:"Edinson Cavani",country:"Uruguay",img:"https://upload.wikimedia.org/wikipedia/commons/8/88/Edinson_Cavani_2018.jpg"},
+  {name:"James Rodríguez",country:"Colombia",img:"https://upload.wikimedia.org/wikipedia/commons/5/52/James_Rodr%C3%ADguez_2018.jpg"},
+  {name:"Alexis Sánchez",country:"Chile",img:"https://upload.wikimedia.org/wikipedia/commons/b/b0/Alexis_S%C3%A1nchez_2018.jpg"},
+];
+
+const MAIN_COUNTRIES = ["Argentina","Brazil","France","Germany","Spain","England","Portugal","Italy","Netherlands"];
+
+let pool = [];
+let questions = [];
+let currentQ = 0;
+let score = 0;
+let streak = 0;
+let bestStreak = 0;
+let totalQuestions = 10;
+let answered = false;
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function startQuiz(region) {
+  if (region === 'all') {
+    pool = [...PLAYERS];
+  } else if (region === 'Other') {
+    pool = PLAYERS.filter(p => !MAIN_COUNTRIES.includes(p.country));
+  } else {
+    pool = PLAYERS.filter(p => p.country === region);
+  }
+
+  if (pool.length < 4) return;
+
+  totalQuestions = Math.min(pool.length, region === 'all' ? 20 : 10);
+  questions = shuffle([...pool]).slice(0, totalQuestions);
+  currentQ = 0;
+  score = 0;
+  streak = 0;
+  bestStreak = 0;
+
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  document.getElementById('result').style.display = 'none';
+
+  showQuestion();
+}
+
+function showQuestion() {
+  answered = false;
+  const q = questions[currentQ];
+
+  document.getElementById('score').textContent = score;
+  document.getElementById('qnum').textContent = `${currentQ + 1}/${totalQuestions}`;
+  document.getElementById('streak').textContent = streak;
+  document.getElementById('progress').style.width = `${((currentQ) / totalQuestions) * 100}%`;
+
+  const img = document.getElementById('player-img');
+  img.src = q.img;
+  img.style.display = 'block';
+  img.onerror = function() {
+    this.style.display = 'none';
+    const parent = this.parentElement;
+    let errDiv = parent.querySelector('.img-error');
+    if (!errDiv) {
+      errDiv = document.createElement('div');
+      errDiv.className = 'img-error';
+      errDiv.textContent = '⚽';
+      parent.insertBefore(errDiv, this.nextSibling);
+    }
+  };
+  // Remove old error placeholders
+  const oldErr = document.querySelector('.img-error');
+  if (oldErr) oldErr.remove();
+
+  document.getElementById('player-hint').textContent = `Country: ${q.country}`;
+
+  // Build 4 options: 1 correct + 3 wrong from full PLAYERS list (same country preferred)
+  const sameCountry = PLAYERS.filter(p => p.name !== q.name && p.country === q.country);
+  const diffCountry = PLAYERS.filter(p => p.name !== q.name && p.country !== q.country);
+  let wrongPool = shuffle([...sameCountry]).slice(0, 2);
+  if (wrongPool.length < 3) {
+    wrongPool = wrongPool.concat(shuffle([...diffCountry]).slice(0, 3 - wrongPool.length));
+  }
+  const wrong = wrongPool.slice(0, 3);
+  const options = shuffle([q, ...wrong]);
+
+  const optionsEl = document.getElementById('options');
+  optionsEl.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt.name;
+    btn.addEventListener('click', () => handleAnswer(btn, opt.name === q.name, q.name));
+    optionsEl.appendChild(btn);
+  });
+}
+
+function handleAnswer(btn, isCorrect, correctName) {
+  if (answered) return;
+  answered = true;
+
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => b.classList.add('disabled'));
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    score++;
+    streak++;
+    if (streak > bestStreak) bestStreak = streak;
+  } else {
+    btn.classList.add('wrong');
+    streak = 0;
+    allBtns.forEach(b => {
+      if (b.textContent === correctName) b.classList.add('reveal');
+    });
+  }
+
+  document.getElementById('score').textContent = score;
+  document.getElementById('streak').textContent = streak;
+
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ < totalQuestions) {
+      showQuestion();
+    } else {
+      showResult();
+    }
+  }, 1500);
+}
+
+function showResult() {
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+
+  const pct = Math.round((score / totalQuestions) * 100);
+  document.getElementById('final-score').textContent = score;
+  document.getElementById('final-total').textContent = `out of ${totalQuestions}`;
+  document.getElementById('final-pct').textContent = `${pct}% correct`;
+  document.getElementById('final-streak').textContent = `Best streak: ${bestStreak}`;
+  document.getElementById('progress').style.width = '100%';
+}
+
+function backToMenu() {
+  document.getElementById('menu').style.display = 'block';
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('result').style.display = 'none';
+}
+</script>
+</body>
+</html>
