@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guess the Footballer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 24px 0;
+    }
+
+    .container {
+      max-width: 620px;
+      width: 100%;
+      padding: 20px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 16px;
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    h1 { text-align: center; font-size: 2rem; margin-bottom: 6px; }
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 28px;
+      font-size: 0.95rem;
+    }
+
+    /* ── MENU ──────────────────────────────── */
+    #menu { text-align: center; }
+    #menu h2 { font-size: 1.2rem; margin-bottom: 16px; color: #ccc; }
+
+    .region-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .region-btn {
+      padding: 14px 10px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .region-btn:hover {
+      background: rgba(255,255,255,0.15);
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    .region-btn.all {
+      grid-column: 1 / -1;
+      background: rgba(16,185,129,0.2);
+      border-color: rgba(16,185,129,0.45);
+    }
+    .region-btn.all:hover { background: rgba(16,185,129,0.35); }
+
+    /* ── QUIZ ──────────────────────────────── */
+    #quiz { display: none; }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #6366f1);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+
+    .score-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      font-size: 0.95rem;
+    }
+    .score-bar .label  { color: #aaa; }
+    .score-bar .value  { font-weight: 700; font-size: 1.1rem; }
+    .score-bar .streak { color: #f59e0b; }
+    .score-bar .correct-count { color: #10b981; }
+
+    /* Clue card */
+    .clue-card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 28px 24px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .clue-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #10b981;
+      margin-bottom: 18px;
+    }
+
+    .clues-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .clue-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 12px 16px;
+    }
+
+    .clue-icon {
+      font-size: 1.5rem;
+      width: 36px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .clue-text {
+      text-align: left;
+    }
+    .clue-type {
+      font-size: 0.72rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 2px;
+    }
+    .clue-value {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+
+    /* Options */
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .option-btn {
+      padding: 16px 12px;
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .option-btn:hover:not(.disabled) {
+      background: rgba(255,255,255,0.13);
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    .option-btn.correct  { background: rgba(16,185,129,0.3); border-color: #10b981; }
+    .option-btn.wrong    { background: rgba(239,68,68,0.25); border-color: #ef4444; }
+    .option-btn.reveal   { border-color: #10b981; opacity: 0.8; }
+    .option-btn.disabled { cursor: default; pointer-events: none; }
+
+    /* ── RESULT ────────────────────────────── */
+    #result { display: none; text-align: center; }
+
+    .result-card {
+      background: rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 40px 30px;
+      margin-bottom: 24px;
+    }
+    .result-card .big-score {
+      font-size: 4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #10b981, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .result-card .out-of   { font-size: 1.2rem; color: #aaa; margin-top: 4px; }
+    .result-card .percentage { font-size: 1.5rem; margin-top: 12px; color: #e2e8f0; }
+    .result-card .best-streak { margin-top: 12px; color: #f59e0b; font-size: 1rem; }
+
+    .play-again-btn {
+      padding: 14px 40px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+      margin-top: 8px;
+    }
+    .play-again-btn:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="../index.html" class="back-link">← Back to Arcade</a>
+  <h1>⚽ Guess the Footballer</h1>
+  <p class="subtitle">Birthplace, country & club — who is this player?</p>
+
+  <!-- MENU -->
+  <div id="menu">
+    <h2>Choose a region</h2>
+    <div class="region-grid">
+      <button class="region-btn all"    onclick="startQuiz('all')">⚽ All Players</button>
+      <button class="region-btn"        onclick="startQuiz('Europe')">🌍 Europe</button>
+      <button class="region-btn"        onclick="startQuiz('South America')">🌎 South America</button>
+      <button class="region-btn"        onclick="startQuiz('Africa')">🌍 Africa</button>
+      <button class="region-btn"        onclick="startQuiz('North America')">🌎 North America</button>
+      <button class="region-btn"        onclick="startQuiz('Asia')">🌏 Asia &amp; Others</button>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz">
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+    <div class="score-bar">
+      <div><span class="label">Score: </span><span class="value correct-count" id="score">0</span></div>
+      <div><span class="label">Question: </span><span class="value" id="qnum">1/10</span></div>
+      <div><span class="label">Streak: </span><span class="value streak" id="streak">0</span></div>
+    </div>
+
+    <div class="clue-card">
+      <div class="clue-label">Who is this footballer?</div>
+      <div class="clues-grid">
+        <div class="clue-row">
+          <span class="clue-icon">📍</span>
+          <div class="clue-text">
+            <div class="clue-type">Born in</div>
+            <div class="clue-value" id="clue-city">—</div>
+          </div>
+        </div>
+        <div class="clue-row">
+          <span class="clue-icon">🏳️</span>
+          <div class="clue-text">
+            <div class="clue-type">Country</div>
+            <div class="clue-value" id="clue-country">—</div>
+          </div>
+        </div>
+        <div class="clue-row">
+          <span class="clue-icon">🏟️</span>
+          <div class="clue-text">
+            <div class="clue-type">Notable Club</div>
+            <div class="clue-value" id="clue-club">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="options" id="options"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result">
+    <div class="result-card">
+      <div class="big-score" id="final-score">0</div>
+      <div class="out-of" id="final-total">out of 10</div>
+      <div class="percentage" id="final-pct">0%</div>
+      <div class="best-streak" id="final-streak">Best streak: 0</div>
+    </div>
+    <button class="play-again-btn" onclick="backToMenu()">Play Again</button>
+  </div>
+</div>
+
+<script>
+const PLAYERS = [
+  // Europe
+  { name: "Lionel Messi",        city: "Rosario",           country: "Argentina",    club: "FC Barcelona",          region: "South America" },
+  { name: "Cristiano Ronaldo",   city: "Funchal",           country: "Portugal",     club: "Manchester United",     region: "Europe" },
+  { name: "Neymar Jr.",          city: "Mogi das Cruzes",   country: "Brazil",       club: "Paris Saint-Germain",   region: "South America" },
+  { name: "Kylian Mbappé",       city: "Paris",             country: "France",       club: "Paris Saint-Germain",   region: "Europe" },
+  { name: "Robert Lewandowski",  city: "Warsaw",            country: "Poland",       club: "Bayern Munich",         region: "Europe" },
+  { name: "Kevin De Bruyne",     city: "Ghent",             country: "Belgium",      club: "Manchester City",       region: "Europe" },
+  { name: "Virgil van Dijk",     city: "Breda",             country: "Netherlands",  club: "Liverpool",             region: "Europe" },
+  { name: "Mohamed Salah",       city: "Nagrig",            country: "Egypt",        club: "Liverpool",             region: "Africa" },
+  { name: "Sadio Mané",          city: "Sédhiou",           country: "Senegal",      club: "Bayern Munich",         region: "Africa" },
+  { name: "Karim Benzema",       city: "Lyon",              country: "France",       club: "Real Madrid",           region: "Europe" },
+  { name: "Luka Modrić",         city: "Zadar",             country: "Croatia",      club: "Real Madrid",           region: "Europe" },
+  { name: "Harry Kane",          city: "London",            country: "England",      club: "Tottenham Hotspur",     region: "Europe" },
+  { name: "Son Heung-min",       city: "Chuncheon",         country: "South Korea",  club: "Tottenham Hotspur",     region: "Asia" },
+  { name: "Erling Haaland",      city: "Leeds",             country: "Norway",       club: "Manchester City",       region: "Europe" },
+  { name: "Pedri",               city: "Las Palmas",        country: "Spain",        club: "FC Barcelona",          region: "Europe" },
+  { name: "Vinicius Jr.",        city: "São Gonçalo",       country: "Brazil",       club: "Real Madrid",           region: "South America" },
+  { name: "Rodri",               city: "Málaga",            country: "Spain",        club: "Manchester City",       region: "Europe" },
+  { name: "Gianluigi Buffon",    city: "Carrara",           country: "Italy",        club: "Juventus",              region: "Europe" },
+  { name: "Andrés Iniesta",      city: "Fuentealbilla",     country: "Spain",        club: "FC Barcelona",          region: "Europe" },
+  { name: "Xavi Hernández",      city: "Terrassa",          country: "Spain",        club: "FC Barcelona",          region: "Europe" },
+  { name: "Zinedine Zidane",     city: "Marseille",         country: "France",       club: "Real Madrid",           region: "Europe" },
+  { name: "Thierry Henry",       city: "Les Ulis",          country: "France",       club: "Arsenal",               region: "Europe" },
+  { name: "Ronaldinho",          city: "Porto Alegre",      country: "Brazil",       club: "FC Barcelona",          region: "South America" },
+  { name: "Ronaldo Nazário",     city: "Rio de Janeiro",    country: "Brazil",       club: "Real Madrid",           region: "South America" },
+  { name: "Rivaldo",             city: "Paulista",          country: "Brazil",       club: "FC Barcelona",          region: "South America" },
+  { name: "Didier Drogba",       city: "Abidjan",           country: "Ivory Coast",  club: "Chelsea",               region: "Africa" },
+  { name: "Samuel Eto'o",        city: "Nkon",              country: "Cameroon",     club: "FC Barcelona",          region: "Africa" },
+  { name: "Zlatan Ibrahimović",  city: "Malmö",             country: "Sweden",       club: "Paris Saint-Germain",   region: "Europe" },
+  { name: "Wayne Rooney",        city: "Liverpool",         country: "England",      club: "Manchester United",     region: "Europe" },
+  { name: "Steven Gerrard",      city: "Whiston",           country: "England",      club: "Liverpool",             region: "Europe" },
+  { name: "Frank Lampard",       city: "Romford",           country: "England",      club: "Chelsea",               region: "Europe" },
+  { name: "Patrick Vieira",      city: "Dakar",             country: "Senegal",      club: "Arsenal",               region: "Africa" },
+  { name: "Cafu",                city: "São Paulo",         country: "Brazil",       club: "AS Roma",               region: "South America" },
+  { name: "Roberto Carlos",      city: "Garça",             country: "Brazil",       club: "Real Madrid",           region: "South America" },
+  { name: "David Beckham",       city: "London",            country: "England",      club: "Manchester United",     region: "Europe" },
+  { name: "Francesco Totti",     city: "Rome",              country: "Italy",        club: "AS Roma",               region: "Europe" },
+  { name: "Paolo Maldini",       city: "Milan",             country: "Italy",        club: "AC Milan",              region: "Europe" },
+  { name: "Rui Costa",           city: "Lisbon",            country: "Portugal",     club: "AC Milan",              region: "Europe" },
+  { name: "Luis Figo",           city: "Lisbon",            country: "Portugal",     club: "Real Madrid",           region: "Europe" },
+  { name: "Raúl",                city: "Madrid",            country: "Spain",        club: "Real Madrid",           region: "Europe" },
+  { name: "Filippo Inzaghi",     city: "Piacenza",          country: "Italy",        club: "AC Milan",              region: "Europe" },
+  { name: "Gabriel Batistuta",   city: "Reconquista",       country: "Argentina",    club: "Fiorentina",            region: "South America" },
+  { name: "Juan Román Riquelme", city: "Buenos Aires",      country: "Argentina",    club: "Boca Juniors",          region: "South America" },
+  { name: "Hernán Crespo",       city: "Florida",           country: "Argentina",    club: "Inter Milan",           region: "South America" },
+  { name: "Javier Zanetti",      city: "Buenos Aires",      country: "Argentina",    club: "Inter Milan",           region: "South America" },
+  { name: "Carlos Tevez",        city: "Buenos Aires",      country: "Argentina",    club: "Manchester United",     region: "South America" },
+  { name: "Sergio Agüero",       city: "Buenos Aires",      country: "Argentina",    club: "Manchester City",       region: "South America" },
+  { name: "Diego Forlán",        city: "Montevideo",        country: "Uruguay",      club: "Atlético Madrid",       region: "South America" },
+  { name: "Luis Suárez",         city: "Salto",             country: "Uruguay",      club: "FC Barcelona",          region: "South America" },
+  { name: "Edinson Cavani",      city: "Salto",             country: "Uruguay",      club: "Paris Saint-Germain",   region: "South America" },
+  { name: "Radamel Falcao",      city: "Santa Marta",       country: "Colombia",     club: "Atlético Madrid",       region: "South America" },
+  { name: "James Rodríguez",     city: "Cúcuta",            country: "Colombia",     club: "Real Madrid",           region: "South America" },
+  { name: "Alexis Sánchez",      city: "Tocopilla",         country: "Chile",        club: "Arsenal",               region: "South America" },
+  { name: "Arturo Vidal",        city: "Santiago",          country: "Chile",        club: "FC Barcelona",          region: "South America" },
+  { name: "Marcelo",             city: "Rio de Janeiro",    country: "Brazil",       club: "Real Madrid",           region: "South America" },
+  { name: "Thiago Silva",        city: "Rio de Janeiro",    country: "Brazil",       club: "Chelsea",               region: "South America" },
+  { name: "Dani Alves",          city: "Juazeiro",          country: "Brazil",       club: "FC Barcelona",          region: "South America" },
+  { name: "Oscar",               city: "Americana",         country: "Brazil",       club: "Chelsea",               region: "South America" },
+  { name: "Philippe Coutinho",   city: "Rio de Janeiro",    country: "Brazil",       club: "FC Barcelona",          region: "South America" },
+  { name: "Firmino",             city: "Maceió",            country: "Brazil",       club: "Liverpool",             region: "South America" },
+  { name: "Alisson Becker",      city: "Novo Hamburgo",     country: "Brazil",       club: "Liverpool",             region: "South America" },
+  { name: "Ederson",             city: "Osasco",            country: "Brazil",       club: "Manchester City",       region: "South America" },
+  { name: "Casemiro",            city: "São José dos Campos", country: "Brazil",     club: "Real Madrid",           region: "South America" },
+  { name: "Fabinho",             city: "Campinas",          country: "Brazil",       club: "Liverpool",             region: "South America" },
+  { name: "Richarlison",         city: "Nova Venécia",      country: "Brazil",       club: "Tottenham Hotspur",     region: "South America" },
+  { name: "Raphinha",            city: "Porto Alegre",      country: "Brazil",       club: "FC Barcelona",          region: "South America" },
+  { name: "Antoine Griezmann",   city: "Mâcon",             country: "France",       club: "Atlético Madrid",       region: "Europe" },
+  { name: "N'Golo Kanté",        city: "Paris",             country: "France",       club: "Chelsea",               region: "Europe" },
+  { name: "Paul Pogba",          city: "Lagny-sur-Marne",   country: "France",       club: "Manchester United",     region: "Europe" },
+  { name: "Olivier Giroud",      city: "Chambéry",          country: "France",       club: "Arsenal",               region: "Europe" },
+  { name: "Hugo Lloris",         city: "Nice",              country: "France",       club: "Tottenham Hotspur",     region: "Europe" },
+  { name: "Raphaël Varane",      city: "Lille",             country: "France",       club: "Real Madrid",           region: "Europe" },
+  { name: "Ousmane Dembélé",     city: "Vernon",            country: "France",       club: "FC Barcelona",          region: "Europe" },
+  { name: "Marcus Rashford",     city: "Manchester",        country: "England",      club: "Manchester United",     region: "Europe" },
+  { name: "Raheem Sterling",     city: "Kingston",          country: "Jamaica",      club: "Manchester City",       region: "North America" },
+  { name: "Phil Foden",          city: "Stockport",         country: "England",      club: "Manchester City",       region: "Europe" },
+  { name: "Bukayo Saka",         city: "London",            country: "England",      club: "Arsenal",               region: "Europe" },
+  { name: "Jude Bellingham",     city: "Stourbridge",       country: "England",      club: "Real Madrid",           region: "Europe" },
+  { name: "Declan Rice",         city: "London",            country: "England",      club: "Arsenal",               region: "Europe" },
+  { name: "Jack Grealish",       city: "Birmingham",        country: "England",      club: "Manchester City",       region: "Europe" },
+  { name: "Trent Alexander-Arnold", city: "Liverpool",      country: "England",      club: "Liverpool",             region: "Europe" },
+  { name: "Jordan Henderson",    city: "Sunderland",        country: "England",      club: "Liverpool",             region: "Europe" },
+  { name: "Manuel Neuer",        city: "Gelsenkirchen",     country: "Germany",      club: "Bayern Munich",         region: "Europe" },
+  { name: "Thomas Müller",       city: "Weilheim",          country: "Germany",      club: "Bayern Munich",         region: "Europe" },
+  { name: "Toni Kroos",          city: "Greifswald",        country: "Germany",      club: "Real Madrid",           region: "Europe" },
+  { name: "Mesut Özil",          city: "Gelsenkirchen",     country: "Germany",      club: "Arsenal",               region: "Europe" },
+  { name: "Marco Reus",          city: "Dortmund",          country: "Germany",      club: "Borussia Dortmund",     region: "Europe" },
+  { name: "Mats Hummels",        city: "Bergisch Gladbach", country: "Germany",      club: "Borussia Dortmund",     region: "Europe" },
+  { name: "Ilkay Gündogan",      city: "Gelsenkirchen",     country: "Germany",      club: "Manchester City",       region: "Europe" },
+  { name: "Leroy Sané",          city: "Essen",             country: "Germany",      club: "Bayern Munich",         region: "Europe" },
+  { name: "Kai Havertz",         city: "Aachen",            country: "Germany",      club: "Chelsea",               region: "Europe" },
+  { name: "Jadon Sancho",        city: "London",            country: "England",      club: "Borussia Dortmund",     region: "Europe" },
+  { name: "Serge Gnabry",        city: "Stuttgart",         country: "Germany",      club: "Bayern Munich",         region: "Europe" },
+  { name: "Joshua Kimmich",      city: "Rottweil",          country: "Germany",      club: "Bayern Munich",         region: "Europe" },
+  { name: "Florian Wirtz",       city: "Pulheim",           country: "Germany",      club: "Bayer Leverkusen",      region: "Europe" },
+  { name: "Gavi",                city: "Los Palacios",      country: "Spain",        club: "FC Barcelona",          region: "Europe" },
+  { name: "Ansu Fati",           city: "Bissau",            country: "Spain",        club: "FC Barcelona",          region: "Europe" },
+  { name: "Álvaro Morata",       city: "Madrid",            country: "Spain",        club: "Atlético Madrid",       region: "Europe" },
+  { name: "Cesc Fàbregas",       city: "Arenys de Mar",     country: "Spain",        club: "Arsenal",               region: "Europe" },
+  { name: "David Villa",         city: "Langreo",           country: "Spain",        club: "Valencia CF",           region: "Europe" },
+  { name: "Fernando Torres",     city: "Fuenlabrada",       country: "Spain",        club: "Liverpool",             region: "Europe" },
+  { name: "Iker Casillas",       city: "Móstoles",          country: "Spain",        club: "Real Madrid",           region: "Europe" },
+  { name: "Sergio Ramos",        city: "Camas",             country: "Spain",        club: "Real Madrid",           region: "Europe" },
+  { name: "Gerard Piqué",        city: "Barcelona",         country: "Spain",        club: "FC Barcelona",          region: "Europe" },
+  { name: "Jordi Alba",          city: "L'Hospitalet",      country: "Spain",        club: "FC Barcelona",          region: "Europe" },
+  { name: "Dani Carvajal",       city: "Leganés",           country: "Spain",        club: "Real Madrid",           region: "Europe" },
+  { name: "Marco Verratti",      city: "Pescara",           country: "Italy",        club: "Paris Saint-Germain",   region: "Europe" },
+  { name: "Giorgio Chiellini",   city: "Pisa",              country: "Italy",        club: "Juventus",              region: "Europe" },
+  { name: "Leonardo Bonucci",    city: "Viterbo",           country: "Italy",        club: "Juventus",              region: "Europe" },
+  { name: "Federico Chiesa",     city: "Genoa",             country: "Italy",        club: "Juventus",              region: "Europe" },
+  { name: "Nicolo Barella",      city: "Cagliari",          country: "Italy",        club: "Inter Milan",           region: "Europe" },
+  { name: "Ciro Immobile",       city: "Torre Annunziata",  country: "Italy",        club: "Lazio",                 region: "Europe" },
+  { name: "Gianluigi Donnarumma",city: "Castellammare",     country: "Italy",        club: "AC Milan",              region: "Europe" },
+  { name: "Romelu Lukaku",       city: "Antwerp",           country: "Belgium",      club: "Inter Milan",           region: "Europe" },
+  { name: "Eden Hazard",         city: "La Louvière",       country: "Belgium",      club: "Chelsea",               region: "Europe" },
+  { name: "Thibaut Courtois",    city: "Bree",              country: "Belgium",      club: "Real Madrid",           region: "Europe" },
+  { name: "Dries Mertens",       city: "Leuven",            country: "Belgium",      club: "Napoli",                region: "Europe" },
+  { name: "Jan Vertonghen",      city: "Sint-Niklaas",      country: "Belgium",      club: "Tottenham Hotspur",     region: "Europe" },
+  { name: "Toby Alderweireld",   city: "Antwerp",           country: "Belgium",      club: "Tottenham Hotspur",     region: "Europe" },
+  { name: "Christian Eriksen",   city: "Middelfart",        country: "Denmark",      club: "Tottenham Hotspur",     region: "Europe" },
+  { name: "Peter Schmeichel",    city: "Gladsaxe",          country: "Denmark",      club: "Manchester United",     region: "Europe" },
+  { name: "Riyad Mahrez",        city: "Sarcelles",         country: "Algeria",      club: "Manchester City",       region: "Africa" },
+  { name: "Yaya Touré",          city: "Bouaké",            country: "Ivory Coast",  club: "Manchester City",       region: "Africa" },
+  { name: "Naby Keïta",          city: "Conakry",           country: "Guinea",       club: "Liverpool",             region: "Africa" },
+  { name: "Thomas Partey",       city: "Krobo Odumase",     country: "Ghana",        club: "Arsenal",               region: "Africa" },
+  { name: "Nicolas Pepe",        city: "Mantes-la-Grande",  country: "Ivory Coast",  club: "Arsenal",               region: "Africa" },
+  { name: "Edouard Mendy",       city: "Montivilliers",     country: "Senegal",      club: "Chelsea",               region: "Africa" },
+  { name: "Kalidou Koulibaly",   city: "Saint-Dié",         country: "Senegal",      club: "Napoli",                region: "Africa" },
+  { name: "Hakim Ziyech",        city: "Dronten",           country: "Morocco",      club: "Chelsea",               region: "Africa" },
+  { name: "Achraf Hakimi",       city: "Madrid",            country: "Morocco",      club: "Paris Saint-Germain",   region: "Africa" },
+  { name: "Victor Osimhen",      city: "Lagos",             country: "Nigeria",      club: "Napoli",                region: "Africa" },
+  { name: "Wilfried Zaha",       city: "Abidjan",           country: "Ivory Coast",  club: "Crystal Palace",        region: "Africa" },
+  { name: "Georginio Wijnaldum", city: "Rotterdam",         country: "Netherlands",  club: "Liverpool",             region: "Europe" },
+  { name: "Frenkie de Jong",     city: "Arkel",             country: "Netherlands",  club: "FC Barcelona",          region: "Europe" },
+  { name: "Matthijs de Ligt",    city: "Leiderdorp",        country: "Netherlands",  club: "Juventus",              region: "Europe" },
+  { name: "Jaap Stam",           city: "Kampen",            country: "Netherlands",  club: "Manchester United",     region: "Europe" },
+  { name: "Ruud van Nistelrooy", city: "Oss",               country: "Netherlands",  club: "Manchester United",     region: "Europe" },
+  { name: "Robin van Persie",    city: "Rotterdam",         country: "Netherlands",  club: "Arsenal",               region: "Europe" },
+  { name: "Arjen Robben",        city: "Bedum",             country: "Netherlands",  club: "Bayern Munich",         region: "Europe" },
+  { name: "Wesley Sneijder",     city: "Utrecht",           country: "Netherlands",  club: "Inter Milan",           region: "Europe" },
+  { name: "Dirk Kuyt",           city: "Katwijk",           country: "Netherlands",  club: "Liverpool",             region: "Europe" },
+  { name: "Granit Xhaka",        city: "Basel",             country: "Switzerland",  club: "Arsenal",               region: "Europe" },
+  { name: "Xherdan Shaqiri",     city: "Gjilan",            country: "Switzerland",  club: "Liverpool",             region: "Europe" },
+  { name: "Yann Sommer",         city: "Morges",            country: "Switzerland",  club: "Borussia Mönchengladbach", region: "Europe" },
+  { name: "Lautaro Martínez",    city: "Bahía Blanca",      country: "Argentina",    club: "Inter Milan",           region: "South America" },
+  { name: "Paulo Dybala",        city: "Laguna Larga",      country: "Argentina",    club: "Juventus",              region: "South America" },
+  { name: "Gonzalo Higuaín",     city: "Brest",             country: "Argentina",    club: "Real Madrid",           region: "South America" },
+  { name: "Ángel Di María",      city: "Rosario",           country: "Argentina",    club: "Paris Saint-Germain",   region: "South America" },
+  { name: "Leandro Paredes",     city: "Buenos Aires",      country: "Argentina",    club: "Juventus",              region: "South America" },
+  { name: "Weston McKennie",     city: "Little Elm",        country: "United States",club: "Juventus",              region: "North America" },
+  { name: "Christian Pulisic",   city: "Hershey",           country: "United States",club: "Chelsea",               region: "North America" },
+  { name: "Gio Reyna",           city: "Sunderland",        country: "United States",club: "Borussia Dortmund",     region: "North America" },
+  { name: "Hirving Lozano",      city: "Mexico City",       country: "Mexico",       club: "Napoli",                region: "North America" },
+  { name: "Guillermo Ochoa",     city: "Guadalajara",       country: "Mexico",       club: "Club América",          region: "North America" },
+  { name: "Héctor Herrera",      city: "Tijuana",           country: "Mexico",       club: "Atlético Madrid",       region: "North America" },
+  { name: "Park Ji-sung",        city: "Goheung",           country: "South Korea",  club: "Manchester United",     region: "Asia" },
+  { name: "Cha Bum-kun",         city: "Hwaseong",          country: "South Korea",  club: "Eintracht Frankfurt",   region: "Asia" },
+  { name: "Shinji Kagawa",       city: "Hyogo",             country: "Japan",        club: "Borussia Dortmund",     region: "Asia" },
+  { name: "Keisuke Honda",       city: "Settsu",            country: "Japan",        club: "AC Milan",              region: "Asia" },
+  { name: "Hidetoshi Nakata",    city: "Kōfu",              country: "Japan",        club: "AS Roma",               region: "Asia" },
+  { name: "Ali Daei",            city: "Ardabil",           country: "Iran",         club: "Bayern Munich",         region: "Asia" },
+  { name: "Zlatan Ibrahimović",  city: "Malmö",             country: "Sweden",       club: "Inter Milan",           region: "Europe" },
+  { name: "Henrik Larsson",      city: "Helsingborg",       country: "Sweden",       club: "Celtic",                region: "Europe" },
+  { name: "Miroslav Klose",      city: "Opole",             country: "Germany",      club: "Bayern Munich",         region: "Europe" },
+  { name: "Oliver Kahn",         city: "Karlsruhe",         country: "Germany",      club: "Bayern Munich",         region: "Europe" },
+  { name: "Bastian Schweinsteiger", city: "Kolbermoor",     country: "Germany",      club: "Bayern Munich",         region: "Europe" },
+  { name: "Michael Ballack",     city: "Görlitz",           country: "Germany",      club: "Chelsea",               region: "Europe" },
+  { name: "Lukas Podolski",      city: "Gliwice",           country: "Germany",      club: "Arsenal",               region: "Europe" },
+  { name: "Per Mertesacker",     city: "Hannover",          country: "Germany",      club: "Arsenal",               region: "Europe" },
+  { name: "Phillip Lahm",        city: "Munich",            country: "Germany",      club: "Bayern Munich",         region: "Europe" },
+];
+
+// Remove duplicate Zlatan entry (keep the PSG one)
+const seen = new Set();
+const PLAYERS_DEDUPED = PLAYERS.filter(p => {
+  if (seen.has(p.name)) return false;
+  seen.add(p.name);
+  return true;
+});
+
+let pool = [], questions = [], currentQ = 0;
+let score = 0, streak = 0, bestStreak = 0, totalQuestions = 10;
+let answered = false;
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function startQuiz(region) {
+  pool = region === 'all'
+    ? [...PLAYERS_DEDUPED]
+    : PLAYERS_DEDUPED.filter(p => p.region === region);
+
+  if (pool.length < 4) {
+    alert('Not enough players in this region yet. Try another!');
+    return;
+  }
+
+  totalQuestions = Math.min(pool.length, 12);
+  questions = shuffle([...pool]).slice(0, totalQuestions);
+  currentQ = 0; score = 0; streak = 0; bestStreak = 0;
+
+  document.getElementById('menu').style.display   = 'none';
+  document.getElementById('quiz').style.display   = 'block';
+  document.getElementById('result').style.display = 'none';
+
+  showQuestion();
+}
+
+function showQuestion() {
+  answered = false;
+  const q = questions[currentQ];
+
+  document.getElementById('score').textContent    = score;
+  document.getElementById('qnum').textContent     = `${currentQ + 1}/${totalQuestions}`;
+  document.getElementById('streak').textContent   = streak;
+  document.getElementById('progress').style.width = `${(currentQ / totalQuestions) * 100}%`;
+
+  document.getElementById('clue-city').textContent    = q.city;
+  document.getElementById('clue-country').textContent = q.country;
+  document.getElementById('clue-club').textContent    = q.club;
+
+  // Build 4 options: 1 correct + 3 distractors from the full pool
+  const others = shuffle(PLAYERS_DEDUPED.filter(p => p.name !== q.name));
+  const distractors = others.slice(0, 3);
+  const options = shuffle([q, ...distractors]);
+
+  const optionsEl = document.getElementById('options');
+  optionsEl.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt.name;
+    btn.addEventListener('click', () => handleAnswer(btn, opt.name === q.name, q.name));
+    optionsEl.appendChild(btn);
+  });
+}
+
+function handleAnswer(btn, isCorrect, correctName) {
+  if (answered) return;
+  answered = true;
+
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    score++; streak++;
+    if (streak > bestStreak) bestStreak = streak;
+  } else {
+    btn.classList.add('wrong');
+    streak = 0;
+    document.querySelectorAll('.option-btn').forEach(b => {
+      if (b.textContent === correctName) b.classList.add('reveal');
+    });
+  }
+
+  document.getElementById('score').textContent  = score;
+  document.getElementById('streak').textContent = streak;
+
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ < totalQuestions) showQuestion();
+    else showResult();
+  }, 1400);
+}
+
+function showResult() {
+  document.getElementById('quiz').style.display   = 'none';
+  document.getElementById('result').style.display = 'block';
+  const pct = Math.round((score / totalQuestions) * 100);
+  document.getElementById('final-score').textContent  = score;
+  document.getElementById('final-total').textContent  = `out of ${totalQuestions}`;
+  document.getElementById('final-pct').textContent    = `${pct}%`;
+  document.getElementById('final-streak').textContent = `Best streak: ${bestStreak} 🔥`;
+}
+
+function backToMenu() {
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('quiz').style.display   = 'none';
+  document.getElementById('menu').style.display   = 'block';
+}
+</script>
+</body>
+</html>
