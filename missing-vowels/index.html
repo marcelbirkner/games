@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔡 Missing Vowels</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    a.back-link {
+      align-self: flex-start;
+      margin: 1.2rem 1.5rem;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    a.back-link:hover { color: #06b6d4; }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #f8fafc;
+      text-shadow: 0 0 30px rgba(6,182,212,0.4);
+      margin-bottom: 0.3rem;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      margin-bottom: 1.8rem;
+      text-align: center;
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+      display: flex;
+      background: rgba(255,255,255,0.07);
+      border-radius: 50px;
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 2rem;
+    }
+    .lang-btn {
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      padding: 0.45rem 1.1rem;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .lang-btn.active {
+      background: #06b6d4;
+      color: #0f172a;
+    }
+    .lang-btn:hover:not(.active) { color: #e2e8f0; }
+
+    /* Screen management */
+    .screen { display: none; width: 100%; max-width: 560px; padding: 0 1rem; flex-direction: column; align-items: center; }
+    .screen.active { display: flex; }
+
+    /* ── Menu Screen ── */
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .cat-btn {
+      background: rgba(255,255,255,0.07);
+      border: 2px solid transparent;
+      border-radius: 14px;
+      padding: 1rem 0.75rem;
+      color: #e2e8f0;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .cat-btn:hover { background: rgba(6,182,212,0.15); border-color: rgba(6,182,212,0.4); }
+    .cat-btn.selected { background: rgba(6,182,212,0.2); border-color: #06b6d4; color: #67e8f9; }
+
+    .start-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #06b6d4, #0891b2);
+      border: none;
+      border-radius: 14px;
+      padding: 1rem;
+      color: #0f172a;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .start-btn.enabled {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .start-btn.enabled:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(6,182,212,0.4); }
+
+    /* ── Game Screen ── */
+    .hud {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+    .hud-score span, .hud-time span {
+      color: #f8fafc;
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .timer-bar-wrap {
+      width: 100%;
+      height: 7px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .timer-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #06b6d4, #22d3ee);
+      border-radius: 10px;
+      transition: width 1s linear, background 1s;
+      width: 100%;
+    }
+    .timer-bar.warn { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .timer-bar.danger { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+    .word-card {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      margin-bottom: 1.2rem;
+      position: relative;
+      transition: border-color 0.3s;
+    }
+    .word-card.correct { border-color: #22c55e; box-shadow: 0 0 24px rgba(34,197,94,0.25); }
+    .word-card.wrong { border-color: #ef4444; box-shadow: 0 0 24px rgba(239,68,68,0.25); }
+
+    .masked-word {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: 8px;
+      display: inline-block;
+      margin-bottom: 0.6rem;
+    }
+    .masked-word .consonant { color: #f8fafc; }
+    .masked-word .vowel-blank { color: #06b6d4; }
+
+    .category-hint {
+      font-size: 0.8rem;
+      color: #64748b;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 0.2rem;
+    }
+
+    .feedback-msg {
+      min-height: 1.6rem;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-align: center;
+      margin-bottom: 0.8rem;
+      transition: opacity 0.3s;
+    }
+    .feedback-msg.correct-msg { color: #22c55e; }
+    .feedback-msg.wrong-msg { color: #f87171; }
+
+    .input-row {
+      width: 100%;
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+    }
+    .word-input {
+      flex: 1;
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: #f8fafc;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      outline: none;
+      text-transform: uppercase;
+      transition: border-color 0.2s;
+    }
+    .word-input:focus { border-color: #06b6d4; }
+    .word-input::placeholder { color: #475569; text-transform: none; }
+
+    .submit-btn {
+      background: #06b6d4;
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 1.3rem;
+      color: #0f172a;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .submit-btn:hover { background: #22d3ee; transform: translateY(-1px); }
+
+    .skip-btn {
+      align-self: flex-end;
+      background: transparent;
+      border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 10px;
+      padding: 0.45rem 1rem;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 0.5rem;
+    }
+    .skip-btn:hover { border-color: #06b6d4; color: #06b6d4; }
+    .hidden { display: none !important; }
+
+    /* ── Result Screen ── */
+    .result-card {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .result-title {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+    }
+    .result-stats {
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .stat-block { display: flex; flex-direction: column; align-items: center; }
+    .stat-value {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: #06b6d4;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 0.3rem;
+    }
+    .result-buttons {
+      display: flex;
+      gap: 0.75rem;
+      width: 100%;
+    }
+    .result-btn {
+      flex: 1;
+      border: none;
+      border-radius: 12px;
+      padding: 0.9rem;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .result-btn.primary {
+      background: linear-gradient(135deg, #06b6d4, #0891b2);
+      color: #0f172a;
+    }
+    .result-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(6,182,212,0.4); }
+    .result-btn.secondary {
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.15);
+      color: #e2e8f0;
+    }
+    .result-btn.secondary:hover { background: rgba(255,255,255,0.13); }
+
+    /* Animations */
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-8px); }
+      40%      { transform: translateX(8px); }
+      60%      { transform: translateX(-5px); }
+      80%      { transform: translateX(5px); }
+    }
+    @keyframes pop {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.04); }
+      100% { transform: scale(1); }
+    }
+    .shake { animation: shake 0.4s ease; }
+    .pop   { animation: pop 0.3s ease; }
+
+    /* Responsive */
+    @media (max-width: 440px) {
+      h1 { font-size: 1.8rem; }
+      .masked-word { font-size: 1.8rem; letter-spacing: 5px; }
+      .category-grid { grid-template-columns: 1fr 1fr; }
+      .result-stats { gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<a class="back-link" href="../index.html">← Back to Arcade</a>
+
+<h1>🔡 Missing Vowels</h1>
+
+<!-- Language Toggle (shared, always visible) -->
+<div class="lang-toggle" id="langToggle">
+  <button class="lang-btn active" data-lang="en" onclick="setLang('en')">🇬🇧 English</button>
+  <button class="lang-btn"        data-lang="de" onclick="setLang('de')">🇩🇪 Deutsch</button>
+</div>
+
+<!-- ══════════════ MENU SCREEN ══════════════ -->
+<div class="screen active" id="screenMenu">
+  <p class="subtitle" id="menuSubtitle">Choose a category and start!</p>
+  <div class="category-grid" id="categoryGrid"></div>
+  <button class="start-btn" id="startBtn" onclick="startGame()">▶ START</button>
+</div>
+
+<!-- ══════════════ GAME SCREEN ══════════════ -->
+<div class="screen" id="screenGame">
+  <div class="hud">
+    <div class="hud-score" id="hudScore"></div>
+    <div class="hud-time"  id="hudTime"></div>
+  </div>
+
+  <div class="timer-bar-wrap">
+    <div class="timer-bar" id="timerBar"></div>
+  </div>
+
+  <div class="word-card" id="wordCard">
+    <div class="masked-word" id="maskedWord"></div>
+    <div class="category-hint" id="categoryHint"></div>
+  </div>
+
+  <div class="feedback-msg" id="feedbackMsg"></div>
+
+  <div class="input-row">
+    <input
+      type="text"
+      class="word-input"
+      id="wordInput"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="characters"
+      spellcheck="false"
+      onkeydown="onInputKey(event)"
+    />
+    <button class="submit-btn" id="submitBtn" onclick="checkAnswer()"></button>
+  </div>
+
+  <button class="skip-btn hidden" id="skipBtn" onclick="skipWord()"></button>
+</div>
+
+<!-- ══════════════ RESULT SCREEN ══════════════ -->
+<div class="screen" id="screenResult">
+  <div class="result-card">
+    <div class="result-title" id="resultTitle">🎉</div>
+    <div class="result-stats">
+      <div class="stat-block">
+        <div class="stat-value" id="statSolved">0</div>
+        <div class="stat-label" id="statSolvedLabel"></div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-value" id="statAccuracy">0%</div>
+        <div class="stat-label" id="statAccuracyLabel"></div>
+      </div>
+    </div>
+  </div>
+  <div class="result-buttons">
+    <button class="result-btn primary"   id="btnPlayAgain" onclick="playAgain()"></button>
+    <button class="result-btn secondary" id="btnMenu"      onclick="goMenu()"></button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════
+const CATEGORIES = {
+  en: [
+    { key:'animals',   label:'🐾 Animals'   },
+    { key:'countries', label:'🌍 Countries'  },
+    { key:'food',      label:'🍕 Food'       },
+    { key:'nature',    label:'🌿 Nature'     },
+    { key:'cities',    label:'🏙️ Cities'     },
+  ],
+  de: [
+    { key:'de_tiere',   label:'🐾 Tiere'    },
+    { key:'de_laender', label:'🌍 Länder'   },
+    { key:'de_essen',   label:'🍕 Essen'    },
+    { key:'de_natur',   label:'🌿 Natur'    },
+    { key:'de_staedte', label:'🏙️ Städte'   },
+  ],
+};
+
+const WORD_LISTS = {
+  animals: ["AARDVARK","ALBATROSS","ALLIGATOR","ANACONDA","ANTELOPE","ARMADILLO","AXOLOTL","BABOON","BADGER","BEAR","BEAVER","BISON","BOAR","BUFFALO","BUTTERFLY","BUZZARD","CAMEL","CARDINAL","CHEETAH","CHIPMUNK","COBRA","COYOTE","CRANE","CROCODILE","CROW","DEER","DINGO","DOLPHIN","DONKEY","DRAGONFLY","EAGLE","EEL","ELEPHANT","EMU","ERMINE","FALCON","FERRET","FINCH","FLAMINGO","FOX","FROG","GECKO","GIRAFFE","GORILLA","GROUSE","HAMSTER","HAWK","HEDGEHOG","HERON","HIPPO","HYENA","IGUANA","IMPALA","JAGUAR","JELLYFISH","KANGAROO","KITE","KOALA","KOOKABURRA","LEMUR","LION","LIZARD","LLAMA","LOBSTER","LYNX","MEERKAT","MOLE","MONKEY","MOOSE","MOUSE","NARWHAL","NEWT","NIGHTINGALE","OCELOT","OCTOPUS","ORANGUTAN","OSTRICH","OTTER","OWL","PANDA","PARROT","PELICAN","PENGUIN","PIRANHA","PLATYPUS","PORCUPINE","PUMA","QUOKKA","RABBIT","RACCOON","RAVEN","RHINOCEROS","ROBIN","SALAMANDER","SHARK","SNAKE","SPARROW","SQUIRREL","STORK","SWAN","TARANTULA","TIGER","TORTOISE","TOUCAN","TURKEY","VULTURE","VIPER","WALRUS","WHALE","WOLF","WOLVERINE","WOMBAT","WREN","YAK","ZEBRA"],
+  countries: ["AFGHANISTAN","ALBANIA","ALGERIA","ANGOLA","ARGENTINA","ARMENIA","AUSTRALIA","AUSTRIA","AZERBAIJAN","BAHRAIN","BANGLADESH","BELARUS","BELGIUM","BELIZE","BOLIVIA","BRAZIL","BULGARIA","CAMBODIA","CAMEROON","CANADA","CHILE","CHINA","COLOMBIA","CROATIA","CUBA","CYPRUS","DENMARK","ECUADOR","EGYPT","ENGLAND","ETHIOPIA","FINLAND","FRANCE","GEORGIA","GERMANY","GHANA","GREECE","GUATEMALA","GUINEA","HAITI","HUNGARY","ICELAND","INDIA","INDONESIA","IRAN","IRAQ","IRELAND","ISRAEL","ITALY","JAMAICA","JAPAN","JORDAN","KAZAKHSTAN","KENYA","KUWAIT","LAOS","LATVIA","LEBANON","LIBYA","LITHUANIA","LUXEMBOURG","MADAGASCAR","MALAYSIA","MALI","MEXICO","MOLDOVA","MONGOLIA","MOROCCO","MOZAMBIQUE","MYANMAR","NAMIBIA","NEPAL","NETHERLANDS","NICARAGUA","NIGER","NIGERIA","NORWAY","OMAN","PAKISTAN","PANAMA","PARAGUAY","PERU","PHILIPPINES","POLAND","PORTUGAL","QATAR","ROMANIA","RUSSIA","RWANDA","SENEGAL","SERBIA","SOMALIA","SPAIN","SUDAN","SWEDEN","SWITZERLAND","SYRIA","TAIWAN","TAJIKISTAN","TANZANIA","THAILAND","TUNISIA","TURKEY","UGANDA","UKRAINE","URUGUAY","VENEZUELA","VIETNAM","WALES","YEMEN","ZAMBIA","ZIMBABWE"],
+  food: ["ALMOND","APPLE","APRICOT","ASPARAGUS","AVOCADO","BANANA","BASIL","BEAN","BEET","BREAD","BROCCOLI","BROWNIE","BUTTER","CABBAGE","CARAMEL","CARROT","CHEESE","CHERRY","CHICKEN","CHILI","CHOCOLATE","CINNAMON","COCONUT","COFFEE","COOKIE","CORN","CREAM","CROISSANT","DATE","DILL","DUMPLING","EGG","EGGPLANT","FIG","FISH","FLOUR","FUDGE","GARLIC","GINGER","GRAPE","GUAVA","HAZELNUT","HONEY","HUMMUS","JAM","JELLY","KALE","KIWI","LEMON","LETTUCE","LIME","LYCHEE","LASAGNE","MANGO","MELON","MINT","MUSHROOM","MUSTARD","MACARON","NOODLE","NUTMEG","OATS","OLIVE","ONION","ORANGE","OREGANO","PAPAYA","PAPRIKA","PARSLEY","PEACH","PEAR","PEPPER","PINEAPPLE","PLUM","POTATO","PRETZEL","PANCAKE","QUINOA","RADISH","RAISIN","RASPBERRY","RICE","ROSEMARY","RHUBARB","SAGE","SALMON","SALT","SHRIMP","SPINACH","STRAWBERRY","SUGAR","TAMARIND","THYME","TOFU","TOMATO","TRUFFLE","TUNA","TURNIP","VANILLA","WALNUT","WATERMELON","WHEAT","WAFFLE","YAM","YOGURT","ZUCCHINI"],
+  nature: ["ARCTIC","AURORA","AVALANCHE","ATOLL","BAY","BEACH","BLIZZARD","BOULDER","BOG","CANYON","CAVE","CLIFF","CLOUD","COAST","CORAL","CREEK","CRATER","CURRENT","DELTA","DESERT","DUNE","DROUGHT","EARTHQUAKE","ESTUARY","EROSION","FJORD","FLOOD","FOREST","FOUNTAIN","FOG","GEYSER","GLACIER","GORGE","GROVE","GULF","HURRICANE","HILL","HAIL","ICEBERG","ISLAND","INLET","JUNGLE","LAGOON","LAKE","LAVA","LIGHTNING","MEADOW","MOUNTAIN","MARSH","MONSOON","MESA","OASIS","OCEAN","PENINSULA","PLATEAU","PRAIRIE","RAINFOREST","RAVINE","REEF","RIVER","ROCK","RAPIDS","SAVANNA","SEA","SPRING","STORM","STREAM","SWAMP","STRAIT","TIDE","TORNADO","TUNDRA","TAIGA","VALLEY","VOLCANO","WATERFALL","WETLAND","WIND","WAVE"],
+  cities: ["AMSTERDAM","ANKARA","ATHENS","ACCRA","ALGIERS","AUSTIN","BANGKOK","BARCELONA","BEIJING","BEIRUT","BELGRADE","BERLIN","BOGOTA","BRUSSELS","BUCHAREST","BUDAPEST","CAIRO","CARACAS","CHICAGO","COLOMBO","DELHI","DHAKA","DUBAI","DUBLIN","EDINBURGH","FRANKFURT","HAMBURG","HANOI","HAVANA","HELSINKI","HOUSTON","ISTANBUL","JAKARTA","JOHANNESBURG","KABUL","KARACHI","KHARTOUM","KINSHASA","KYIV","LAGOS","LAHORE","LIMA","LISBON","LONDON","LUANDA","LUSAKA","MADRID","MANILA","MELBOURNE","MONTREAL","MOSCOW","MUMBAI","NAIROBI","OSLO","PARIS","PRAGUE","PYONGYANG","ROME","ROTTERDAM","SEOUL","SHANGHAI","SINGAPORE","STOCKHOLM","SYDNEY","TAIPEI","TBILISI","TEHRAN","TOKYO","TORONTO","VIENNA","VILNIUS","WARSAW","YEREVAN","ZAGREB","ZURICH"],
+  de_tiere: ["ADLER","AMEISE","AXOLOTL","BIBER","BIENE","DACHS","DELFIN","EICHHORNCHEN","ELEFANT","ENTE","FALKE","FISCH","FROSCH","FUCHS","GECKO","GEPARD","GIRAFFE","GORILLA","HASE","HUND","HYAENE","IGEL","JAGUAR","KATZE","KOALA","KROKODIL","LIBELLE","LOEWE","LUCHS","MARDER","MAUS","NASHORN","NILPFERD","OTTER","PAPAGEI","PFERD","PINGUIN","RABE","RATTE","SCHAF","SCHLANGE","SCHMETTERLING","SEEHUND","SPINNE","STORCH","TIGER","TINTENFISCH","UHU","VOGEL","WASCHBAER","WOLF","ZEBRA","ZIEGE"],
+  de_laender: ["AEGYPTEN","AETHIOPIEN","ALBANIEN","ALGERIEN","ANGOLA","ARGENTINIEN","AUSTRALIEN","BELGIEN","BOLIVIEN","BRASILIEN","BULGARIEN","CHILE","CHINA","DAENEMARK","DEUTSCHLAND","ECUADOR","ENGLAND","FINNLAND","FRANKREICH","GEORGIEN","GHANA","GRIECHENLAND","GUATEMALA","INDIEN","INDONESIEN","IRAK","IRAN","IRLAND","ISLAND","ISRAEL","ITALIEN","JAMAIKA","JAPAN","JORDANIEN","KAMERUN","KANADA","KENIA","KOLUMBIEN","KROATIEN","KUBA","LAOS","LETTLAND","LIBYEN","LITAUEN","LUXEMBURG","MALI","MEXIKO","MOLDAWIEN","MONGOLEI","MAROKKO","NAMIBIA","NEPAL","NIEDERLANDE","NIGERIA","NORWEGEN","OMAN","PAKISTAN","PANAMA","PERU","PHILIPPINEN","POLEN","PORTUGAL","RUMAENIEN","RUSSLAND","RUANDA","SAMBIA","SCHWEDEN","SERBIEN","SIMBABWE","SOMALIA","SPANIEN","SUDAN","SYRIEN","TAIWAN","TANSANIA","THAILAND","TUNESIEN","TUERKEI","UGANDA","UKRAINE","UNGARN","URUGUAY","USBEKISTAN","VENEZUELA","VIETNAM","WALES","JEMEN"],
+  de_essen: ["APFEL","ARTISCHOCKE","AVOCADO","BANANE","BIRNE","BOHNE","BROCCOLI","BROT","BUTTER","DATTEL","EI","ERBSE","FEIGE","FISCH","FLEISCH","GEMUESE","GURKE","HONIG","INGWER","JOGHURT","KAROTTE","KARTOFFEL","KAESE","KIRSCHE","KNOBLAUCH","KOHL","KUCHEN","LACHS","LAUCH","LINSE","MAIS","MANGO","MELONE","MILCH","NUDELN","NUSS","OBST","OLIVE","ORANGE","PFIRSICH","PFLAUME","PILZ","PIZZA","QUARK","RADIESCHEN","REIS","ROSENKOHL","ROSINE","SALAT","SALZ","SCHINKEN","SCHOKOLADE","SENF","SPINAT","SUPPE","THYMIAN","TOMATE","VANILLE","WASSERMELONE","WEIZEN","WURST","ZITRONE","ZUCCHINI","ZWIEBEL"],
+  de_natur: ["ALPEN","AUEN","BACH","BERG","BODEN","DELTA","DUENE","EBENE","EIS","FELS","FLUSS","GEBIRGE","GIPFEL","GLETSCHER","HUEGEL","INSEL","KANAL","KLIPPE","KUESTE","LANDSCHAFT","LAVA","MEER","MONSUN","MOOR","NEBEL","OASE","PLATEAU","REGEN","RIFF","SCHNEE","SEE","STEPPE","STURM","TAL","TAIGA","TORNADO","WALD","WASSER","WELLE","WUESTE"],
+  de_staedte: ["AACHEN","AUGSBURG","BERLIN","BIELEFELD","BOCHUM","BONN","BRAUNSCHWEIG","BREMEN","CHEMNITZ","DORTMUND","DRESDEN","DUISBURG","DUESSELDORF","ERFURT","ESSEN","FRANKFURT","GELSENKIRCHEN","HAMBURG","HANNOVER","INGOLSTADT","JENA","KARLSRUHE","KASSEL","KIEL","KOELN","KOBLENZ","LEIPZIG","LUDWIGSHAFEN","MAGDEBURG","MAINZ","MANNHEIM","MUENCHEN","MUENSTER","NUERNBERG","OBERHAUSEN","REGENSBURG","ROSTOCK","SAARBRUECKEN","STUTTGART","ULM","WIESBADEN","WUPPERTAL","WUERZBURG","WIEN","GRAZ","LINZ","SALZBURG","INNSBRUCK","ZUERICH","BASEL","BERN","LUZERN","LAUSANNE","GENF"],
+};
+
+const STRINGS = {
+  en: {
+    subtitle:    'Guess the word — vowels are missing!',
+    scoreLabel:  'Score',
+    timeLabel:   'Time',
+    submitBtn:   'Submit',
+    skipBtn:     'Skip →',
+    catPrefix:   'Category:',
+    correct:     '✓ Correct!',
+    wrong:       '✗ Wrong — try again!',
+    playAgain:   'Play Again',
+    menuBtn:     'Menu',
+    wordsSolved: 'words solved',
+    accuracy:    'accuracy',
+    placeholder: 'Type the full word…',
+    startBtn:    '▶ START',
+  },
+  de: {
+    subtitle:    'Rate das Wort — Vokale fehlen!',
+    scoreLabel:  'Punkte',
+    timeLabel:   'Zeit',
+    submitBtn:   'Prüfen',
+    skipBtn:     'Überspringen',
+    catPrefix:   'Kategorie:',
+    correct:     '✓ Richtig!',
+    wrong:       '✗ Falsch — nochmal!',
+    playAgain:   'Nochmal',
+    menuBtn:     'Menü',
+    wordsSolved: 'Wörter gelöst',
+    accuracy:    'Genauigkeit',
+    placeholder: 'Vollständiges Wort…',
+    startBtn:    '▶ START',
+  },
+};
+
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+let lang            = 'en';
+let selectedCatKey  = null;
+let currentWord     = '';
+let usedWords       = new Set();
+let score           = 0;
+let totalAttempted  = 0;
+let wrongCount      = 0;
+let timeLeft        = 60;
+let timerInterval   = null;
+const GAME_DURATION = 60;
+const VOWELS        = new Set(['A','E','I','O','U']);
+
+// ════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════
+function isEligible(word) {
+  const w = word.toUpperCase();
+  if (w.includes(' ')) return false;
+  if (w.length < 4)    return false;
+  let vowelCount = 0;
+  for (const ch of w) if (VOWELS.has(ch)) vowelCount++;
+  return vowelCount >= 2;
+}
+
+function maskWord(word) {
+  return word.toUpperCase().split('').map(ch => VOWELS.has(ch) ? '_' : ch).join('');
+}
+
+function renderMasked(word) {
+  const masked = maskWord(word);
+  return masked.split('').map(ch =>
+    ch === '_'
+      ? `<span class="vowel-blank">_</span>`
+      : `<span class="consonant">${ch}</span>`
+  ).join('');
+}
+
+function getCategoryLabel(key) {
+  const cats = CATEGORIES[lang];
+  const cat = cats.find(c => c.key === key);
+  return cat ? cat.label : key;
+}
+
+function t(key) { return STRINGS[lang][key] || ''; }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ════════════════════════════════════════════
+// LANGUAGE
+// ════════════════════════════════════════════
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === l);
+  });
+  selectedCatKey = null;
+  renderMenu();
+}
+
+// ════════════════════════════════════════════
+// MENU
+// ════════════════════════════════════════════
+function renderMenu() {
+  document.getElementById('menuSubtitle').textContent = t('subtitle');
+  document.getElementById('startBtn').textContent = t('startBtn');
+
+  const grid = document.getElementById('categoryGrid');
+  grid.innerHTML = '';
+  CATEGORIES[lang].forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (cat.key === selectedCatKey ? ' selected' : '');
+    btn.textContent = cat.label;
+    btn.onclick = () => selectCategory(cat.key);
+    grid.appendChild(btn);
+  });
+
+  const startBtn = document.getElementById('startBtn');
+  startBtn.classList.toggle('enabled', !!selectedCatKey);
+}
+
+function selectCategory(key) {
+  selectedCatKey = key;
+  renderMenu();
+}
+
+// ════════════════════════════════════════════
+// GAME START
+// ════════════════════════════════════════════
+function startGame() {
+  if (!selectedCatKey) return;
+  score          = 0;
+  totalAttempted = 0;
+  wrongCount     = 0;
+  timeLeft       = GAME_DURATION;
+  usedWords      = new Set();
+
+  showScreen('screenGame');
+  updateHUD();
+  updateTimerBar();
+  loadNextWord();
+
+  document.getElementById('submitBtn').textContent = t('submitBtn');
+  document.getElementById('skipBtn').textContent   = t('skipBtn');
+  document.getElementById('wordInput').placeholder = t('placeholder');
+
+  clearInterval(timerInterval);
+  timerInterval = setInterval(tick, 1000);
+}
+
+function tick() {
+  timeLeft--;
+  updateTimerBar();
+  updateHUD();
+  if (timeLeft <= 0) {
+    clearInterval(timerInterval);
+    endGame();
+  }
+}
+
+function updateTimerBar() {
+  const bar = document.getElementById('timerBar');
+  const pct = Math.max(0, (timeLeft / GAME_DURATION) * 100);
+  bar.style.width = pct + '%';
+  bar.classList.remove('warn','danger');
+  if (pct <= 20)      bar.classList.add('danger');
+  else if (pct <= 40) bar.classList.add('warn');
+}
+
+function updateHUD() {
+  const s = t('scoreLabel');
+  const tl = t('timeLabel');
+  document.getElementById('hudScore').innerHTML = `${s}: <span>${score}</span>`;
+  document.getElementById('hudTime').innerHTML  = `${tl}: <span>${timeLeft}s</span>`;
+}
+
+// ════════════════════════════════════════════
+// WORD LOADING
+// ════════════════════════════════════════════
+function loadNextWord() {
+  wrongCount = 0;
+  document.getElementById('skipBtn').classList.add('hidden');
+  document.getElementById('feedbackMsg').textContent = '';
+  document.getElementById('feedbackMsg').className   = 'feedback-msg';
+  document.getElementById('wordCard').className      = 'word-card';
+  document.getElementById('wordInput').value         = '';
+
+  const pool = (WORD_LISTS[selectedCatKey] || []).filter(w => isEligible(w) && !usedWords.has(w));
+
+  if (pool.length === 0) {
+    // All eligible words used — reset pool (but keep playing)
+    usedWords.clear();
+    const fullPool = (WORD_LISTS[selectedCatKey] || []).filter(w => isEligible(w));
+    if (fullPool.length === 0) { endGame(); return; }
+    currentWord = fullPool[Math.floor(Math.random() * fullPool.length)];
+  } else {
+    currentWord = pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  usedWords.add(currentWord);
+
+  document.getElementById('maskedWord').innerHTML = renderMasked(currentWord);
+  document.getElementById('categoryHint').textContent = t('catPrefix') + ' ' + getCategoryLabel(selectedCatKey);
+
+  // Focus input with slight delay (prevent virtual keyboard flicker)
+  setTimeout(() => document.getElementById('wordInput').focus(), 50);
+}
+
+// ════════════════════════════════════════════
+// ANSWER CHECKING
+// ════════════════════════════════════════════
+function onInputKey(e) {
+  if (e.key === 'Enter') checkAnswer();
+}
+
+function checkAnswer() {
+  const input = document.getElementById('wordInput').value.trim().toUpperCase();
+  if (!input) return;
+
+  if (input === currentWord.toUpperCase()) {
+    // Correct
+    score++;
+    totalAttempted++;
+    showFeedback(true, '✓ ' + currentWord);
+    flashCard(true);
+    setTimeout(loadNextWord, 900);
+  } else {
+    // Wrong
+    wrongCount++;
+    totalAttempted++;
+    showFeedback(false, t('wrong'));
+    flashCard(false);
+    document.getElementById('wordInput').value = '';
+
+    if (wrongCount >= 2) {
+      document.getElementById('skipBtn').classList.remove('hidden');
+    }
+  }
+}
+
+function showFeedback(correct, msg) {
+  const el = document.getElementById('feedbackMsg');
+  el.textContent = msg;
+  el.className   = 'feedback-msg ' + (correct ? 'correct-msg' : 'wrong-msg');
+}
+
+function flashCard(correct) {
+  const card = document.getElementById('wordCard');
+  card.classList.remove('correct','wrong','pop','shake');
+  // Trigger reflow
+  void card.offsetWidth;
+  if (correct) {
+    card.classList.add('correct','pop');
+  } else {
+    card.classList.add('wrong','shake');
+  }
+}
+
+function skipWord() {
+  loadNextWord();
+}
+
+// ════════════════════════════════════════════
+// GAME END
+// ════════════════════════════════════════════
+function endGame() {
+  clearInterval(timerInterval);
+  showScreen('screenResult');
+
+  const accuracy = totalAttempted > 0
+    ? Math.round((score / totalAttempted) * 100)
+    : 0;
+
+  document.getElementById('resultTitle').textContent      = score > 0 ? '🎉 Time\'s up!' : '⏱️ Time\'s up!';
+  document.getElementById('statSolved').textContent       = score;
+  document.getElementById('statSolvedLabel').textContent  = t('wordsSolved');
+  document.getElementById('statAccuracy').textContent     = accuracy + '%';
+  document.getElementById('statAccuracyLabel').textContent = t('accuracy');
+  document.getElementById('btnPlayAgain').textContent     = t('playAgain');
+  document.getElementById('btnMenu').textContent          = t('menuBtn');
+}
+
+function playAgain() {
+  startGame();
+}
+
+function goMenu() {
+  showScreen('screenMenu');
+  renderMenu();
+}
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+renderMenu();
+</script>
+</body>
+</html>

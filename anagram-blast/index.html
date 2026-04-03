@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔀 Anagram Blast</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #ec4899;
+      --accent-hover: #f472b6;
+      --bg-card: rgba(255,255,255,0.07);
+      --bg-card-hover: rgba(255,255,255,0.12);
+      --border: rgba(255,255,255,0.15);
+      --text: #e2e8f0;
+      --text-dim: #94a3b8;
+      --tile-pool-bg: #312e81;
+      --tile-pool-border: #6366f1;
+      --tile-answer-bg: #0d4a4a;
+      --tile-answer-border: #22d3ee;
+      --correct: #22c55e;
+      --wrong: #ef4444;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Header ── */
+    .top-bar {
+      width: 100%;
+      max-width: 760px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px 0;
+    }
+
+    .back-link {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    .lang-toggle {
+      display: flex;
+      gap: 8px;
+    }
+    .lang-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .lang-btn:hover { background: var(--bg-card-hover); }
+    .lang-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      font-weight: 800;
+      background: linear-gradient(90deg, #ec4899, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      padding: 18px 20px 4px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+    }
+
+    /* ── Screens ── */
+    .screen { display: none; width: 100%; max-width: 720px; padding: 0 16px 40px; }
+    .screen.active { display: block; }
+
+    /* ── Menu ── */
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .cat-btn {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      color: var(--text);
+      padding: 16px 10px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 0.95rem;
+      text-align: center;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+    .cat-btn:hover { background: var(--bg-card-hover); border-color: var(--accent); transform: translateY(-2px); }
+    .cat-btn.selected {
+      background: rgba(236,72,153,0.2);
+      border-color: var(--accent);
+      color: var(--accent-hover);
+      font-weight: 700;
+    }
+
+    .primary-btn {
+      display: block;
+      width: 100%;
+      max-width: 260px;
+      margin: 0 auto;
+      padding: 14px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .primary-btn:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(236,72,153,0.4); }
+    .primary-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ── Game ── */
+    .game-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .stat-label { font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+    .stat-val { font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+
+    .timer-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 22px;
+    }
+    #timer-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--accent), #a78bfa);
+      border-radius: 4px;
+      transition: width 0.5s linear, background 0.5s;
+    }
+    #timer-bar.urgent { background: linear-gradient(90deg, #ef4444, #f97316); }
+
+    .prompt-text {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+      min-height: 20px;
+    }
+
+    /* Tile areas */
+    .tile-zone {
+      min-height: 80px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      padding: 14px;
+      border-radius: var(--radius);
+      border: 2px dashed var(--border);
+      margin-bottom: 14px;
+      transition: border-color 0.2s;
+    }
+    .tile-zone.answer-zone {
+      border-color: rgba(34,211,238,0.35);
+      background: rgba(34,211,238,0.04);
+      min-height: 88px;
+    }
+    .tile-zone.answer-zone.zone-hint { border-color: rgba(34,211,238,0.7); }
+
+    .tile {
+      width: 44px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 800;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.12s, box-shadow 0.12s;
+      position: relative;
+    }
+    .tile:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.4); }
+    .tile:active { transform: scale(0.92); }
+
+    .tile.pool-tile {
+      background: var(--tile-pool-bg);
+      border: 2px solid var(--tile-pool-border);
+      color: #c7d2fe;
+    }
+    .tile.answer-tile {
+      background: var(--tile-answer-bg);
+      border: 2px solid var(--tile-answer-border);
+      color: #cffafe;
+    }
+    .tile.flash-correct {
+      background: #14532d !important;
+      border-color: var(--correct) !important;
+      color: #86efac !important;
+    }
+    .tile.flash-wrong {
+      background: #450a0a !important;
+      border-color: var(--wrong) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.45s ease;
+    }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      15%      { transform: translateX(-6px); }
+      30%      { transform: translateX(6px); }
+      45%      { transform: translateX(-5px); }
+      60%      { transform: translateX(5px); }
+      75%      { transform: translateX(-3px); }
+      90%      { transform: translateX(3px); }
+    }
+
+    /* Feedback */
+    #feedback {
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 700;
+      min-height: 26px;
+      margin-bottom: 14px;
+      transition: opacity 0.3s;
+    }
+    #feedback.correct { color: var(--correct); }
+    #feedback.wrong   { color: var(--wrong); }
+
+    .game-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 6px;
+    }
+    .sec-btn {
+      padding: 10px 22px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .sec-btn:hover { background: var(--bg-card-hover); border-color: var(--accent); }
+    .submit-btn {
+      padding: 10px 28px;
+      background: rgba(236,72,153,0.2);
+      border: 2px solid var(--accent);
+      color: var(--accent-hover);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .submit-btn:hover { background: var(--accent); color: #fff; }
+
+    /* ── Result ── */
+    .result-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 36px 28px;
+      text-align: center;
+    }
+    .result-card h2 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      background: linear-gradient(90deg, #ec4899, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .result-stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin: 28px 0;
+    }
+    .res-stat { text-align: center; }
+    .res-stat .num { font-size: 2.8rem; font-weight: 900; color: var(--accent); line-height: 1; }
+    .res-stat .lbl { font-size: 0.8rem; color: var(--text-dim); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .result-actions { display: flex; gap: 14px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+
+    /* ── Misc ── */
+    .section-label {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 14px;
+    }
+    .empty-hint {
+      color: rgba(255,255,255,0.2);
+      font-size: 0.85rem;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a class="back-link" href="../index.html">← Back to Arcade</a>
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="btn-en" onclick="setLang('en')">🇬🇧 English</button>
+    <button class="lang-btn" id="btn-de" onclick="setLang('de')">🇩🇪 Deutsch</button>
+  </div>
+</div>
+
+<h1>🔀 Anagram Blast</h1>
+<p class="subtitle" id="subtitle">Unscramble the letters!</p>
+
+<!-- ═══ MENU SCREEN ═══ -->
+<div class="screen active" id="screen-menu">
+  <p class="section-label" id="cat-label">Choose a Category</p>
+  <div class="category-grid" id="category-grid"></div>
+  <button class="primary-btn" id="start-btn" disabled onclick="startGame()">▶ Start</button>
+</div>
+
+<!-- ═══ GAME SCREEN ═══ -->
+<div class="screen" id="screen-game">
+  <div class="game-header">
+    <div>
+      <div class="stat-label" id="lbl-score">Score</div>
+      <div class="stat-val" id="score-val">0</div>
+    </div>
+    <div style="text-align:center;">
+      <div class="stat-label" id="lbl-streak">Streak</div>
+      <div class="stat-val" id="streak-val">0</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="stat-label" id="lbl-time">Time</div>
+      <div class="stat-val" id="time-val">60</div>
+    </div>
+  </div>
+  <div class="timer-track"><div id="timer-bar"></div></div>
+
+  <p class="prompt-text" id="game-prompt">Unscramble the letters!</p>
+
+  <!-- Answer zone -->
+  <div class="tile-zone answer-zone" id="answer-zone">
+    <span class="empty-hint" id="answer-hint">Click tiles below ↓</span>
+  </div>
+
+  <div id="feedback"></div>
+
+  <!-- Pool zone -->
+  <div class="tile-zone" id="pool-zone"></div>
+
+  <div class="game-actions">
+    <button class="sec-btn" id="skip-btn" onclick="skipWord()">Skip</button>
+    <button class="submit-btn" id="submit-btn" onclick="submitAnswer()">Submit</button>
+  </div>
+</div>
+
+<!-- ═══ RESULT SCREEN ═══ -->
+<div class="screen" id="screen-result">
+  <div class="result-card">
+    <h2 id="result-heading">Time's Up!</h2>
+    <p id="result-sub" style="color:var(--text-dim); margin-top:6px; font-size:0.95rem;"></p>
+    <div class="result-stats">
+      <div class="res-stat">
+        <div class="num" id="res-score">0</div>
+        <div class="lbl" id="lbl-res-score">Score</div>
+      </div>
+      <div class="res-stat">
+        <div class="num" id="res-streak">0</div>
+        <div class="lbl" id="lbl-res-streak">Best Streak</div>
+      </div>
+    </div>
+    <div class="result-actions">
+      <button class="primary-btn" style="max-width:160px;" onclick="startGame()" id="play-again-btn">Play Again</button>
+      <button class="sec-btn" onclick="showMenu()" id="menu-btn">Menu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Data ────────────────────────────────────────────────────────────────────
+const CATEGORIES = {
+  en: [
+    { key:'animals',   label:'🐾 Animals'  },
+    { key:'countries', label:'🌍 Countries' },
+    { key:'food',      label:'🍕 Food'      },
+    { key:'nature',    label:'🌿 Nature'    },
+    { key:'cities',    label:'🏙️ Cities'    },
+  ],
+  de: [
+    { key:'de_tiere',   label:'🐾 Tiere'   },
+    { key:'de_laender', label:'🌍 Länder'  },
+    { key:'de_essen',   label:'🍕 Essen'   },
+    { key:'de_natur',   label:'🌿 Natur'   },
+    { key:'de_staedte', label:'🏙️ Städte'  },
+  ],
+};
+
+const WORD_LISTS = {
+  animals: ["AARDVARK","ALBATROSS","ALLIGATOR","ANACONDA","ANTELOPE","ARMADILLO","AXOLOTL","BABOON","BADGER","BEAR","BEAVER","BISON","BOAR","BUFFALO","BUTTERFLY","BUZZARD","CAMEL","CARDINAL","CHEETAH","CHIPMUNK","COBRA","COYOTE","CRANE","CROCODILE","CROW","DEER","DINGO","DOLPHIN","DONKEY","DRAGONFLY","EAGLE","EEL","ELEPHANT","EMU","ERMINE","FALCON","FERRET","FINCH","FLAMINGO","FOX","FROG","GECKO","GIRAFFE","GORILLA","GROUSE","HAMSTER","HAWK","HEDGEHOG","HERON","HIPPO","HYENA","IGUANA","IMPALA","JAGUAR","JELLYFISH","KANGAROO","KITE","KOALA","KOOKABURRA","LEMUR","LION","LIZARD","LLAMA","LOBSTER","LYNX","MEERKAT","MOLE","MONKEY","MOOSE","MOUSE","NARWHAL","NEWT","NIGHTINGALE","OCELOT","OCTOPUS","ORANGUTAN","OSTRICH","OTTER","OWL","PANDA","PARROT","PELICAN","PENGUIN","PIRANHA","PLATYPUS","PORCUPINE","PUMA","QUOKKA","RABBIT","RACCOON","RAVEN","RHINOCEROS","ROBIN","SALAMANDER","SHARK","SNAKE","SPARROW","SQUIRREL","STORK","SWAN","TARANTULA","TIGER","TORTOISE","TOUCAN","TURKEY","VULTURE","VIPER","WALRUS","WHALE","WOLF","WOLVERINE","WOMBAT","WREN","YAK","ZEBRA"],
+  countries: ["AFGHANISTAN","ALBANIA","ALGERIA","ANGOLA","ARGENTINA","ARMENIA","AUSTRALIA","AUSTRIA","AZERBAIJAN","BAHRAIN","BANGLADESH","BELARUS","BELGIUM","BELIZE","BOLIVIA","BRAZIL","BULGARIA","CAMBODIA","CAMEROON","CANADA","CHILE","CHINA","COLOMBIA","CROATIA","CUBA","CYPRUS","DENMARK","ECUADOR","EGYPT","ENGLAND","ETHIOPIA","FINLAND","FRANCE","GEORGIA","GERMANY","GHANA","GREECE","GUATEMALA","GUINEA","HAITI","HUNGARY","ICELAND","INDIA","INDONESIA","IRAN","IRAQ","IRELAND","ISRAEL","ITALY","JAMAICA","JAPAN","JORDAN","KAZAKHSTAN","KENYA","KUWAIT","LAOS","LATVIA","LEBANON","LIBYA","LITHUANIA","LUXEMBOURG","MADAGASCAR","MALAYSIA","MALI","MEXICO","MOLDOVA","MONGOLIA","MOROCCO","MOZAMBIQUE","MYANMAR","NAMIBIA","NEPAL","NETHERLANDS","NICARAGUA","NIGER","NIGERIA","NORWAY","OMAN","PAKISTAN","PANAMA","PARAGUAY","PERU","PHILIPPINES","POLAND","PORTUGAL","QATAR","ROMANIA","RUSSIA","RWANDA","SENEGAL","SERBIA","SOMALIA","SPAIN","SUDAN","SWEDEN","SWITZERLAND","SYRIA","TAIWAN","TAJIKISTAN","TANZANIA","THAILAND","TUNISIA","TURKEY","UGANDA","UKRAINE","URUGUAY","VENEZUELA","VIETNAM","WALES","YEMEN","ZAMBIA","ZIMBABWE"],
+  food: ["ALMOND","APPLE","APRICOT","ASPARAGUS","AVOCADO","BANANA","BASIL","BEAN","BEET","BREAD","BROCCOLI","BROWNIE","BUTTER","CABBAGE","CARAMEL","CARROT","CHEESE","CHERRY","CHICKEN","CHILI","CHOCOLATE","CINNAMON","COCONUT","COFFEE","COOKIE","CORN","CREAM","CROISSANT","DATE","DILL","DUMPLING","EGG","EGGPLANT","FIG","FISH","FLOUR","FUDGE","GARLIC","GINGER","GRAPE","GUAVA","HAZELNUT","HONEY","HUMMUS","JAM","JELLY","KALE","KIWI","LEMON","LETTUCE","LIME","LYCHEE","LASAGNE","MANGO","MELON","MINT","MUSHROOM","MUSTARD","MACARON","NOODLE","NUTMEG","OATS","OLIVE","ONION","ORANGE","OREGANO","PAPAYA","PAPRIKA","PARSLEY","PEACH","PEAR","PEPPER","PINEAPPLE","PLUM","POTATO","PRETZEL","PANCAKE","QUINOA","RADISH","RAISIN","RASPBERRY","RICE","ROSEMARY","RHUBARB","SAGE","SALMON","SALT","SHRIMP","SPINACH","STRAWBERRY","SUGAR","TAMARIND","THYME","TOFU","TOMATO","TRUFFLE","TUNA","TURNIP","VANILLA","WALNUT","WATERMELON","WHEAT","WAFFLE","YAM","YOGURT","ZUCCHINI"],
+  nature: ["ARCTIC","AURORA","AVALANCHE","ATOLL","BAY","BEACH","BLIZZARD","BOULDER","BOG","CANYON","CAVE","CLIFF","CLOUD","COAST","CORAL","CREEK","CRATER","CURRENT","DELTA","DESERT","DUNE","DROUGHT","EARTHQUAKE","ESTUARY","EROSION","FJORD","FLOOD","FOREST","FOUNTAIN","FOG","GEYSER","GLACIER","GORGE","GROVE","GULF","HURRICANE","HILL","HAIL","ICEBERG","ISLAND","INLET","JUNGLE","LAGOON","LAKE","LAVA","LIGHTNING","MEADOW","MOUNTAIN","MARSH","MONSOON","MESA","OASIS","OCEAN","PENINSULA","PLATEAU","PRAIRIE","RAINFOREST","RAVINE","REEF","RIVER","ROCK","RAPIDS","SAVANNA","SEA","SPRING","STORM","STREAM","SWAMP","STRAIT","TIDE","TORNADO","TUNDRA","TAIGA","VALLEY","VOLCANO","WATERFALL","WETLAND","WIND","WAVE"],
+  cities: ["AMSTERDAM","ANKARA","ATHENS","ACCRA","ALGIERS","AUSTIN","BANGKOK","BARCELONA","BEIJING","BEIRUT","BELGRADE","BERLIN","BOGOTA","BRUSSELS","BUCHAREST","BUDAPEST","CAIRO","CARACAS","CHICAGO","COLOMBO","DELHI","DHAKA","DUBAI","DUBLIN","EDINBURGH","FRANKFURT","HAMBURG","HANOI","HAVANA","HELSINKI","HOUSTON","ISTANBUL","JAKARTA","JOHANNESBURG","KABUL","KARACHI","KHARTOUM","KINSHASA","KYIV","LAGOS","LAHORE","LIMA","LISBON","LONDON","LUANDA","LUSAKA","MADRID","MANILA","MELBOURNE","MONTREAL","MOSCOW","MUMBAI","NAIROBI","OSLO","PARIS","PRAGUE","PYONGYANG","ROME","ROTTERDAM","SEOUL","SHANGHAI","SINGAPORE","STOCKHOLM","SYDNEY","TAIPEI","TBILISI","TEHRAN","TOKYO","TORONTO","VIENNA","VILNIUS","WARSAW","YEREVAN","ZAGREB","ZURICH"],
+  de_tiere: ["ADLER","AMEISE","AXOLOTL","BIBER","BIENE","DACHS","DELFIN","EICHHORNCHEN","ELEFANT","ENTE","FALKE","FISCH","FROSCH","FUCHS","GECKO","GEPARD","GIRAFFE","GORILLA","HASE","HUND","HYAENE","IGEL","JAGUAR","KATZE","KOALA","KROKODIL","LIBELLE","LOEWE","LUCHS","MARDER","MAUS","NASHORN","NILPFERD","OTTER","PAPAGEI","PFERD","PINGUIN","RABE","RATTE","SCHAF","SCHLANGE","SCHMETTERLING","SEEHUND","SPINNE","STORCH","TIGER","TINTENFISCH","UHU","VOGEL","WASCHBAER","WOLF","ZEBRA","ZIEGE"],
+  de_laender: ["AEGYPTEN","AETHIOPIEN","ALBANIEN","ALGERIEN","ANGOLA","ARGENTINIEN","AUSTRALIEN","BELGIEN","BOLIVIEN","BRASILIEN","BULGARIEN","CHILE","CHINA","DAENEMARK","DEUTSCHLAND","ECUADOR","ENGLAND","FINNLAND","FRANKREICH","GEORGIEN","GHANA","GRIECHENLAND","GUATEMALA","INDIEN","INDONESIEN","IRAK","IRAN","IRLAND","ISLAND","ISRAEL","ITALIEN","JAMAIKA","JAPAN","JORDANIEN","KAMERUN","KANADA","KENIA","KOLUMBIEN","KROATIEN","KUBA","LAOS","LETTLAND","LIBYEN","LITAUEN","LUXEMBURG","MALI","MEXIKO","MOLDAWIEN","MONGOLEI","MAROKKO","NAMIBIA","NEPAL","NIEDERLANDE","NIGERIA","NORWEGEN","OMAN","PAKISTAN","PANAMA","PERU","PHILIPPINEN","POLEN","PORTUGAL","RUMAENIEN","RUSSLAND","RUANDA","SAMBIA","SCHWEDEN","SERBIEN","SIMBABWE","SOMALIA","SPANIEN","SUDAN","SYRIEN","TAIWAN","TANSANIA","THAILAND","TUNESIEN","TUERKEI","UGANDA","UKRAINE","UNGARN","URUGUAY","USBEKISTAN","VENEZUELA","VIETNAM","WALES","JEMEN"],
+  de_essen: ["APFEL","ARTISCHOCKE","AVOCADO","BANANE","BIRNE","BOHNE","BROCCOLI","BROT","BUTTER","DATTEL","EI","ERBSE","FEIGE","FISCH","FLEISCH","GEMUESE","GURKE","HONIG","INGWER","JOGHURT","KAROTTE","KARTOFFEL","KAESE","KIRSCHE","KNOBLAUCH","KOHL","KUCHEN","LACHS","LAUCH","LINSE","MAIS","MANGO","MELONE","MILCH","NUDELN","NUSS","OBST","OLIVE","ORANGE","PFIRSICH","PFLAUME","PILZ","PIZZA","QUARK","RADIESCHEN","REIS","ROSENKOHL","ROSINE","SALAT","SALZ","SCHINKEN","SCHOKOLADE","SENF","SPINAT","SUPPE","THYMIAN","TOMATE","VANILLE","WASSERMELONE","WEIZEN","WURST","ZITRONE","ZUCCHINI","ZWIEBEL"],
+  de_natur: ["ALPEN","AUEN","BACH","BERG","BODEN","DELTA","DUENE","EBENE","EIS","FELS","FLUSS","GEBIRGE","GIPFEL","GLETSCHER","HUEGEL","INSEL","KANAL","KLIPPE","KUESTE","LANDSCHAFT","LAVA","MEER","MONSUN","MOOR","NEBEL","OASE","PLATEAU","REGEN","RIFF","SCHNEE","SEE","STEPPE","STURM","TAL","TAIGA","TORNADO","WALD","WASSER","WELLE","WUESTE"],
+  de_staedte: ["AACHEN","AUGSBURG","BERLIN","BIELEFELD","BOCHUM","BONN","BRAUNSCHWEIG","BREMEN","CHEMNITZ","DORTMUND","DRESDEN","DUISBURG","DUESSELDORF","ERFURT","ESSEN","FRANKFURT","GELSENKIRCHEN","HAMBURG","HANNOVER","INGOLSTADT","JENA","KARLSRUHE","KASSEL","KIEL","KOELN","KOBLENZ","LEIPZIG","LUDWIGSHAFEN","MAGDEBURG","MAINZ","MANNHEIM","MUENCHEN","MUENSTER","NUERNBERG","OBERHAUSEN","REGENSBURG","ROSTOCK","SAARBRUECKEN","STUTTGART","ULM","WIESBADEN","WUPPERTAL","WUERZBURG","WIEN","GRAZ","LINZ","SALZBURG","INNSBRUCK","ZUERICH","BASEL","BERN","LUZERN","LAUSANNE","GENF"],
+};
+
+const STRINGS = {
+  en: {
+    subtitle:   'Unscramble the letters!',
+    catLabel:   'Choose a Category',
+    score:      'Score',
+    time:       'Time',
+    streak:     'Streak',
+    skip:       'Skip',
+    submit:     'Submit',
+    correct:    '✓ Correct!',
+    wrong:      '✗ Wrong — try again',
+    playAgain:  'Play Again',
+    menu:       'Menu',
+    wordsSolved:'words solved',
+    bestStreak: 'Best Streak',
+    timesUp:    "Time's Up!",
+    hint:       'Click tiles below ↓',
+    prompt:     'Unscramble the letters!',
+  },
+  de: {
+    subtitle:   'Buchstaben neu ordnen!',
+    catLabel:   'Kategorie wählen',
+    score:      'Punkte',
+    time:       'Zeit',
+    streak:     'Serie',
+    skip:       'Überspringen',
+    submit:     'Prüfen',
+    correct:    '✓ Richtig!',
+    wrong:      '✗ Falsch — versuch\'s nochmal',
+    playAgain:  'Nochmal',
+    menu:       'Menü',
+    wordsSolved:'Wörter gelöst',
+    bestStreak: 'Beste Serie',
+    timesUp:    'Zeit abgelaufen!',
+    hint:       'Kacheln unten anklicken ↓',
+    prompt:     'Buchstaben neu ordnen!',
+  },
+};
+
+// ─── State ───────────────────────────────────────────────────────────────────
+let lang         = 'en';
+let selectedCat  = null;
+let score        = 0;
+let streak       = 0;
+let bestStreak   = 0;
+let timeLeft     = 60;
+let timerInterval= null;
+let currentWord  = '';
+let scrambled    = [];   // array of {id, letter}
+let poolOrder    = [];   // ids in pool
+let answerOrder  = [];   // ids in answer zone
+let retries      = 0;
+let inputLocked  = false;
+let usedWords    = new Set();
+
+// ─── Language ─────────────────────────────────────────────────────────────────
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  document.getElementById('btn-de').classList.toggle('active', l === 'de');
+  applyStrings();
+  buildCategoryGrid();
+  selectedCat = null;
+  document.getElementById('start-btn').disabled = true;
+}
+
+function applyStrings() {
+  const s = STRINGS[lang];
+  document.getElementById('subtitle').textContent   = s.subtitle;
+  document.getElementById('cat-label').textContent  = s.catLabel;
+  document.getElementById('lbl-score').textContent  = s.score;
+  document.getElementById('lbl-time').textContent   = s.time;
+  document.getElementById('lbl-streak').textContent = s.streak;
+  document.getElementById('skip-btn').textContent   = s.skip;
+  document.getElementById('submit-btn').textContent = s.submit;
+  document.getElementById('play-again-btn').textContent = s.playAgain;
+  document.getElementById('menu-btn').textContent   = s.menu;
+  document.getElementById('lbl-res-score').textContent  = s.score;
+  document.getElementById('lbl-res-streak').textContent = s.bestStreak;
+  document.getElementById('game-prompt').textContent= s.prompt;
+  document.getElementById('answer-hint').textContent= s.hint;
+}
+
+// ─── Menu ─────────────────────────────────────────────────────────────────────
+function buildCategoryGrid() {
+  const grid = document.getElementById('category-grid');
+  grid.innerHTML = '';
+  CATEGORIES[lang].forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn';
+    btn.textContent = cat.label;
+    btn.dataset.key = cat.key;
+    btn.onclick = () => selectCategory(cat.key);
+    grid.appendChild(btn);
+  });
+}
+
+function selectCategory(key) {
+  selectedCat = key;
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.key === key);
+  });
+  document.getElementById('start-btn').disabled = false;
+}
+
+function showMenu() {
+  clearInterval(timerInterval);
+  showScreen('menu');
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+}
+
+// ─── Scramble ─────────────────────────────────────────────────────────────────
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function scrambleWord(word) {
+  if (word.length <= 1) return word.split('');
+  const letters = word.split('');
+  let attempt = shuffle(letters);
+  let tries = 0;
+  while (attempt.join('') === word && tries < 50) {
+    attempt = shuffle(letters);
+    tries++;
+  }
+  return attempt;
+}
+
+// ─── Game ─────────────────────────────────────────────────────────────────────
+function getWordList() {
+  const raw = WORD_LISTS[selectedCat] || [];
+  return raw.filter(w => w.length >= 4 && w.length <= 9 && !w.includes(' '));
+}
+
+function pickWord() {
+  const list = getWordList();
+  const available = list.filter(w => !usedWords.has(w));
+  if (available.length === 0) { usedWords.clear(); return pickWord(); }
+  return available[Math.floor(Math.random() * available.length)];
+}
+
+function startGame() {
+  clearInterval(timerInterval);
+  score      = 0;
+  streak     = 0;
+  bestStreak = 0;
+  timeLeft   = 60;
+  usedWords  = new Set();
+  inputLocked= false;
+
+  document.getElementById('score-val').textContent  = 0;
+  document.getElementById('streak-val').textContent = 0;
+  document.getElementById('time-val').textContent   = 60;
+  document.getElementById('timer-bar').style.width  = '100%';
+  document.getElementById('timer-bar').classList.remove('urgent');
+  document.getElementById('feedback').textContent   = '';
+  document.getElementById('feedback').className     = '';
+
+  showScreen('game');
+  applyStrings();
+  loadWord();
+  startTimer();
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    document.getElementById('time-val').textContent = timeLeft;
+    const pct = (timeLeft / 60) * 100;
+    document.getElementById('timer-bar').style.width = pct + '%';
+    document.getElementById('timer-bar').classList.toggle('urgent', timeLeft <= 15);
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      endGame();
+    }
+  }, 1000);
+}
+
+function loadWord() {
+  retries = 0;
+  currentWord = pickWord();
+  usedWords.add(currentWord);
+  const letters = scrambleWord(currentWord);
+  scrambled = letters.map((l, i) => ({ id: i, letter: l }));
+  poolOrder   = scrambled.map(t => t.id);
+  answerOrder = [];
+  inputLocked = false;
+  renderTiles();
+  setFeedback('', '');
+}
+
+function renderTiles() {
+  const pool   = document.getElementById('pool-zone');
+  const answer = document.getElementById('answer-zone');
+  const hint   = document.getElementById('answer-hint');
+  pool.innerHTML   = '';
+  answer.innerHTML = '';
+
+  if (answerOrder.length === 0) {
+    answer.appendChild(hint);
+    hint.style.display = '';
+  } else {
+    hint.style.display = 'none';
+  }
+
+  answerOrder.forEach(id => {
+    const tile = scrambled.find(t => t.id === id);
+    answer.appendChild(makeTile(tile, 'answer'));
+  });
+
+  poolOrder.forEach(id => {
+    const tile = scrambled.find(t => t.id === id);
+    pool.appendChild(makeTile(tile, 'pool'));
+  });
+
+  // highlight answer zone when pool is empty
+  document.getElementById('answer-zone').classList.toggle('zone-hint', poolOrder.length === 0 && answerOrder.length > 0);
+}
+
+function makeTile(tile, zone) {
+  const div = document.createElement('div');
+  div.className = 'tile ' + (zone === 'pool' ? 'pool-tile' : 'answer-tile');
+  div.textContent = tile.letter;
+  div.dataset.id  = tile.id;
+  div.onclick = () => {
+    if (inputLocked) return;
+    if (zone === 'pool') moveTileToAnswer(tile.id);
+    else moveTileToPool(tile.id);
+  };
+  return div;
+}
+
+function moveTileToAnswer(id) {
+  poolOrder = poolOrder.filter(x => x !== id);
+  answerOrder.push(id);
+  renderTiles();
+  if (poolOrder.length === 0) autoCheck();
+}
+
+function moveTileToPool(id) {
+  answerOrder = answerOrder.filter(x => x !== id);
+  poolOrder.push(id);
+  renderTiles();
+}
+
+function autoCheck() {
+  // small delay so the last tile visually lands
+  setTimeout(submitAnswer, 180);
+}
+
+function submitAnswer() {
+  if (inputLocked) return;
+  if (answerOrder.length !== currentWord.length) return;
+  const guess = answerOrder.map(id => scrambled.find(t => t.id === id).letter).join('');
+  if (guess === currentWord) {
+    handleCorrect();
+  } else {
+    handleWrong();
+  }
+}
+
+function handleCorrect() {
+  inputLocked = true;
+  score++;
+  streak++;
+  if (streak > bestStreak) bestStreak = streak;
+  document.getElementById('score-val').textContent  = score;
+  document.getElementById('streak-val').textContent = streak;
+  setFeedback(STRINGS[lang].correct, 'correct');
+  flashTiles('answer-zone', 'flash-correct');
+  setTimeout(loadWord, 800);
+}
+
+function handleWrong() {
+  inputLocked = true;
+  retries++;
+  streak = 0;
+  document.getElementById('streak-val').textContent = 0;
+  setFeedback(STRINGS[lang].wrong, 'wrong');
+  flashTiles('answer-zone', 'flash-wrong');
+  setTimeout(() => {
+    if (retries >= 2) {
+      loadWord(); // skip after 2 retries
+    } else {
+      // snap tiles back to pool
+      poolOrder   = [...answerOrder, ...poolOrder];
+      answerOrder = [];
+      inputLocked = false;
+      renderTiles();
+      setFeedback('', '');
+    }
+  }, 800);
+}
+
+function skipWord() {
+  if (inputLocked) return;
+  streak = 0;
+  document.getElementById('streak-val').textContent = 0;
+  loadWord();
+}
+
+function flashTiles(zoneId, cls) {
+  const zone = document.getElementById(zoneId);
+  zone.querySelectorAll('.tile').forEach(t => {
+    t.classList.add(cls);
+  });
+}
+
+function setFeedback(text, type) {
+  const el = document.getElementById('feedback');
+  el.textContent = text;
+  el.className   = type;
+}
+
+function endGame() {
+  inputLocked = true;
+  showScreen('result');
+  const s = STRINGS[lang];
+  document.getElementById('result-heading').textContent = s.timesUp;
+  document.getElementById('result-sub').textContent     = score + ' ' + s.wordsSolved;
+  document.getElementById('res-score').textContent      = score;
+  document.getElementById('res-streak').textContent     = bestStreak;
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+buildCategoryGrid();
+applyStrings();
+</script>
+</body>
+</html>

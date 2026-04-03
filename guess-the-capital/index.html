@@ -206,6 +206,20 @@
       transition: transform 0.2s;
     }
     .play-again-btn:hover { transform: translateY(-2px); }
+
+    .lang-section { text-align: center; margin-bottom: 20px; }
+    .lang-btn {
+      padding: 8px 22px; border-radius: 99px;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06); color: #ccc;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer;
+      transition: all 0.2s; margin: 0 4px;
+    }
+    .lang-btn:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+    .lang-btn.active {
+      border-color: #14b8a6; background: rgba(20,184,166,0.15);
+      color: #5eead4; box-shadow: 0 0 12px rgba(20,184,166,0.3);
+    }
   </style>
 </head>
 <body>
@@ -216,15 +230,19 @@
 
   <!-- MENU -->
   <div id="menu">
-    <h2>Choose a region</h2>
-    <div class="continent-grid">
-      <button class="continent-btn all" onclick="startQuiz('all')">🌍 All Countries</button>
-      <button class="continent-btn" onclick="startQuiz('Africa')">🌍 Africa</button>
-      <button class="continent-btn" onclick="startQuiz('Asia')">🌏 Asia</button>
-      <button class="continent-btn" onclick="startQuiz('Europe')">🌍 Europe</button>
-      <button class="continent-btn" onclick="startQuiz('North America')">🌎 North America</button>
-      <button class="continent-btn" onclick="startQuiz('South America')">🌎 South America</button>
-      <button class="continent-btn" onclick="startQuiz('Oceania')">🌏 Oceania</button>
+    <div class="lang-section">
+      <button id="lang-en" class="lang-btn active" onclick="setLang('en')">🇬🇧 English</button>
+      <button id="lang-de" class="lang-btn"        onclick="setLang('de')">🇩🇪 Deutsch</button>
+    </div>
+    <h2 id="menu-heading">Choose a region</h2>
+    <div class="continent-grid" id="region-btns">
+      <button class="continent-btn all" onclick="startQuiz('all')" data-en="🌍 All Countries" data-de="🌍 Alle Länder">🌍 All Countries</button>
+      <button class="continent-btn" onclick="startQuiz('Africa')" data-en="🌍 Africa" data-de="🌍 Afrika">🌍 Africa</button>
+      <button class="continent-btn" onclick="startQuiz('Asia')" data-en="🌏 Asia" data-de="🌏 Asien">🌏 Asia</button>
+      <button class="continent-btn" onclick="startQuiz('Europe')" data-en="🌍 Europe" data-de="🌍 Europa">🌍 Europe</button>
+      <button class="continent-btn" onclick="startQuiz('North America')" data-en="🌎 North America" data-de="🌎 Nordamerika">🌎 North America</button>
+      <button class="continent-btn" onclick="startQuiz('South America')" data-en="🌎 South America" data-de="🌎 Südamerika">🌎 South America</button>
+      <button class="continent-btn" onclick="startQuiz('Oceania')" data-en="🌏 Oceania" data-de="🌏 Ozeanien">🌏 Oceania</button>
     </div>
   </div>
 
@@ -232,14 +250,14 @@
   <div id="quiz">
     <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
     <div class="score-bar">
-      <div><span class="label">Score: </span><span class="value correct-count" id="score">0</span></div>
-      <div><span class="label">Question: </span><span class="value" id="qnum">1/10</span></div>
-      <div><span class="label">Streak: </span><span class="value streak" id="streak">0</span></div>
+      <div><span class="label" id="lbl-score">Score: </span><span class="value correct-count" id="score">0</span></div>
+      <div><span class="label" id="lbl-question">Question: </span><span class="value" id="qnum">1/10</span></div>
+      <div><span class="label" id="lbl-streak">Streak: </span><span class="value streak" id="streak">0</span></div>
     </div>
     <div class="country-display">
       <img class="flag-img" id="flag-img" src="" alt="Country flag">
       <div class="country-name" id="country-name"></div>
-      <div class="question-label">What is the capital city?</div>
+      <div class="question-label" id="question-label">What is the capital city?</div>
     </div>
     <div class="options" id="options"></div>
   </div>
@@ -252,11 +270,48 @@
       <div class="percentage" id="final-pct">0%</div>
       <div class="best-streak" id="final-streak">Best streak: 0</div>
     </div>
-    <button class="play-again-btn" onclick="backToMenu()">Play Again</button>
+    <button class="play-again-btn" id="play-again-btn" onclick="backToMenu()">Play Again</button>
   </div>
 </div>
 
 <script>
+// ─── Language support ─────────────────────────────────────────────────────
+let language = 'en';
+
+const UI = {
+  en: { menu:"Choose a region", score:"Score: ", question:"Question: ", streak:"Streak: ", questionLabel:"What is the capital city?", playAgain:"Play Again", outOf: n => `out of ${n}`, bestStreak: n => `Best streak: ${n} 🔥`, pct: p => `${p}%` },
+  de: { menu:"Region wählen",   score:"Punkte: ", question:"Frage: ",   streak:"Serie: ",  questionLabel:"Was ist die Hauptstadt?",       playAgain:"Nochmal",    outOf: n => `von ${n}`,    bestStreak: n => `Beste Serie: ${n} 🔥`, pct: p => `${p}%` },
+};
+
+const DE_NAMES = {
+  "Algeria":"Algerien","Angola":"Angola","Benin":"Benin","Botswana":"Botswana","Burkina Faso":"Burkina Faso","Burundi":"Burundi","Cameroon":"Kamerun","Cape Verde":"Kap Verde","Central African Republic":"Zentralafrikanische Republik","Chad":"Tschad","Comoros":"Komoren","Congo":"Kongo","DR Congo":"DR Kongo","Djibouti":"Dschibuti","Egypt":"Ägypten","Equatorial Guinea":"Äquatorialguinea","Eritrea":"Eritrea","Eswatini":"Eswatini","Ethiopia":"Äthiopien","Gabon":"Gabun","Gambia":"Gambia","Ghana":"Ghana","Guinea":"Guinea","Guinea-Bissau":"Guinea-Bissau","Ivory Coast":"Elfenbeinküste","Kenya":"Kenia","Lesotho":"Lesotho","Liberia":"Liberia","Libya":"Libyen","Madagascar":"Madagaskar","Malawi":"Malawi","Mali":"Mali","Mauritania":"Mauretanien","Mauritius":"Mauritius","Morocco":"Marokko","Mozambique":"Mosambik","Namibia":"Namibia","Niger":"Niger","Nigeria":"Nigeria","Rwanda":"Ruanda","Senegal":"Senegal","Seychelles":"Seychellen","Sierra Leone":"Sierra Leone","Somalia":"Somalia","South Africa":"Südafrika","South Sudan":"Südsudan","Sudan":"Sudan","Tanzania":"Tansania","Togo":"Togo","Tunisia":"Tunesien","Uganda":"Uganda","Zambia":"Sambia","Zimbabwe":"Simbabwe",
+  "Afghanistan":"Afghanistan","Armenia":"Armenien","Azerbaijan":"Aserbaidschan","Bahrain":"Bahrain","Bangladesh":"Bangladesch","Bhutan":"Bhutan","Brunei":"Brunei","Cambodia":"Kambodscha","China":"China","Georgia":"Georgien","India":"Indien","Indonesia":"Indonesien","Iran":"Iran","Iraq":"Irak","Israel":"Israel","Japan":"Japan","Jordan":"Jordanien","Kazakhstan":"Kasachstan","Kuwait":"Kuwait","Kyrgyzstan":"Kirgisistan","Laos":"Laos","Lebanon":"Libanon","Malaysia":"Malaysia","Maldives":"Malediven","Mongolia":"Mongolei","Myanmar":"Myanmar","Nepal":"Nepal","North Korea":"Nordkorea","Oman":"Oman","Pakistan":"Pakistan","Philippines":"Philippinen","Qatar":"Katar","Saudi Arabia":"Saudi-Arabien","Singapore":"Singapur","South Korea":"Südkorea","Sri Lanka":"Sri Lanka","Syria":"Syrien","Taiwan":"Taiwan","Tajikistan":"Tadschikistan","Thailand":"Thailand","Timor-Leste":"Osttimor","Turkey":"Türkei","Turkmenistan":"Turkmenistan","UAE":"Vereinigte Arabische Emirate","Uzbekistan":"Usbekistan","Vietnam":"Vietnam","Yemen":"Jemen",
+  "Albania":"Albanien","Andorra":"Andorra","Austria":"Österreich","Belarus":"Weißrussland","Belgium":"Belgien","Bosnia and Herzegovina":"Bosnien und Herzegowina","Bulgaria":"Bulgarien","Croatia":"Kroatien","Cyprus":"Zypern","Czech Republic":"Tschechische Republik","Denmark":"Dänemark","Estonia":"Estland","Finland":"Finnland","France":"Frankreich","Germany":"Deutschland","Greece":"Griechenland","Hungary":"Ungarn","Iceland":"Island","Ireland":"Irland","Italy":"Italien","Kosovo":"Kosovo","Latvia":"Lettland","Liechtenstein":"Liechtenstein","Lithuania":"Litauen","Luxembourg":"Luxemburg","Malta":"Malta","Moldova":"Moldawien","Monaco":"Monaco","Montenegro":"Montenegro","Netherlands":"Niederlande","North Macedonia":"Nordmazedonien","Norway":"Norwegen","Poland":"Polen","Portugal":"Portugal","Romania":"Rumänien","Russia":"Russland","San Marino":"San Marino","Serbia":"Serbien","Slovakia":"Slowakei","Slovenia":"Slowenien","Spain":"Spanien","Sweden":"Schweden","Switzerland":"Schweiz","Ukraine":"Ukraine","United Kingdom":"Vereinigtes Königreich","Vatican City":"Vatikanstadt",
+  "Antigua and Barbuda":"Antigua und Barbuda","Bahamas":"Bahamas","Barbados":"Barbados","Belize":"Belize","Canada":"Kanada","Costa Rica":"Costa Rica","Cuba":"Kuba","Dominica":"Dominica","Dominican Republic":"Dominikanische Republik","El Salvador":"El Salvador","Grenada":"Grenada","Guatemala":"Guatemala","Haiti":"Haiti","Honduras":"Honduras","Jamaica":"Jamaika","Mexico":"Mexiko","Nicaragua":"Nicaragua","Panama":"Panama","Saint Kitts and Nevis":"St. Kitts und Nevis","Saint Lucia":"St. Lucia","Saint Vincent":"St. Vincent","Trinidad and Tobago":"Trinidad und Tobago","United States":"Vereinigte Staaten",
+  "Argentina":"Argentinien","Bolivia":"Bolivien","Brazil":"Brasilien","Chile":"Chile","Colombia":"Kolumbien","Ecuador":"Ecuador","Guyana":"Guyana","Paraguay":"Paraguay","Peru":"Peru","Suriname":"Surinam","Uruguay":"Uruguay","Venezuela":"Venezuela",
+  "Australia":"Australien","Fiji":"Fidschi","Kiribati":"Kiribati","Marshall Islands":"Marshallinseln","Micronesia":"Mikronesien","Nauru":"Nauru","New Zealand":"Neuseeland","Palau":"Palau","Papua New Guinea":"Papua-Neuguinea","Samoa":"Samoa","Solomon Islands":"Salomonen","Tonga":"Tonga","Tuvalu":"Tuvalu","Vanuatu":"Vanuatu"
+};
+
+function displayName(c) {
+  return language === 'de' ? (DE_NAMES[c.name] || c.name) : c.name;
+}
+
+function setLang(lang) {
+  language = lang;
+  document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+  document.getElementById('lang-de').classList.toggle('active', lang === 'de');
+  const U = UI[lang];
+  document.getElementById('menu-heading').textContent    = U.menu;
+  document.getElementById('lbl-score').textContent       = U.score;
+  document.getElementById('lbl-question').textContent    = U.question;
+  document.getElementById('lbl-streak').textContent      = U.streak;
+  document.getElementById('question-label').textContent  = U.questionLabel;
+  document.getElementById('play-again-btn').textContent  = U.playAgain;
+  document.querySelectorAll('#region-btns button').forEach(btn => {
+    btn.textContent = btn.dataset[lang];
+  });
+}
+
 const COUNTRIES = [
   // Africa
   {name:"Algeria",       code:"dz", continent:"Africa",        capital:"Algiers"},
@@ -497,8 +552,8 @@ function showQuestion() {
   document.getElementById('streak').textContent   = streak;
   document.getElementById('progress').style.width = `${(currentQ / totalQuestions) * 100}%`;
 
-  document.getElementById('flag-img').src         = `https://flagcdn.com/w320/${q.code}.png`;
-  document.getElementById('country-name').textContent = q.name;
+  document.getElementById('flag-img').src              = `https://flagcdn.com/w320/${q.code}.png`;
+  document.getElementById('country-name').textContent  = displayName(q);
 
   // Build 4 options: 1 correct + 3 wrong (prefer same continent for harder choices)
   const sameContinent = COUNTRIES.filter(c => c.name !== q.name && c.continent === q.continent);
@@ -553,10 +608,11 @@ function showResult() {
   document.getElementById('quiz').style.display   = 'none';
   document.getElementById('result').style.display = 'block';
   const pct = Math.round((score / totalQuestions) * 100);
+  const U = UI[language];
   document.getElementById('final-score').textContent  = score;
-  document.getElementById('final-total').textContent  = `out of ${totalQuestions}`;
-  document.getElementById('final-pct').textContent    = `${pct}%`;
-  document.getElementById('final-streak').textContent = `Best streak: ${bestStreak} 🔥`;
+  document.getElementById('final-total').textContent  = U.outOf(totalQuestions);
+  document.getElementById('final-pct').textContent    = U.pct(pct);
+  document.getElementById('final-streak').textContent = U.bestStreak(bestStreak);
 }
 
 function backToMenu() {

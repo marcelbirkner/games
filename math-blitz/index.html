@@ -293,6 +293,20 @@
       transition: transform 0.2s;
     }
     .play-again-btn:hover { transform: translateY(-2px); }
+
+    .lang-section { text-align: center; margin-bottom: 20px; }
+    .lang-btn {
+      padding: 8px 22px; border-radius: 99px;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06); color: #ccc;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer;
+      transition: all 0.2s; margin: 0 4px;
+    }
+    .lang-btn:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+    .lang-btn.active {
+      border-color: #6366f1; background: rgba(99,102,241,0.15);
+      color: #a5b4fc; box-shadow: 0 0 12px rgba(99,102,241,0.3);
+    }
   </style>
 </head>
 <body>
@@ -303,7 +317,11 @@
 
   <!-- MENU -->
   <div id="menu">
-    <h2>Choose your age group</h2>
+    <div class="lang-section">
+      <button id="lang-en" class="lang-btn active" onclick="setLang('en')">🇬🇧 English</button>
+      <button id="lang-de" class="lang-btn"        onclick="setLang('de')">🇩🇪 Deutsch</button>
+    </div>
+    <h2 id="menu-heading">Choose your age group</h2>
     <div class="age-grid">
 
       <div class="age-card" style="--color:#34d399" onclick="startGame('little')">
@@ -340,7 +358,7 @@
   <!-- COUNTDOWN -->
   <div id="countdown">
     <div class="countdown-number" id="countdown-num">3</div>
-    <div class="countdown-label">Get ready!</div>
+    <div class="countdown-label" id="countdown-label">Get ready!</div>
   </div>
 
   <!-- QUIZ -->
@@ -348,7 +366,7 @@
     <div class="timer-section">
       <div class="timer-row">
         <div class="timer-display" id="timer-display">60</div>
-        <div class="score-display">Score: <span id="score">0</span></div>
+        <div class="score-display"><span id="score-label">Score:</span> <span id="score">0</span></div>
       </div>
       <div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div>
     </div>
@@ -370,24 +388,102 @@
       <div class="result-stats">
         <div class="stat-box">
           <div class="stat-value" style="color:#10b981" id="res-score">0</div>
-          <div class="stat-label">Correct</div>
+          <div class="stat-label" id="stat-correct">Correct</div>
         </div>
         <div class="stat-box">
           <div class="stat-value" style="color:#ef4444" id="res-wrong">0</div>
-          <div class="stat-label">Wrong</div>
+          <div class="stat-label" id="stat-wrong">Wrong</div>
         </div>
         <div class="stat-box">
           <div class="stat-value" style="color:#f59e0b" id="res-streak">0</div>
-          <div class="stat-label">Best Streak</div>
+          <div class="stat-label" id="stat-streak">Best Streak</div>
         </div>
       </div>
     </div>
-    <button class="play-again-btn" onclick="backToMenu()">Play Again</button>
+    <button class="play-again-btn" id="play-again-btn" onclick="backToMenu()">Play Again</button>
   </div>
 
 </div>
 
 <script>
+// ─── Language support ─────────────────────────────────────────────────────
+const STRINGS = {
+  en: {
+    subtitle:    "60 seconds. How many can you solve?",
+    menuHeading: "Choose your age group",
+    getReady:    "Get ready!",
+    scoreLabel:  "Score:",
+    streak:      n => `🔥 ${n} in a row!`,
+    correct:    "Correct",
+    wrong:      "Wrong",
+    bestStreak: "Best Streak",
+    playAgain:  "Play Again",
+    cards: [
+      { title:"Little Stars", ages:"Ages 5 – 7",   desc:"Counting, adding & taking away small numbers" },
+      { title:"Juniors",      ages:"Ages 8 – 10",  desc:"Bigger sums, times tables & simple division" },
+      { title:"Champions",    ages:"Ages 11 – 13", desc:"Full times tables, negatives & two-step problems" },
+      { title:"Masters",      ages:"Ages 14+",     desc:"Percentages, powers, fractions & order of operations" },
+    ],
+    grades: [
+      { min:90, emoji:'🏆', title:"Perfect! You're a Math genius!" },
+      { min:70, emoji:'🌟', title:"Brilliant! Superstar performance!" },
+      { min:50, emoji:'😊', title:"Great work! Keep it up!" },
+      { min:30, emoji:'💪', title:"Good effort! Practice makes perfect!" },
+      { min:0,  emoji:'🎯', title:"Keep going — you're learning!" },
+    ],
+  },
+  de: {
+    subtitle:    "60 Sekunden. Wie viele schaffst du?",
+    menuHeading: "Altersgruppe wählen",
+    getReady:    "Fertig machen!",
+    scoreLabel:  "Punkte:",
+    streak:      n => `🔥 ${n} hintereinander!`,
+    correct:    "Richtig",
+    wrong:      "Falsch",
+    bestStreak: "Beststreak",
+    playAgain:  "Nochmal spielen",
+    cards: [
+      { title:"Kleine Sterne", ages:"Alter 5 – 7",   desc:"Zählen, addieren & subtrahieren" },
+      { title:"Einsteiger",    ages:"Alter 8 – 10",  desc:"Größere Zahlen, Einmaleins & Division" },
+      { title:"Champions",     ages:"Alter 11 – 13", desc:"Vollständiges Einmaleins, negative Zahlen" },
+      { title:"Profis",        ages:"Alter 14+",     desc:"Prozent, Potenzen, Brüche & Klammerrechnung" },
+    ],
+    grades: [
+      { min:90, emoji:'🏆', title:"Perfekt! Du bist ein Mathe-Genie!" },
+      { min:70, emoji:'🌟', title:"Brilliant! Superstar!" },
+      { min:50, emoji:'😊', title:"Toll gemacht! Weiter so!" },
+      { min:30, emoji:'💪', title:"Guter Einsatz! Übung macht den Meister!" },
+      { min:0,  emoji:'🎯', title:"Weiter so — du lernst!" },
+    ],
+  },
+};
+
+let language = 'en';
+
+function setLang(lang) {
+  language = lang;
+  document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+  document.getElementById('lang-de').classList.toggle('active', lang === 'de');
+  applyStrings();
+}
+
+function applyStrings() {
+  const S = STRINGS[language];
+  document.querySelector('.subtitle').textContent        = S.subtitle;
+  document.getElementById('menu-heading').textContent    = S.menuHeading;
+  document.getElementById('countdown-label').textContent = S.getReady;
+  document.getElementById('score-label').textContent     = S.scoreLabel;
+  document.getElementById('stat-correct').textContent    = S.correct;
+  document.getElementById('stat-wrong').textContent      = S.wrong;
+  document.getElementById('stat-streak').textContent     = S.bestStreak;
+  document.getElementById('play-again-btn').textContent  = S.playAgain;
+  document.querySelectorAll('.age-card').forEach((card, i) => {
+    card.querySelector('.card-title').textContent = S.cards[i].title;
+    card.querySelector('.card-ages').textContent  = S.cards[i].ages;
+    card.querySelector('.card-desc').textContent  = S.cards[i].desc;
+  });
+}
+
 // ─── Question generators ───────────────────────────────────────────────────
 
 function rand(min, max) {
@@ -617,13 +713,34 @@ function updateTimerDisplay() {
 
 let currentQuestion;
 
+function translateQuestionText(q) {
+  return q
+    .replace(/^Double (\d+) = \?$/, (_, n) => `Verdoppele ${n} = ?`)
+    .replace(/^Half of (\d+) = \?$/, (_, n) => `Hälfte von ${n} = ?`)
+    .replace(/^Bigger of (\d+) and (\d+)\?$/, (_, a, b) => `Größer: ${a} oder ${b}?`);
+}
+
 function nextQuestion() {
   answered = false;
   currentQuestion = generateQuestion(level);
   const choices = generateChoices(currentQuestion.answer, level);
+  const questionText = language === 'de'
+    ? translateQuestionText(currentQuestion.question)
+    : currentQuestion.question;
 
-  document.getElementById('q-type').textContent = currentQuestion.type;
-  document.getElementById('q-text').textContent = currentQuestion.question;
+  const TYPE_DE = {
+    'Addition':'Addition', 'Subtraction':'Subtraktion', 'Multiply':'Multiplizieren',
+    'Division':'Division', 'Counting':'Zählen', 'Compare':'Vergleichen',
+    'Doubles':'Verdoppeln', 'Half':'Halbieren', 'Missing ＋':'Fehlende +',
+    'Missing ×':'Fehlende ×', 'Two-step':'Zweistufig', 'Squares':'Quadratzahlen',
+    'Negatives':'Negative Zahlen', 'Percent':'Prozent', 'Powers':'Potenzen',
+    '√ Root':'√ Wurzel', '∛ Root':'∛ Wurzel', 'BODMAS':'Klammerrechnung',
+    'Fractions':'Brüche',
+  };
+  document.getElementById('q-type').textContent = language === 'de'
+    ? (TYPE_DE[currentQuestion.type] || currentQuestion.type)
+    : currentQuestion.type;
+  document.getElementById('q-text').textContent = questionText;
 
   const grid = document.getElementById('answers');
   grid.innerHTML = '';
@@ -651,7 +768,7 @@ function handleAnswer(btn, value) {
     if (streak > bestStreak) bestStreak = streak;
     document.getElementById('score').textContent = score;
     const streakBar = document.getElementById('streak-bar');
-    streakBar.textContent = streak >= 3 ? `🔥 ${streak} in a row!` : '';
+    streakBar.textContent = streak >= 3 ? STRINGS[language].streak(streak) : '';
   } else {
     btn.classList.add('wrong');
     wrongCount++;
@@ -672,13 +789,7 @@ function endGame() {
   const total = score + wrongCount;
   const pct = total > 0 ? Math.round((score / total) * 100) : 0;
 
-  const grades = [
-    { min:90, emoji:'🏆', title:'Perfect! You\'re a Math genius!' },
-    { min:70, emoji:'🌟', title:'Brilliant! Superstar performance!' },
-    { min:50, emoji:'😊', title:'Great work! Keep it up!' },
-    { min:30, emoji:'💪', title:'Good effort! Practice makes perfect!' },
-    { min:0,  emoji:'🎯', title:'Keep going — you\'re learning!' },
-  ];
+  const grades = STRINGS[language].grades;
   const grade = grades.find(g => pct >= g.min);
 
   document.getElementById('result-emoji').textContent = grade.emoji;

@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hangman</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      min-height: 100vh;
+      color: #fff;
+      padding: 24px 16px 60px;
+    }
+
+    .container { max-width: 600px; margin: 0 auto; }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 16px;
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 0.9rem;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    .back-link:hover { opacity: 1; }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 6px;
+      background: linear-gradient(90deg, #f59e0b, #ef4444, #f97316);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      text-align: center;
+      color: #a5b4fc;
+      margin-bottom: 32px;
+      font-size: 0.95rem;
+    }
+
+    /* ── MENU ── */
+    #menu { text-align: center; }
+    .menu-section { margin-bottom: 28px; }
+    .menu-section h2 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94a3b8;
+      margin-bottom: 14px;
+    }
+
+    .btn-group { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+
+    .lang-btn {
+      padding: 10px 28px;
+      border-radius: 99px;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+      color: #ccc;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .lang-btn:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+    .lang-btn.active {
+      border-color: #f59e0b;
+      background: rgba(245,158,11,0.15);
+      color: #fcd34d;
+      box-shadow: 0 0 12px rgba(245,158,11,0.3);
+    }
+
+    .cat-btn {
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: 2px solid rgba(245,158,11,0.35);
+      background: rgba(245,158,11,0.08);
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cat-btn:hover, .cat-btn.active {
+      border-color: #f59e0b;
+      background: rgba(245,158,11,0.22);
+      color: #fff;
+    }
+    .cat-btn.active { box-shadow: 0 0 12px rgba(245,158,11,0.4); }
+
+    .start-btn {
+      margin-top: 8px;
+      padding: 16px 48px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .start-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+    /* ── GAME ── */
+    #game { display: none; }
+
+    /* Gallows */
+    .gallows-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .gallows-wrap svg {
+      filter: drop-shadow(0 4px 16px rgba(0,0,0,0.4));
+    }
+
+    /* Wrong guesses */
+    .wrong-wrap {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .wrong-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+    .wrong-letters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      min-height: 32px;
+      align-items: center;
+    }
+    .wrong-letter {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.5);
+      color: #f87171;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+    .wrong-count {
+      font-size: 0.8rem;
+      color: #f87171;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    /* Word display */
+    .word-slots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+    .letter-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .letter-char {
+      font-size: 1.8rem;
+      font-weight: 900;
+      min-width: 28px;
+      text-align: center;
+      min-height: 36px;
+      line-height: 36px;
+      color: #f59e0b;
+      transition: transform 0.2s;
+    }
+    .letter-char.revealed { animation: pop 0.25s ease; }
+    @keyframes pop {
+      0%   { transform: scale(1.4); }
+      100% { transform: scale(1); }
+    }
+    .letter-line {
+      width: 28px;
+      height: 3px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 2px;
+    }
+    .letter-line.active { background: #f59e0b; }
+
+    /* On-screen keyboard */
+    .keyboard {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .keyboard-row {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .key-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      border: 2px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.08);
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .key-btn:hover:not(:disabled) {
+      border-color: #f59e0b;
+      background: rgba(245,158,11,0.2);
+      color: #fff;
+    }
+    .key-btn:disabled {
+      cursor: default;
+      opacity: 0.35;
+    }
+    .key-btn.correct {
+      border-color: #22c55e;
+      background: rgba(34,197,94,0.2);
+      color: #86efac;
+    }
+    .key-btn.wrong {
+      border-color: #ef4444;
+      background: rgba(239,68,68,0.15);
+      color: #fca5a5;
+    }
+
+    /* ── RESULT ── */
+    #result { display: none; text-align: center; }
+
+    .result-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      padding: 36px 28px;
+      margin-bottom: 20px;
+    }
+    .result-title {
+      font-size: 2rem;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+    .result-title.win { color: #34d399; }
+    .result-title.lose { color: #f87171; }
+
+    .result-word-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+    .result-word {
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: 6px;
+      color: #f59e0b;
+      margin-bottom: 28px;
+    }
+
+    .score-row {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+    .score-box {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 16px 28px;
+    }
+    .score-val {
+      font-size: 2rem;
+      font-weight: 900;
+    }
+    .score-val.won { color: #34d399; }
+    .score-val.lost { color: #f87171; }
+    .score-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .result-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .next-btn {
+      padding: 14px 36px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .next-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+    .menu-btn {
+      padding: 14px 36px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.07);
+      color: #e2e8f0;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .menu-btn:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+
+    /* Confetti burst helper */
+    .confetti-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      animation: confettiFall var(--dur) ease-in forwards;
+      top: -20px;
+    }
+    @keyframes confettiFall {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a class="back-link" href="../index.html">← Back to Arcade</a>
+
+  <h1>🪓 Hangman</h1>
+  <p class="subtitle" id="subtitle">Guess the word before the man is hanged!</p>
+
+  <!-- ── MENU ── -->
+  <div id="menu">
+    <div class="menu-section">
+      <h2 id="lbl-language">Language</h2>
+      <div class="btn-group">
+        <button class="lang-btn active" data-lang="en" onclick="setLang('en')">🇬🇧 English</button>
+        <button class="lang-btn"        data-lang="de" onclick="setLang('de')">🇩🇪 Deutsch</button>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <h2 id="lbl-category">Category</h2>
+      <div class="btn-group" id="cat-buttons"></div>
+    </div>
+
+    <button class="start-btn" id="start-btn" onclick="startGame()" disabled>
+      <span id="lbl-start">Start Game</span>
+    </button>
+  </div>
+
+  <!-- ── GAME ── -->
+  <div id="game">
+    <!-- Gallows SVG -->
+    <div class="gallows-wrap">
+      <svg id="gallows-svg" viewBox="0 0 160 160" width="220" height="220" xmlns="http://www.w3.org/2000/svg">
+        <!-- Structure (always visible) -->
+        <line x1="10" y1="150" x2="150" y2="150" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+        <line x1="40" y1="150" x2="40"  y2="15"  stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+        <line x1="40" y1="15"  x2="110" y2="15"  stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+        <line x1="110" y1="15" x2="110" y2="35"  stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+        <!-- Body parts (revealed progressively) -->
+        <circle id="part-head"       cx="110" cy="48" r="13"  stroke="#e2e8f0" stroke-width="3" fill="none" style="display:none"/>
+        <line   id="part-body"       x1="110" y1="61" x2="110" y2="105" stroke="#e2e8f0" stroke-width="3" stroke-linecap="round" style="display:none"/>
+        <line   id="part-arm-left"   x1="110" y1="75" x2="88"  y2="98"  stroke="#e2e8f0" stroke-width="3" stroke-linecap="round" style="display:none"/>
+        <line   id="part-arm-right"  x1="110" y1="75" x2="132" y2="98"  stroke="#e2e8f0" stroke-width="3" stroke-linecap="round" style="display:none"/>
+        <line   id="part-leg-left"   x1="110" y1="105" x2="88" y2="135" stroke="#e2e8f0" stroke-width="3" stroke-linecap="round" style="display:none"/>
+        <line   id="part-leg-right"  x1="110" y1="105" x2="132" y2="135" stroke="#e2e8f0" stroke-width="3" stroke-linecap="round" style="display:none"/>
+      </svg>
+    </div>
+
+    <!-- Wrong letters -->
+    <div class="wrong-wrap">
+      <div class="wrong-label" id="lbl-wrong">Wrong guesses</div>
+      <div class="wrong-letters" id="wrong-letters"></div>
+      <div class="wrong-count" id="wrong-count">0 / 6</div>
+    </div>
+
+    <!-- Word slots -->
+    <div class="word-slots" id="word-slots"></div>
+
+    <!-- Keyboard -->
+    <div class="keyboard" id="keyboard"></div>
+  </div>
+
+  <!-- ── RESULT ── -->
+  <div id="result">
+    <div class="result-card">
+      <div class="result-title" id="result-title"></div>
+      <div class="result-word-label" id="lbl-word-was">The word was:</div>
+      <div class="result-word" id="result-word"></div>
+      <div class="score-row">
+        <div class="score-box">
+          <div class="score-val won" id="score-won">0</div>
+          <div class="score-label" id="lbl-won">Won</div>
+        </div>
+        <div class="score-box">
+          <div class="score-val lost" id="score-lost">0</div>
+          <div class="score-label" id="lbl-lost">Lost</div>
+        </div>
+      </div>
+      <div class="result-btns">
+        <button class="next-btn" onclick="nextWord()" id="btn-next">Next Word</button>
+        <button class="menu-btn" onclick="goMenu()"  id="btn-menu">Menu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ─── DATA ─────────────────────────────────────────────────────────────── */
+  const CATEGORIES = {
+    en: [
+      { key:'animals',   label:'🐾 Animals'  },
+      { key:'countries', label:'🌍 Countries' },
+      { key:'food',      label:'🍕 Food'      },
+      { key:'nature',    label:'🌿 Nature'    },
+      { key:'cities',    label:'🏙️ Cities'    },
+    ],
+    de: [
+      { key:'de_tiere',   label:'🐾 Tiere'   },
+      { key:'de_laender', label:'🌍 Länder'  },
+      { key:'de_essen',   label:'🍕 Essen'   },
+      { key:'de_natur',   label:'🌿 Natur'   },
+      { key:'de_staedte', label:'🏙️ Städte'  },
+    ],
+  };
+
+  const WORD_LISTS = {
+    animals: ["AARDVARK","ALBATROSS","ALLIGATOR","ANACONDA","ANTELOPE","ARMADILLO","AXOLOTL","BABOON","BADGER","BEAR","BEAVER","BISON","BOAR","BUFFALO","BUTTERFLY","BUZZARD","CAMEL","CARDINAL","CHEETAH","CHIPMUNK","COBRA","COYOTE","CRANE","CROCODILE","CROW","DEER","DINGO","DOLPHIN","DONKEY","DRAGONFLY","EAGLE","EEL","ELEPHANT","EMU","ERMINE","FALCON","FERRET","FINCH","FLAMINGO","FOX","FROG","GECKO","GIRAFFE","GORILLA","GROUSE","HAMSTER","HAWK","HEDGEHOG","HERON","HIPPO","HYENA","IGUANA","IMPALA","JAGUAR","JELLYFISH","KANGAROO","KITE","KOALA","KOOKABURRA","LEMUR","LION","LIZARD","LLAMA","LOBSTER","LYNX","MEERKAT","MOLE","MONKEY","MOOSE","MOUSE","NARWHAL","NEWT","NIGHTINGALE","OCELOT","OCTOPUS","ORANGUTAN","OSTRICH","OTTER","OWL","PANDA","PARROT","PELICAN","PENGUIN","PIRANHA","PLATYPUS","PORCUPINE","PUMA","QUOKKA","RABBIT","RACCOON","RAVEN","RHINOCEROS","ROBIN","SALAMANDER","SHARK","SNAKE","SPARROW","SQUIRREL","STORK","SWAN","TARANTULA","TIGER","TORTOISE","TOUCAN","TURKEY","VULTURE","VIPER","WALRUS","WHALE","WOLF","WOLVERINE","WOMBAT","WREN","YAK","ZEBRA"],
+    countries: ["AFGHANISTAN","ALBANIA","ALGERIA","ANGOLA","ARGENTINA","ARMENIA","AUSTRALIA","AUSTRIA","AZERBAIJAN","BAHRAIN","BANGLADESH","BELARUS","BELGIUM","BELIZE","BOLIVIA","BRAZIL","BULGARIA","CAMBODIA","CAMEROON","CANADA","CHILE","CHINA","COLOMBIA","CROATIA","CUBA","CYPRUS","DENMARK","ECUADOR","EGYPT","ENGLAND","ETHIOPIA","FINLAND","FRANCE","GEORGIA","GERMANY","GHANA","GREECE","GUATEMALA","GUINEA","HAITI","HUNGARY","ICELAND","INDIA","INDONESIA","IRAN","IRAQ","IRELAND","ISRAEL","ITALY","JAMAICA","JAPAN","JORDAN","KAZAKHSTAN","KENYA","KUWAIT","LAOS","LATVIA","LEBANON","LIBYA","LITHUANIA","LUXEMBOURG","MADAGASCAR","MALAYSIA","MALI","MEXICO","MOLDOVA","MONGOLIA","MOROCCO","MOZAMBIQUE","MYANMAR","NAMIBIA","NEPAL","NETHERLANDS","NICARAGUA","NIGER","NIGERIA","NORWAY","OMAN","PAKISTAN","PANAMA","PARAGUAY","PERU","PHILIPPINES","POLAND","PORTUGAL","QATAR","ROMANIA","RUSSIA","RWANDA","SENEGAL","SERBIA","SOMALIA","SPAIN","SUDAN","SWEDEN","SWITZERLAND","SYRIA","TAIWAN","TAJIKISTAN","TANZANIA","THAILAND","TUNISIA","TURKEY","UGANDA","UKRAINE","URUGUAY","VENEZUELA","VIETNAM","WALES","YEMEN","ZAMBIA","ZIMBABWE"],
+    food: ["ALMOND","APPLE","APRICOT","ASPARAGUS","AVOCADO","BANANA","BASIL","BEAN","BEET","BREAD","BROCCOLI","BROWNIE","BUTTER","CABBAGE","CARAMEL","CARROT","CHEESE","CHERRY","CHICKEN","CHILI","CHOCOLATE","CINNAMON","COCONUT","COFFEE","COOKIE","CORN","CREAM","CROISSANT","DATE","DILL","DUMPLING","EGG","EGGPLANT","FIG","FISH","FLOUR","FUDGE","GARLIC","GINGER","GRAPE","GUAVA","HAZELNUT","HONEY","HUMMUS","JAM","JELLY","KALE","KIWI","LEMON","LETTUCE","LIME","LYCHEE","LASAGNE","MANGO","MELON","MINT","MUSHROOM","MUSTARD","MACARON","NOODLE","NUTMEG","OATS","OLIVE","ONION","ORANGE","OREGANO","PAPAYA","PAPRIKA","PARSLEY","PEACH","PEAR","PEPPER","PINEAPPLE","PLUM","POTATO","PRETZEL","PANCAKE","QUINOA","RADISH","RAISIN","RASPBERRY","RICE","ROSEMARY","RHUBARB","SAGE","SALMON","SALT","SHRIMP","SPINACH","STRAWBERRY","SUGAR","TAMARIND","THYME","TOFU","TOMATO","TRUFFLE","TUNA","TURNIP","VANILLA","WALNUT","WATERMELON","WHEAT","WAFFLE","YAM","YOGURT","ZUCCHINI"],
+    nature: ["ARCTIC","AURORA","AVALANCHE","ATOLL","BAY","BEACH","BLIZZARD","BOULDER","BOG","CANYON","CAVE","CLIFF","CLOUD","COAST","CORAL","CREEK","CRATER","CURRENT","DELTA","DESERT","DUNE","DROUGHT","EARTHQUAKE","ESTUARY","EROSION","FJORD","FLOOD","FOREST","FOUNTAIN","FOG","GEYSER","GLACIER","GORGE","GROVE","GULF","HURRICANE","HILL","HAIL","ICEBERG","ISLAND","INLET","JUNGLE","LAGOON","LAKE","LAVA","LIGHTNING","MEADOW","MOUNTAIN","MARSH","MONSOON","MESA","OASIS","OCEAN","PENINSULA","PLATEAU","PRAIRIE","RAINFOREST","RAVINE","REEF","RIVER","ROCK","RAPIDS","SAVANNA","SEA","SPRING","STORM","STREAM","SWAMP","STRAIT","TIDE","TORNADO","TUNDRA","TAIGA","VALLEY","VOLCANO","WATERFALL","WETLAND","WIND","WAVE"],
+    cities: ["AMSTERDAM","ANKARA","ATHENS","ACCRA","ALGIERS","AUSTIN","BANGKOK","BARCELONA","BEIJING","BEIRUT","BELGRADE","BERLIN","BOGOTA","BRUSSELS","BUCHAREST","BUDAPEST","CAIRO","CARACAS","CHICAGO","COLOMBO","DELHI","DHAKA","DUBAI","DUBLIN","EDINBURGH","FRANKFURT","HAMBURG","HANOI","HAVANA","HELSINKI","HOUSTON","ISTANBUL","JAKARTA","JOHANNESBURG","KABUL","KARACHI","KHARTOUM","KINSHASA","KYIV","LAGOS","LAHORE","LIMA","LISBON","LONDON","LUANDA","LUSAKA","MADRID","MANILA","MELBOURNE","MONTREAL","MOSCOW","MUMBAI","NAIROBI","OSLO","PARIS","PRAGUE","PYONGYANG","ROME","ROTTERDAM","SEOUL","SHANGHAI","SINGAPORE","STOCKHOLM","SYDNEY","TAIPEI","TBILISI","TEHRAN","TOKYO","TORONTO","VIENNA","VILNIUS","WARSAW","YEREVAN","ZAGREB","ZURICH"],
+    de_tiere: ["ADLER","AMEISE","AXOLOTL","BIBER","BIENE","DACHS","DELFIN","EICHHORNCHEN","ELEFANT","ENTE","FALKE","FISCH","FROSCH","FUCHS","GECKO","GEPARD","GIRAFFE","GORILLA","HASE","HUND","HYAENE","IGEL","JAGUAR","KATZE","KOALA","KROKODIL","LIBELLE","LOEWE","LUCHS","MARDER","MAUS","NASHORN","NILPFERD","OTTER","PAPAGEI","PFERD","PINGUIN","RABE","RATTE","SCHAF","SCHLANGE","SCHMETTERLING","SEEHUND","SPINNE","STORCH","TIGER","TINTENFISCH","UHU","VOGEL","WASCHBAER","WOLF","ZEBRA","ZIEGE"],
+    de_laender: ["AEGYPTEN","AETHIOPIEN","ALBANIEN","ALGERIEN","ANGOLA","ARGENTINIEN","AUSTRALIEN","BELGIEN","BOLIVIEN","BRASILIEN","BULGARIEN","CHILE","CHINA","DAENEMARK","DEUTSCHLAND","ECUADOR","ENGLAND","FINNLAND","FRANKREICH","GEORGIEN","GHANA","GRIECHENLAND","GUATEMALA","INDIEN","INDONESIEN","IRAK","IRAN","IRLAND","ISLAND","ISRAEL","ITALIEN","JAMAIKA","JAPAN","JORDANIEN","KAMERUN","KANADA","KENIA","KOLUMBIEN","KROATIEN","KUBA","LAOS","LETTLAND","LIBYEN","LITAUEN","LUXEMBURG","MALI","MEXIKO","MOLDAWIEN","MONGOLEI","MAROKKO","NAMIBIA","NEPAL","NIEDERLANDE","NIGERIA","NORWEGEN","OMAN","PAKISTAN","PANAMA","PERU","PHILIPPINEN","POLEN","PORTUGAL","RUMAENIEN","RUSSLAND","RUANDA","SAMBIA","SCHWEDEN","SERBIEN","SIMBABWE","SOMALIA","SPANIEN","SUDAN","SYRIEN","TAIWAN","TANSANIA","THAILAND","TUNESIEN","TUERKEI","UGANDA","UKRAINE","UNGARN","URUGUAY","USBEKISTAN","VENEZUELA","VIETNAM","WALES","JEMEN"],
+    de_essen: ["APFEL","ARTISCHOCKE","AVOCADO","BANANE","BIRNE","BOHNE","BROCCOLI","BROT","BUTTER","DATTEL","EI","ERBSE","FEIGE","FISCH","FLEISCH","GEMUESE","GURKE","HONIG","INGWER","JOGHURT","KAROTTE","KARTOFFEL","KAESE","KIRSCHE","KNOBLAUCH","KOHL","KUCHEN","LACHS","LAUCH","LINSE","MAIS","MANGO","MELONE","MILCH","NUDELN","NUSS","OBST","OLIVE","ORANGE","PFIRSICH","PFLAUME","PILZ","PIZZA","QUARK","RADIESCHEN","REIS","ROSENKOHL","ROSINE","SALAT","SALZ","SCHINKEN","SCHOKOLADE","SENF","SPINAT","SUPPE","THYMIAN","TOMATE","VANILLE","WASSERMELONE","WEIZEN","WURST","ZITRONE","ZUCCHINI","ZWIEBEL"],
+    de_natur: ["ALPEN","AUEN","BACH","BERG","BODEN","DELTA","DUENE","EBENE","EIS","FELS","FLUSS","GEBIRGE","GIPFEL","GLETSCHER","HUEGEL","INSEL","KANAL","KLIPPE","KUESTE","LANDSCHAFT","LAVA","MEER","MONSUN","MOOR","NEBEL","OASE","PLATEAU","REGEN","RIFF","SCHNEE","SEE","STEPPE","STURM","TAL","TAIGA","TORNADO","WALD","WASSER","WELLE","WUESTE"],
+    de_staedte: ["AACHEN","AUGSBURG","BERLIN","BIELEFELD","BOCHUM","BONN","BRAUNSCHWEIG","BREMEN","CHEMNITZ","DORTMUND","DRESDEN","DUISBURG","DUESSELDORF","ERFURT","ESSEN","FRANKFURT","GELSENKIRCHEN","HAMBURG","HANNOVER","INGOLSTADT","JENA","KARLSRUHE","KASSEL","KIEL","KOELN","KOBLENZ","LEIPZIG","LUDWIGSHAFEN","MAGDEBURG","MAINZ","MANNHEIM","MUENCHEN","MUENSTER","NUERNBERG","OBERHAUSEN","REGENSBURG","ROSTOCK","SAARBRUECKEN","STUTTGART","ULM","WIESBADEN","WUPPERTAL","WUERZBURG","WIEN","GRAZ","LINZ","SALZBURG","INNSBRUCK","ZUERICH","BASEL","BERN","LUZERN","LAUSANNE","GENF"],
+  };
+
+  const STRINGS = {
+    en: {
+      subtitle:   'Guess the word before the man is hanged!',
+      language:   'Language',
+      category:   'Category',
+      start:      'Start Game',
+      wrong:      'Wrong guesses',
+      winTitle:   'You got it! 🎉',
+      loseTitle:  'Hard luck! 💀',
+      wordWas:    'The word was:',
+      next:       'Next Word',
+      menu:       'Menu',
+      won:        'Won',
+      lost:       'Lost',
+    },
+    de: {
+      subtitle:   'Rate das Wort bevor der Mann gehängt wird!',
+      language:   'Sprache',
+      category:   'Kategorie',
+      start:      'Spiel starten',
+      wrong:      'Falsche Buchstaben',
+      winTitle:   'Richtig! 🎉',
+      loseTitle:  'Schade! 💀',
+      wordWas:    'Das Wort war:',
+      next:       'Nächstes Wort',
+      menu:       'Menü',
+      won:        'Gewonnen',
+      lost:       'Verloren',
+    },
+  };
+
+  const BODY_PARTS = [
+    'part-head', 'part-body', 'part-arm-left', 'part-arm-right',
+    'part-leg-left', 'part-leg-right'
+  ];
+  const MAX_WRONG = 6;
+  const KB_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
+
+  /* ─── STATE ────────────────────────────────────────────────────────────── */
+  let lang        = 'en';
+  let selectedCat = null;
+  let currentWord = '';
+  let guessed     = new Set();
+  let wrongCount  = 0;
+  let score       = { won: 0, lost: 0 };
+  let gameOver    = false;
+
+  /* ─── INIT ─────────────────────────────────────────────────────────────── */
+  function applyStrings() {
+    const s = STRINGS[lang];
+    document.getElementById('subtitle').textContent       = s.subtitle;
+    document.getElementById('lbl-language').textContent   = s.language;
+    document.getElementById('lbl-category').textContent   = s.category;
+    document.getElementById('lbl-start').textContent      = s.start;
+    document.getElementById('lbl-wrong').textContent      = s.wrong;
+    document.getElementById('lbl-word-was').textContent   = s.wordWas;
+    document.getElementById('btn-next').textContent       = s.next;
+    document.getElementById('btn-menu').textContent       = s.menu;
+    document.getElementById('lbl-won').textContent        = s.won;
+    document.getElementById('lbl-lost').textContent       = s.lost;
+  }
+
+  function setLang(l) {
+    lang = l;
+    document.documentElement.lang = l;
+    document.querySelectorAll('.lang-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.lang === l)
+    );
+    selectedCat = null;
+    buildCatButtons();
+    document.getElementById('start-btn').disabled = true;
+    applyStrings();
+  }
+
+  function buildCatButtons() {
+    const wrap = document.getElementById('cat-buttons');
+    wrap.innerHTML = '';
+    CATEGORIES[lang].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'cat-btn';
+      btn.dataset.key = c.key;
+      btn.textContent = c.label;
+      btn.onclick = () => selectCat(c.key);
+      wrap.appendChild(btn);
+    });
+  }
+
+  function selectCat(key) {
+    selectedCat = key;
+    document.querySelectorAll('.cat-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.key === key)
+    );
+    document.getElementById('start-btn').disabled = false;
+  }
+
+  /* ─── GAME START ────────────────────────────────────────────────────────── */
+  function startGame() {
+    const list = WORD_LISTS[selectedCat];
+    currentWord = list[Math.floor(Math.random() * list.length)];
+    guessed     = new Set();
+    wrongCount  = 0;
+    gameOver    = false;
+
+    resetGallows();
+    renderWordSlots();
+    renderKeyboard();
+    updateWrongDisplay();
+
+    show('game');
+  }
+
+  function nextWord() {
+    startGame();
+  }
+
+  function goMenu() {
+    show('menu');
+  }
+
+  /* ─── GALLOWS ─────────────────────────────────────────────────────────── */
+  function resetGallows() {
+    BODY_PARTS.forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+  }
+
+  function revealPart(index) {
+    document.getElementById(BODY_PARTS[index]).style.display = '';
+  }
+
+  /* ─── WORD SLOTS ─────────────────────────────────────────────────────── */
+  function renderWordSlots() {
+    const wrap = document.getElementById('word-slots');
+    wrap.innerHTML = '';
+    for (let i = 0; i < currentWord.length; i++) {
+      const slot = document.createElement('div');
+      slot.className = 'letter-slot';
+
+      const ch = document.createElement('div');
+      ch.className = 'letter-char';
+      ch.id = `slot-${i}`;
+      ch.textContent = guessed.has(currentWord[i]) ? currentWord[i] : '';
+
+      const line = document.createElement('div');
+      line.className = 'letter-line' + (guessed.has(currentWord[i]) ? ' active' : '');
+      line.id = `line-${i}`;
+
+      slot.appendChild(ch);
+      slot.appendChild(line);
+      wrap.appendChild(slot);
+    }
+  }
+
+  function updateSlots(letter) {
+    for (let i = 0; i < currentWord.length; i++) {
+      if (currentWord[i] === letter) {
+        const ch = document.getElementById(`slot-${i}`);
+        ch.textContent = letter;
+        ch.classList.add('revealed');
+        document.getElementById(`line-${i}`).classList.add('active');
+      }
+    }
+  }
+
+  /* ─── KEYBOARD ──────────────────────────────────────────────────────── */
+  function renderKeyboard() {
+    const kb = document.getElementById('keyboard');
+    kb.innerHTML = '';
+    KB_ROWS.forEach(row => {
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'keyboard-row';
+      for (const ch of row) {
+        const btn = document.createElement('button');
+        btn.className = 'key-btn';
+        btn.id = `key-${ch}`;
+        btn.textContent = ch;
+        btn.onclick = () => guess(ch);
+        rowDiv.appendChild(btn);
+      }
+      kb.appendChild(rowDiv);
+    });
+  }
+
+  function disableKey(letter, correct) {
+    const btn = document.getElementById(`key-${letter}`);
+    if (!btn) return;
+    btn.disabled = true;
+    btn.classList.add(correct ? 'correct' : 'wrong');
+  }
+
+  /* ─── WRONG DISPLAY ──────────────────────────────────────────────────── */
+  function updateWrongDisplay() {
+    const wrap  = document.getElementById('wrong-letters');
+    const count = document.getElementById('wrong-count');
+    wrap.innerHTML = '';
+    // show wrong letters only
+    guessed.forEach(l => {
+      if (!currentWord.includes(l)) {
+        const span = document.createElement('span');
+        span.className = 'wrong-letter';
+        span.textContent = l;
+        wrap.appendChild(span);
+      }
+    });
+    count.textContent = `${wrongCount} / ${MAX_WRONG}`;
+  }
+
+  /* ─── GUESS LOGIC ────────────────────────────────────────────────────── */
+  function guess(letter) {
+    if (gameOver || guessed.has(letter)) return;
+    guessed.add(letter);
+
+    const correct = currentWord.includes(letter);
+    disableKey(letter, correct);
+
+    if (correct) {
+      updateSlots(letter);
+    } else {
+      wrongCount++;
+      revealPart(wrongCount - 1);
+    }
+
+    updateWrongDisplay();
+    checkEndGame();
+  }
+
+  function checkEndGame() {
+    const won = [...currentWord].every(l => guessed.has(l));
+    const lost = wrongCount >= MAX_WRONG;
+
+    if (won || lost) {
+      gameOver = true;
+      if (won) {
+        score.won++;
+        spawnConfetti();
+      } else {
+        score.lost++;
+        // reveal full word
+        for (let i = 0; i < currentWord.length; i++) {
+          const ch = document.getElementById(`slot-${i}`);
+          if (ch) ch.textContent = currentWord[i];
+          const ln = document.getElementById(`line-${i}`);
+          if (ln) ln.classList.add('active');
+        }
+      }
+      setTimeout(() => showResult(won), won ? 1200 : 700);
+    }
+  }
+
+  function showResult(won) {
+    const s = STRINGS[lang];
+    document.getElementById('result-title').textContent = won ? s.winTitle : s.loseTitle;
+    document.getElementById('result-title').className   = 'result-title ' + (won ? 'win' : 'lose');
+    document.getElementById('result-word').textContent  = currentWord;
+    document.getElementById('score-won').textContent    = score.won;
+    document.getElementById('score-lost').textContent   = score.lost;
+    document.getElementById('lbl-won').textContent      = s.won;
+    document.getElementById('lbl-lost').textContent     = s.lost;
+    document.getElementById('lbl-word-was').textContent = s.wordWas;
+    document.getElementById('btn-next').textContent     = s.next;
+    document.getElementById('btn-menu').textContent     = s.menu;
+    show('result');
+  }
+
+  /* ─── KEYBOARD INPUT ─────────────────────────────────────────────────── */
+  document.addEventListener('keydown', e => {
+    if (document.getElementById('game').style.display === 'none') return;
+    const letter = e.key.toUpperCase();
+    if (/^[A-Z]$/.test(letter)) guess(letter);
+  });
+
+  /* ─── SCREEN SWITCHER ────────────────────────────────────────────────── */
+  function show(screen) {
+    ['menu','game','result'].forEach(id => {
+      document.getElementById(id).style.display = id === screen ? '' : 'none';
+    });
+  }
+
+  /* ─── CONFETTI ───────────────────────────────────────────────────────── */
+  function spawnConfetti() {
+    const colors = ['#f59e0b','#34d399','#60a5fa','#f87171','#a78bfa','#fcd34d'];
+    const container = document.createElement('div');
+    container.className = 'confetti-container';
+    document.body.appendChild(container);
+    for (let i = 0; i < 80; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      const dur = (1.5 + Math.random() * 2).toFixed(2) + 's';
+      p.style.cssText = [
+        `left:${Math.random()*100}%`,
+        `--dur:${dur}`,
+        `background:${colors[Math.floor(Math.random()*colors.length)]}`,
+        `width:${6+Math.random()*10}px`,
+        `height:${6+Math.random()*10}px`,
+        `animation-delay:${(Math.random()*0.5).toFixed(2)}s`,
+        `border-radius:${Math.random()>0.5?'50%':'2px'}`,
+      ].join(';');
+      container.appendChild(p);
+    }
+    setTimeout(() => container.remove(), 4000);
+  }
+
+  /* ─── BOOT ─────────────────────────────────────────────────────────────── */
+  applyStrings();
+  buildCatButtons();
+  show('menu');
+</script>
+</body>
+</html>

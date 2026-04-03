@@ -6,19 +6,23 @@ A collection of small, fun browser games built for my kids. No backend, no accou
 
 ## Games
 
-| Category | Game | Description |
-|----------|------|-------------|
-| ⚽ Football | **Guess the Player** | Recognize famous soccer players from their photos |
-| ⚽ Football | **Guess the Footballer** | Birthplace, country & club — name the footballer from clues |
-| ⚽ Football | **Guess the Birth Country** | You know their name — but which country were they born in? |
-| 🌍 Geography | **Fun with Flags** | Identify country flags from 249 nations across the globe |
-| 🌍 Geography | **Guess the Capital** | Name the capital city of countries, pick by continent or all |
-| 🌍 Geography | **Guess the River** | Which country do the world's 50 largest rivers flow through? |
-| 🔤 Words | **Word Hunt** | Find all hidden words in the letter grid before time runs out |
-| 🔤 Words | **Word Chain** | Each word must start with the last letter of the previous |
-| 🧠 Brain & Math | **Math Blitz** | Race the clock with age-appropriate math puzzles |
-| 🧠 Brain & Math | **Tic Tac Toe** | Play against a friend or the computer (Easy / Medium / Hard AI) |
-| 🧠 Brain & Math | **Puzzle Rush** | Classic sliding tile puzzle in 3×3, 4×4 or 5×5 — race the countdown |
+| Category | Game | Description | Languages |
+|----------|------|-------------|-----------|
+| ⚽ Football | **Guess the Player** | Recognize famous soccer players from their photos | 🇬🇧 |
+| ⚽ Football | **Guess the Footballer** | Birthplace, country & club — name the footballer from clues | 🇬🇧 |
+| ⚽ Football | **Guess the Birth Country** | You know their name — but which country were they born in? | 🇬🇧 |
+| 🌍 Geography | **Fun with Flags** | Identify country flags from 249 nations across the globe | 🇬🇧 🇩🇪 |
+| 🌍 Geography | **Guess the Capital** | Name the capital city of countries, pick by continent or all | 🇬🇧 🇩🇪 |
+| 🌍 Geography | **Guess the River** | Which country do the world's 50 largest rivers flow through? | 🇬🇧 🇩🇪 |
+| 🔤 Words | **Word Hunt** | Find all hidden words in the letter grid before time runs out | 🇬🇧 |
+| 🔤 Words | **Word Chain** | Each word must start with the last letter of the previous | 🇬🇧 🇩🇪 |
+| 🔤 Words | **Hangman** | Classic word-guessing — reveal the hidden word before it's too late | 🇬🇧 🇩🇪 |
+| 🔤 Words | **Anagram Blast** | Unscramble jumbled letters to form the hidden word in 60 seconds | 🇬🇧 🇩🇪 |
+| 🔤 Words | **Missing Vowels** | All vowels removed — can you guess the word from consonants alone? | 🇬🇧 🇩🇪 |
+| 🔤 Words | **Speed Typing** | Type as many words as you can in 60 seconds — beat your WPM record! | 🇬🇧 🇩🇪 |
+| 🧠 Brain & Math | **Math Blitz** | Race the clock with age-appropriate math puzzles | 🇬🇧 🇩🇪 |
+| 🧠 Brain & Math | **Tic Tac Toe** | Play against a friend or the computer (Easy / Medium / Hard AI) | 🇬🇧 |
+| 🧠 Brain & Math | **Puzzle Rush** | Classic sliding tile puzzle in 3×3, 4×4 or 5×5 — race the countdown | 🇬🇧 |
 
 ## How it works
 
@@ -38,6 +42,6 @@ If you have an idea for a fun browser game or want to improve an existing one, f
 4. Add a `← Back to Arcade` link at the top pointing to `../index.html`
 5. Add a card for your game in the root `index.html` and a row in this README
 
-**Ideas for new games:** Anagram Blast, Missing Vowels, Odd One Out, Trivia Quiz, Hangman, Memory Match, Typing Speed, Country Silhouettes, Guess the Year ...
+**Ideas for new games:** Odd One Out, Trivia Quiz, Memory Match, Country Silhouettes, Guess the Year ...
 
 Any skill level welcome — the simpler the better!

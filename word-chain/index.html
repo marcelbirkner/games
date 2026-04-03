@@ -443,12 +443,14 @@ const CATEGORIES = {
     { key:'countries', label:'🌍 Countries'  },
     { key:'food',      label:'🍕 Food'       },
     { key:'nature',    label:'🌿 Nature'     },
+    { key:'cities',    label:'🏙️ Cities'     },
   ],
   de: [
     { key:'de_tiere',   label:'🐾 Tiere'    },
     { key:'de_laender', label:'🌍 Länder'   },
     { key:'de_essen',   label:'🍕 Essen'    },
     { key:'de_natur',   label:'🌿 Natur'    },
+    { key:'de_staedte', label:'🏙️ Städte'   },
   ],
 };
 
@@ -647,6 +649,55 @@ const WORD_LISTS = {
     "SCHNEE","SEE","STEPPE","STURM",
     "TAL","TAIGA","TORNADO",
     "WALD","WASSER","WELLE","WUESTE"
+  ],
+
+  cities: [
+    "AMSTERDAM","ANKARA","ATHENS","ACCRA","ALGIERS","AUSTIN",
+    "BANGKOK","BARCELONA","BEIJING","BEIRUT","BELGRADE","BERLIN","BOGOTA","BRUSSELS","BUCHAREST","BUDAPEST",
+    "CAIRO","CARACAS","CHICAGO","COLOMBO",
+    "DELHI","DHAKA","DUBAI","DUBLIN",
+    "EDINBURGH",
+    "FRANKFURT",
+    "HAMBURG","HANOI","HAVANA","HELSINKI","HOUSTON",
+    "ISTANBUL",
+    "JAKARTA","JOHANNESBURG",
+    "KABUL","KARACHI","KHARTOUM","KINSHASA","KYIV",
+    "LAGOS","LAHORE","LIMA","LISBON","LONDON","LUANDA","LUSAKA",
+    "MADRID","MANILA","MELBOURNE","MONTREAL","MOSCOW","MUMBAI",
+    "NAIROBI",
+    "OSLO",
+    "PARIS","PRAGUE","PYONGYANG",
+    "ROME","ROTTERDAM",
+    "SEOUL","SHANGHAI","SINGAPORE","STOCKHOLM","SYDNEY",
+    "TAIPEI","TBILISI","TEHRAN","TOKYO","TORONTO",
+    "VIENNA","VILNIUS",
+    "WARSAW",
+    "YEREVAN",
+    "ZAGREB","ZURICH"
+  ],
+
+  de_staedte: [
+    "AACHEN","AUGSBURG",
+    "BERLIN","BIELEFELD","BOCHUM","BONN","BRAUNSCHWEIG","BREMEN",
+    "CHEMNITZ",
+    "DORTMUND","DRESDEN","DUISBURG","DUESSELDORF",
+    "ERFURT","ESSEN",
+    "FRANKFURT",
+    "GELSENKIRCHEN",
+    "HAMBURG","HANNOVER",
+    "INGOLSTADT",
+    "JENA",
+    "KARLSRUHE","KASSEL","KIEL","KOELN","KOBLENZ",
+    "LEIPZIG","LUDWIGSHAFEN",
+    "MAGDEBURG","MAINZ","MANNHEIM","MUENCHEN","MUENSTER",
+    "NUERNBERG",
+    "OBERHAUSEN",
+    "REGENSBURG","ROSTOCK",
+    "SAARBRUECKEN","STUTTGART",
+    "ULM",
+    "WIESBADEN","WUPPERTAL","WUERZBURG",
+    "WIEN","GRAZ","LINZ","SALZBURG","INNSBRUCK",
+    "ZUERICH","BASEL","BERN","LUZERN","LAUSANNE","GENF"
   ]
 };
 
@@ -656,10 +707,12 @@ const CAT_LABELS = {
   countries:  "Countries 🌍",
   food:       "Food 🍕",
   nature:     "Nature 🌿",
+  cities:     "Cities 🏙️",
   de_tiere:   "Tiere 🐾",
   de_laender: "Länder 🌍",
   de_essen:   "Essen 🍕",
   de_natur:   "Natur 🌿",
+  de_staedte: "Städte 🏙️",
 };
 
 // Letters considered "safe" to end a starting word on (have multiple followers)

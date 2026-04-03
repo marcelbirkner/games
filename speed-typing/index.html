@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⌨️ Speed Typing</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── NAV ── */
+    nav {
+      width: 100%;
+      max-width: 700px;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .back-link {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: .9rem;
+      transition: color .2s;
+    }
+    .back-link:hover { color: #10b981; }
+
+    /* ── LANG TOGGLE ── */
+    .lang-toggle {
+      display: flex;
+      gap: .4rem;
+    }
+    .lang-btn {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 8px;
+      color: #cbd5e1;
+      padding: .35rem .75rem;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .lang-btn:hover { background: rgba(255,255,255,.14); }
+    .lang-btn.active {
+      background: rgba(16,185,129,.2);
+      border-color: #10b981;
+      color: #10b981;
+    }
+
+    /* ── MAIN WRAPPER ── */
+    main {
+      width: 100%;
+      max-width: 700px;
+      padding: 0 1.5rem 2rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin-bottom: .4rem;
+      text-align: center;
+    }
+    .subtitle {
+      color: #94a3b8;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    /* ── SCREENS ── */
+    .screen { width: 100%; display: none; flex-direction: column; align-items: center; gap: 1.2rem; }
+    .screen.active { display: flex; }
+
+    /* ── CATEGORY BUTTONS ── */
+    .category-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .7rem;
+      justify-content: center;
+      width: 100%;
+    }
+    .cat-btn {
+      background: rgba(255,255,255,.07);
+      border: 2px solid rgba(255,255,255,.12);
+      border-radius: 12px;
+      color: #e2e8f0;
+      padding: .65rem 1.2rem;
+      font-size: .95rem;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+    .cat-btn:hover { background: rgba(255,255,255,.13); border-color: rgba(255,255,255,.25); }
+    .cat-btn.selected {
+      background: rgba(16,185,129,.18);
+      border-color: #10b981;
+      color: #10b981;
+    }
+
+    /* ── START BUTTON ── */
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: .85rem 2.5rem;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      box-shadow: 0 4px 20px rgba(16,185,129,.35);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(16,185,129,.45); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+    .btn-secondary {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 12px;
+      color: #cbd5e1;
+      font-size: 1rem;
+      font-weight: 500;
+      padding: .75rem 2rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.3); }
+
+    /* ── GAME SCREEN ── */
+    .game-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-box {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px;
+      padding: .5rem .9rem;
+      text-align: center;
+      min-width: 80px;
+      flex: 1;
+    }
+    .stat-label { font-size: .7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: .05em; }
+    .stat-value { font-size: 1.4rem; font-weight: 700; color: #e2e8f0; line-height: 1.2; }
+    .stat-value.green { color: #10b981; }
+    .stat-value.red { color: #ef4444; }
+
+    /* Timer bar */
+    .timer-bar-wrap {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,.1);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .timer-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #34d399);
+      border-radius: 99px;
+      width: 100%;
+      transition: width .5s linear, background .5s;
+    }
+    .timer-bar.warn { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .timer-bar.danger { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+    /* Word card */
+    .word-card {
+      width: 100%;
+      min-height: 110px;
+      background: rgba(255,255,255,.06);
+      border: 2px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .word-display {
+      font-size: 3rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      gap: 0;
+      flex-wrap: wrap;
+      justify-content: center;
+      user-select: none;
+    }
+    .char { display: inline-block; }
+    .char.correct { color: #10b981; }
+    .char.wrong { color: #fff; background: #ef4444; border-radius: 3px; padding: 0 1px; }
+    .char.pending { color: #94a3b8; }
+
+    /* Input */
+    .typing-input {
+      width: 100%;
+      background: rgba(255,255,255,.07);
+      border: 2px solid rgba(255,255,255,.15);
+      border-radius: 12px;
+      color: #e2e8f0;
+      font-size: 1.4rem;
+      font-weight: 600;
+      padding: .85rem 1.2rem;
+      text-align: center;
+      outline: none;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      font-family: 'Courier New', monospace;
+      transition: border-color .2s;
+      caret-color: #10b981;
+    }
+    .typing-input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.15); }
+    .typing-input.shake { animation: shake .35s ease; border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239,68,68,.2) !important; }
+    .typing-input.flash-correct { border-color: #10b981 !important; box-shadow: 0 0 0 3px rgba(16,185,129,.3) !important; }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      15% { transform: translateX(-8px); }
+      30% { transform: translateX(8px); }
+      45% { transform: translateX(-6px); }
+      60% { transform: translateX(6px); }
+      75% { transform: translateX(-3px); }
+      90% { transform: translateX(3px); }
+    }
+
+    /* Word card flash */
+    .word-card.flash-green { animation: flashGreen .3s ease; }
+    @keyframes flashGreen {
+      0% { border-color: rgba(255,255,255,.12); }
+      50% { border-color: #10b981; box-shadow: 0 0 24px rgba(16,185,129,.4); }
+      100% { border-color: rgba(255,255,255,.12); }
+    }
+
+    /* Recent words log */
+    .log-label { font-size: .75rem; color: #64748b; text-transform: uppercase; letter-spacing: .06em; align-self: flex-start; }
+    .words-log {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+      min-height: 36px;
+    }
+    .log-word {
+      background: rgba(16,185,129,.15);
+      border: 1px solid rgba(16,185,129,.3);
+      border-radius: 6px;
+      color: #10b981;
+      font-size: .8rem;
+      font-weight: 600;
+      padding: .2rem .55rem;
+      letter-spacing: .05em;
+      font-family: 'Courier New', monospace;
+      animation: popIn .2s ease;
+    }
+    @keyframes popIn {
+      0% { transform: scale(.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ── RESULT SCREEN ── */
+    .result-card {
+      width: 100%;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.4rem;
+    }
+    .result-wpm {
+      font-size: 4rem;
+      font-weight: 800;
+      color: #10b981;
+      line-height: 1;
+    }
+    .result-wpm-label { font-size: .9rem; color: #64748b; margin-top: .1rem; }
+    .result-stats {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .result-stat { text-align: center; }
+    .result-stat .val { font-size: 1.8rem; font-weight: 700; }
+    .result-stat .lbl { font-size: .75rem; color: #94a3b8; }
+    .record-badge {
+      background: linear-gradient(135deg, rgba(251,191,36,.2), rgba(245,158,11,.15));
+      border: 1px solid #f59e0b;
+      border-radius: 10px;
+      color: #fbbf24;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: .5rem 1.2rem;
+      display: none;
+    }
+    .record-badge.show { display: block; animation: popIn .4s ease; }
+    .result-actions { display: flex; gap: .8rem; flex-wrap: wrap; justify-content: center; }
+
+    /* ── MISC ── */
+    .divider { width: 100%; height: 1px; background: rgba(255,255,255,.07); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="back-link" href="../index.html">← Back to Arcade</a>
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="btn-en" onclick="setLang('en')">🇬🇧 English</button>
+    <button class="lang-btn" id="btn-de" onclick="setLang('de')">🇩🇪 Deutsch</button>
+  </div>
+</nav>
+
+<main>
+  <h1>⌨️ Speed Typing</h1>
+  <p class="subtitle" id="subtitle">How fast can you type?</p>
+
+  <!-- ══ MENU SCREEN ══ -->
+  <div class="screen active" id="screen-menu">
+    <div class="category-grid" id="cat-grid"></div>
+    <button class="btn-primary" id="btn-start" disabled onclick="startGame()">▶ Start</button>
+  </div>
+
+  <!-- ══ GAME SCREEN ══ -->
+  <div class="screen" id="screen-game">
+    <!-- Timer bar -->
+    <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+
+    <!-- Stats header -->
+    <div class="game-header">
+      <div class="stat-box">
+        <div class="stat-label" id="lbl-time">Time</div>
+        <div class="stat-value" id="val-time">60</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label" id="lbl-wpm">WPM</div>
+        <div class="stat-value green" id="val-wpm">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label" id="lbl-correct">Correct</div>
+        <div class="stat-value green" id="val-correct">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label" id="lbl-wrong">Wrong</div>
+        <div class="stat-value red" id="val-wrong">0</div>
+      </div>
+    </div>
+
+    <!-- Word card -->
+    <div class="word-card" id="word-card">
+      <div class="word-display" id="word-display"></div>
+    </div>
+
+    <!-- Input -->
+    <input
+      type="text"
+      class="typing-input"
+      id="typing-input"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="characters"
+      spellcheck="false"
+      placeholder="Type here…"
+    />
+
+    <!-- Recent words log -->
+    <div class="log-label" id="lbl-log">Recent</div>
+    <div class="words-log" id="words-log"></div>
+  </div>
+
+  <!-- ══ RESULT SCREEN ══ -->
+  <div class="screen" id="screen-result">
+    <div class="result-card">
+      <div>
+        <div class="result-wpm" id="res-wpm">0</div>
+        <div class="result-wpm-label" id="lbl-words-min">words/min</div>
+      </div>
+      <div class="record-badge" id="record-badge">🏆 New Record!</div>
+      <div class="divider"></div>
+      <div class="result-stats">
+        <div class="result-stat">
+          <div class="val green" id="res-correct">0</div>
+          <div class="lbl" id="res-lbl-correct">Correct</div>
+        </div>
+        <div class="result-stat">
+          <div class="val red" id="res-wrong">0</div>
+          <div class="lbl" id="res-lbl-wrong">Wrong</div>
+        </div>
+        <div class="result-stat">
+          <div class="val" id="res-accuracy">0%</div>
+          <div class="lbl" id="res-lbl-accuracy">Accuracy</div>
+        </div>
+        <div class="result-stat">
+          <div class="val" id="res-best">0</div>
+          <div class="lbl" id="res-lbl-best">Best WPM</div>
+        </div>
+      </div>
+      <div class="result-actions">
+        <button class="btn-primary" id="btn-again" onclick="startGame()">▶ Play Again</button>
+        <button class="btn-secondary" id="btn-menu" onclick="showMenu()">☰ Menu</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ══════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════
+const CATEGORIES = {
+  en: [
+    { key:'animals',   label:'🐾 Animals'  },
+    { key:'countries', label:'🌍 Countries' },
+    { key:'food',      label:'🍕 Food'      },
+    { key:'nature',    label:'🌿 Nature'    },
+    { key:'cities',    label:'🏙️ Cities'    },
+  ],
+  de: [
+    { key:'de_tiere',   label:'🐾 Tiere'   },
+    { key:'de_laender', label:'🌍 Länder'  },
+    { key:'de_essen',   label:'🍕 Essen'   },
+    { key:'de_natur',   label:'🌿 Natur'   },
+    { key:'de_staedte', label:'🏙️ Städte'  },
+  ],
+};
+
+const WORD_LISTS = {
+  animals: ["AARDVARK","ALBATROSS","ALLIGATOR","ANACONDA","ANTELOPE","ARMADILLO","AXOLOTL","BABOON","BADGER","BEAR","BEAVER","BISON","BOAR","BUFFALO","BUTTERFLY","BUZZARD","CAMEL","CARDINAL","CHEETAH","CHIPMUNK","COBRA","COYOTE","CRANE","CROCODILE","CROW","DEER","DINGO","DOLPHIN","DONKEY","DRAGONFLY","EAGLE","EEL","ELEPHANT","EMU","ERMINE","FALCON","FERRET","FINCH","FLAMINGO","FOX","FROG","GECKO","GIRAFFE","GORILLA","GROUSE","HAMSTER","HAWK","HEDGEHOG","HERON","HIPPO","HYENA","IGUANA","IMPALA","JAGUAR","JELLYFISH","KANGAROO","KITE","KOALA","KOOKABURRA","LEMUR","LION","LIZARD","LLAMA","LOBSTER","LYNX","MEERKAT","MOLE","MONKEY","MOOSE","MOUSE","NARWHAL","NEWT","NIGHTINGALE","OCELOT","OCTOPUS","ORANGUTAN","OSTRICH","OTTER","OWL","PANDA","PARROT","PELICAN","PENGUIN","PIRANHA","PLATYPUS","PORCUPINE","PUMA","QUOKKA","RABBIT","RACCOON","RAVEN","RHINOCEROS","ROBIN","SALAMANDER","SHARK","SNAKE","SPARROW","SQUIRREL","STORK","SWAN","TARANTULA","TIGER","TORTOISE","TOUCAN","TURKEY","VULTURE","VIPER","WALRUS","WHALE","WOLF","WOLVERINE","WOMBAT","WREN","YAK","ZEBRA"],
+  countries: ["AFGHANISTAN","ALBANIA","ALGERIA","ANGOLA","ARGENTINA","ARMENIA","AUSTRALIA","AUSTRIA","AZERBAIJAN","BAHRAIN","BANGLADESH","BELARUS","BELGIUM","BELIZE","BOLIVIA","BRAZIL","BULGARIA","CAMBODIA","CAMEROON","CANADA","CHILE","CHINA","COLOMBIA","CROATIA","CUBA","CYPRUS","DENMARK","ECUADOR","EGYPT","ENGLAND","ETHIOPIA","FINLAND","FRANCE","GEORGIA","GERMANY","GHANA","GREECE","GUATEMALA","GUINEA","HAITI","HUNGARY","ICELAND","INDIA","INDONESIA","IRAN","IRAQ","IRELAND","ISRAEL","ITALY","JAMAICA","JAPAN","JORDAN","KAZAKHSTAN","KENYA","KUWAIT","LAOS","LATVIA","LEBANON","LIBYA","LITHUANIA","LUXEMBOURG","MADAGASCAR","MALAYSIA","MALI","MEXICO","MOLDOVA","MONGOLIA","MOROCCO","MOZAMBIQUE","MYANMAR","NAMIBIA","NEPAL","NETHERLANDS","NICARAGUA","NIGER","NIGERIA","NORWAY","OMAN","PAKISTAN","PANAMA","PARAGUAY","PERU","PHILIPPINES","POLAND","PORTUGAL","QATAR","ROMANIA","RUSSIA","RWANDA","SENEGAL","SERBIA","SOMALIA","SPAIN","SUDAN","SWEDEN","SWITZERLAND","SYRIA","TAIWAN","TAJIKISTAN","TANZANIA","THAILAND","TUNISIA","TURKEY","UGANDA","UKRAINE","URUGUAY","VENEZUELA","VIETNAM","WALES","YEMEN","ZAMBIA","ZIMBABWE"],
+  food: ["ALMOND","APPLE","APRICOT","ASPARAGUS","AVOCADO","BANANA","BASIL","BEAN","BEET","BREAD","BROCCOLI","BROWNIE","BUTTER","CABBAGE","CARAMEL","CARROT","CHEESE","CHERRY","CHICKEN","CHILI","CHOCOLATE","CINNAMON","COCONUT","COFFEE","COOKIE","CORN","CREAM","CROISSANT","DATE","DILL","DUMPLING","EGG","EGGPLANT","FIG","FISH","FLOUR","FUDGE","GARLIC","GINGER","GRAPE","GUAVA","HAZELNUT","HONEY","HUMMUS","JAM","JELLY","KALE","KIWI","LEMON","LETTUCE","LIME","LYCHEE","LASAGNE","MANGO","MELON","MINT","MUSHROOM","MUSTARD","MACARON","NOODLE","NUTMEG","OATS","OLIVE","ONION","ORANGE","OREGANO","PAPAYA","PAPRIKA","PARSLEY","PEACH","PEAR","PEPPER","PINEAPPLE","PLUM","POTATO","PRETZEL","PANCAKE","QUINOA","RADISH","RAISIN","RASPBERRY","RICE","ROSEMARY","RHUBARB","SAGE","SALMON","SALT","SHRIMP","SPINACH","STRAWBERRY","SUGAR","TAMARIND","THYME","TOFU","TOMATO","TRUFFLE","TUNA","TURNIP","VANILLA","WALNUT","WATERMELON","WHEAT","WAFFLE","YAM","YOGURT","ZUCCHINI"],
+  nature: ["ARCTIC","AURORA","AVALANCHE","ATOLL","BAY","BEACH","BLIZZARD","BOULDER","BOG","CANYON","CAVE","CLIFF","CLOUD","COAST","CORAL","CREEK","CRATER","CURRENT","DELTA","DESERT","DUNE","DROUGHT","EARTHQUAKE","ESTUARY","EROSION","FJORD","FLOOD","FOREST","FOUNTAIN","FOG","GEYSER","GLACIER","GORGE","GROVE","GULF","HURRICANE","HILL","HAIL","ICEBERG","ISLAND","INLET","JUNGLE","LAGOON","LAKE","LAVA","LIGHTNING","MEADOW","MOUNTAIN","MARSH","MONSOON","MESA","OASIS","OCEAN","PENINSULA","PLATEAU","PRAIRIE","RAINFOREST","RAVINE","REEF","RIVER","ROCK","RAPIDS","SAVANNA","SEA","SPRING","STORM","STREAM","SWAMP","STRAIT","TIDE","TORNADO","TUNDRA","TAIGA","VALLEY","VOLCANO","WATERFALL","WETLAND","WIND","WAVE"],
+  cities: ["AMSTERDAM","ANKARA","ATHENS","ACCRA","ALGIERS","AUSTIN","BANGKOK","BARCELONA","BEIJING","BEIRUT","BELGRADE","BERLIN","BOGOTA","BRUSSELS","BUCHAREST","BUDAPEST","CAIRO","CARACAS","CHICAGO","COLOMBO","DELHI","DHAKA","DUBAI","DUBLIN","EDINBURGH","FRANKFURT","HAMBURG","HANOI","HAVANA","HELSINKI","HOUSTON","ISTANBUL","JAKARTA","JOHANNESBURG","KABUL","KARACHI","KHARTOUM","KINSHASA","KYIV","LAGOS","LAHORE","LIMA","LISBON","LONDON","LUANDA","LUSAKA","MADRID","MANILA","MELBOURNE","MONTREAL","MOSCOW","MUMBAI","NAIROBI","OSLO","PARIS","PRAGUE","PYONGYANG","ROME","ROTTERDAM","SEOUL","SHANGHAI","SINGAPORE","STOCKHOLM","SYDNEY","TAIPEI","TBILISI","TEHRAN","TOKYO","TORONTO","VIENNA","VILNIUS","WARSAW","YEREVAN","ZAGREB","ZURICH"],
+  de_tiere: ["ADLER","AMEISE","AXOLOTL","BIBER","BIENE","DACHS","DELFIN","EICHHORNCHEN","ELEFANT","ENTE","FALKE","FISCH","FROSCH","FUCHS","GECKO","GEPARD","GIRAFFE","GORILLA","HASE","HUND","HYAENE","IGEL","JAGUAR","KATZE","KOALA","KROKODIL","LIBELLE","LOEWE","LUCHS","MARDER","MAUS","NASHORN","NILPFERD","OTTER","PAPAGEI","PFERD","PINGUIN","RABE","RATTE","SCHAF","SCHLANGE","SCHMETTERLING","SEEHUND","SPINNE","STORCH","TIGER","TINTENFISCH","UHU","VOGEL","WASCHBAER","WOLF","ZEBRA","ZIEGE"],
+  de_laender: ["AEGYPTEN","AETHIOPIEN","ALBANIEN","ALGERIEN","ANGOLA","ARGENTINIEN","AUSTRALIEN","BELGIEN","BOLIVIEN","BRASILIEN","BULGARIEN","CHILE","CHINA","DAENEMARK","DEUTSCHLAND","ECUADOR","ENGLAND","FINNLAND","FRANKREICH","GEORGIEN","GHANA","GRIECHENLAND","GUATEMALA","INDIEN","INDONESIEN","IRAK","IRAN","IRLAND","ISLAND","ISRAEL","ITALIEN","JAMAIKA","JAPAN","JORDANIEN","KAMERUN","KANADA","KENIA","KOLUMBIEN","KROATIEN","KUBA","LAOS","LETTLAND","LIBYEN","LITAUEN","LUXEMBURG","MALI","MEXIKO","MOLDAWIEN","MONGOLEI","MAROKKO","NAMIBIA","NEPAL","NIEDERLANDE","NIGERIA","NORWEGEN","OMAN","PAKISTAN","PANAMA","PERU","PHILIPPINEN","POLEN","PORTUGAL","RUMAENIEN","RUSSLAND","RUANDA","SAMBIA","SCHWEDEN","SERBIEN","SIMBABWE","SOMALIA","SPANIEN","SUDAN","SYRIEN","TAIWAN","TANSANIA","THAILAND","TUNESIEN","TUERKEI","UGANDA","UKRAINE","UNGARN","URUGUAY","USBEKISTAN","VENEZUELA","VIETNAM","WALES","JEMEN"],
+  de_essen: ["APFEL","ARTISCHOCKE","AVOCADO","BANANE","BIRNE","BOHNE","BROCCOLI","BROT","BUTTER","DATTEL","EI","ERBSE","FEIGE","FISCH","FLEISCH","GEMUESE","GURKE","HONIG","INGWER","JOGHURT","KAROTTE","KARTOFFEL","KAESE","KIRSCHE","KNOBLAUCH","KOHL","KUCHEN","LACHS","LAUCH","LINSE","MAIS","MANGO","MELONE","MILCH","NUDELN","NUSS","OBST","OLIVE","ORANGE","PFIRSICH","PFLAUME","PILZ","PIZZA","QUARK","RADIESCHEN","REIS","ROSENKOHL","ROSINE","SALAT","SALZ","SCHINKEN","SCHOKOLADE","SENF","SPINAT","SUPPE","THYMIAN","TOMATE","VANILLE","WASSERMELONE","WEIZEN","WURST","ZITRONE","ZUCCHINI","ZWIEBEL"],
+  de_natur: ["ALPEN","AUEN","BACH","BERG","BODEN","DELTA","DUENE","EBENE","EIS","FELS","FLUSS","GEBIRGE","GIPFEL","GLETSCHER","HUEGEL","INSEL","KANAL","KLIPPE","KUESTE","LANDSCHAFT","LAVA","MEER","MONSUN","MOOR","NEBEL","OASE","PLATEAU","REGEN","RIFF","SCHNEE","SEE","STEPPE","STURM","TAL","TAIGA","TORNADO","WALD","WASSER","WELLE","WUESTE"],
+  de_staedte: ["AACHEN","AUGSBURG","BERLIN","BIELEFELD","BOCHUM","BONN","BRAUNSCHWEIG","BREMEN","CHEMNITZ","DORTMUND","DRESDEN","DUISBURG","DUESSELDORF","ERFURT","ESSEN","FRANKFURT","GELSENKIRCHEN","HAMBURG","HANNOVER","INGOLSTADT","JENA","KARLSRUHE","KASSEL","KIEL","KOELN","KOBLENZ","LEIPZIG","LUDWIGSHAFEN","MAGDEBURG","MAINZ","MANNHEIM","MUENCHEN","MUENSTER","NUERNBERG","OBERHAUSEN","REGENSBURG","ROSTOCK","SAARBRUECKEN","STUTTGART","ULM","WIESBADEN","WUPPERTAL","WUERZBURG","WIEN","GRAZ","LINZ","SALZBURG","INNSBRUCK","ZUERICH","BASEL","BERN","LUZERN","LAUSANNE","GENF"],
+};
+
+const UI = {
+  en: {
+    subtitle: 'How fast can you type?',
+    wpm: 'WPM',
+    score: 'Score',
+    time: 'Time',
+    correct: 'Correct',
+    wrong: 'Wrong',
+    wordsMin: 'words/min',
+    playAgain: '▶ Play Again',
+    menu: '☰ Menu',
+    bestWpm: 'Best WPM',
+    accuracy: 'Accuracy',
+    record: '🏆 New Record!',
+    recent: 'Recent',
+    start: '▶ Start',
+  },
+  de: {
+    subtitle: 'Wie schnell kannst du tippen?',
+    wpm: 'WPM',
+    score: 'Punkte',
+    time: 'Zeit',
+    correct: 'Richtig',
+    wrong: 'Falsch',
+    wordsMin: 'Wörter/Min',
+    playAgain: '▶ Nochmal',
+    menu: '☰ Menü',
+    bestWpm: 'Bestes WPM',
+    accuracy: 'Genauigkeit',
+    record: '🏆 Neuer Rekord!',
+    recent: 'Zuletzt',
+    start: '▶ Start',
+  },
+};
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let lang = 'en';
+let selectedCategory = null;
+let gameWords = [];
+let currentWordIndex = 0;
+let currentWord = '';
+let retryCount = 0;
+let score = { correct: 0, wrong: 0 };
+let totalCorrectChars = 0;
+let timeLeft = 60;
+let timerInterval = null;
+let startTime = null;
+let gameActive = false;
+let recentWords = [];
+
+// ══════════════════════════════════════════════
+//  LANGUAGE
+// ══════════════════════════════════════════════
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  document.getElementById('btn-de').classList.toggle('active', l === 'de');
+  applyUI();
+  renderCategories();
+  selectedCategory = null;
+  document.getElementById('btn-start').disabled = true;
+}
+
+function applyUI() {
+  const t = UI[lang];
+  document.getElementById('subtitle').textContent = t.subtitle;
+  document.getElementById('lbl-time').textContent = t.time;
+  document.getElementById('lbl-wpm').textContent = t.wpm;
+  document.getElementById('lbl-correct').textContent = t.correct;
+  document.getElementById('lbl-wrong').textContent = t.wrong;
+  document.getElementById('lbl-log').textContent = t.recent;
+  document.getElementById('lbl-words-min').textContent = t.wordsMin;
+  document.getElementById('btn-again').textContent = t.playAgain;
+  document.getElementById('btn-menu').textContent = t.menu;
+  document.getElementById('res-lbl-correct').textContent = t.correct;
+  document.getElementById('res-lbl-wrong').textContent = t.wrong;
+  document.getElementById('res-lbl-accuracy').textContent = t.accuracy;
+  document.getElementById('res-lbl-best').textContent = t.bestWpm;
+  document.getElementById('record-badge').textContent = t.record;
+  document.getElementById('btn-start').textContent = t.start;
+}
+
+// ══════════════════════════════════════════════
+//  CATEGORY RENDER
+// ══════════════════════════════════════════════
+function renderCategories() {
+  const grid = document.getElementById('cat-grid');
+  grid.innerHTML = '';
+  CATEGORIES[lang].forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn';
+    btn.textContent = cat.label;
+    btn.dataset.key = cat.key;
+    btn.onclick = () => selectCategory(cat.key, btn);
+    grid.appendChild(btn);
+  });
+}
+
+function selectCategory(key, btn) {
+  selectedCategory = key;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('btn-start').disabled = false;
+}
+
+// ══════════════════════════════════════════════
+//  SCREEN HELPERS
+// ══════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showMenu() {
+  stopTimer();
+  gameActive = false;
+  showScreen('screen-menu');
+}
+
+// ══════════════════════════════════════════════
+//  GAME
+// ══════════════════════════════════════════════
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startGame() {
+  if (!selectedCategory) return;
+
+  // Build word queue — shuffle and repeat if needed
+  const base = WORD_LISTS[selectedCategory];
+  gameWords = shuffle(base);
+  if (gameWords.length < 200) {
+    while (gameWords.length < 200) gameWords.push(...shuffle(base));
+  }
+
+  currentWordIndex = 0;
+  retryCount = 0;
+  score = { correct: 0, wrong: 0 };
+  totalCorrectChars = 0;
+  timeLeft = 60;
+  startTime = null;
+  recentWords = [];
+  gameActive = true;
+
+  updateScoreDisplay();
+  document.getElementById('val-time').textContent = '60';
+  document.getElementById('val-wpm').textContent = '0';
+  document.getElementById('timer-bar').style.width = '100%';
+  document.getElementById('timer-bar').className = 'timer-bar';
+  document.getElementById('words-log').innerHTML = '';
+
+  showScreen('screen-game');
+  loadWord();
+  document.getElementById('typing-input').value = '';
+  document.getElementById('typing-input').focus();
+  startTimer();
+}
+
+function loadWord() {
+  currentWord = gameWords[currentWordIndex % gameWords.length];
+  retryCount = 0;
+  renderWordDisplay('');
+  document.getElementById('typing-input').value = '';
+}
+
+function renderWordDisplay(typed) {
+  const container = document.getElementById('word-display');
+  container.innerHTML = '';
+  for (let i = 0; i < currentWord.length; i++) {
+    const span = document.createElement('span');
+    span.className = 'char';
+    span.textContent = currentWord[i];
+    if (i < typed.length) {
+      span.classList.add(typed[i] === currentWord[i] ? 'correct' : 'wrong');
+    } else {
+      span.classList.add('pending');
+    }
+    container.appendChild(span);
+  }
+}
+
+function startTimer() {
+  stopTimer();
+  startTime = Date.now();
+  timerInterval = setInterval(tick, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+function tick() {
+  timeLeft--;
+  const pct = (timeLeft / 60) * 100;
+  const bar = document.getElementById('timer-bar');
+  bar.style.width = pct + '%';
+  bar.className = 'timer-bar' + (pct <= 16 ? ' danger' : pct <= 33 ? ' warn' : '');
+  document.getElementById('val-time').textContent = timeLeft;
+
+  // Live WPM
+  updateWPM();
+
+  if (timeLeft <= 0) endGame();
+}
+
+function updateWPM() {
+  if (!startTime) return;
+  const elapsed = (Date.now() - startTime) / 1000 / 60; // minutes
+  const wpm = elapsed > 0 ? Math.round((totalCorrectChars / 5) / elapsed) : 0;
+  document.getElementById('val-wpm').textContent = wpm;
+}
+
+function updateScoreDisplay() {
+  document.getElementById('val-correct').textContent = score.correct;
+  document.getElementById('val-wrong').textContent = score.wrong;
+}
+
+// ══════════════════════════════════════════════
+//  INPUT HANDLER
+// ══════════════════════════════════════════════
+const inputEl = document.getElementById('typing-input');
+
+inputEl.addEventListener('input', () => {
+  if (!gameActive) return;
+  // Start timer on first keystroke if somehow not started
+  if (!startTime) startTime = Date.now();
+
+  let val = inputEl.value.toUpperCase();
+  inputEl.value = val; // enforce uppercase
+
+  renderWordDisplay(val);
+
+  // Auto-advance on exact match
+  if (val === currentWord) {
+    handleCorrect();
+  }
+});
+
+inputEl.addEventListener('keydown', e => {
+  if (!gameActive) return;
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const val = inputEl.value.toUpperCase();
+    if (val === currentWord) {
+      handleCorrect();
+    } else {
+      handleWrong();
+    }
+  }
+});
+
+function handleCorrect() {
+  totalCorrectChars += currentWord.length;
+  score.correct++;
+  updateScoreDisplay();
+  updateWPM();
+
+  // Flash effects
+  const card = document.getElementById('word-card');
+  card.classList.remove('flash-green');
+  void card.offsetWidth; // reflow
+  card.classList.add('flash-green');
+  inputEl.classList.remove('flash-correct');
+  void inputEl.offsetWidth;
+  inputEl.classList.add('flash-correct');
+  setTimeout(() => {
+    inputEl.classList.remove('flash-correct');
+    card.classList.remove('flash-green');
+  }, 300);
+
+  // Add to recent words log
+  recentWords.unshift(currentWord);
+  if (recentWords.length > 5) recentWords.pop();
+  renderLog();
+
+  currentWordIndex++;
+  loadWord();
+}
+
+function handleWrong() {
+  score.wrong++;
+  updateScoreDisplay();
+  retryCount++;
+
+  // Shake input
+  inputEl.classList.remove('shake');
+  void inputEl.offsetWidth;
+  inputEl.classList.add('shake');
+  setTimeout(() => inputEl.classList.remove('shake'), 400);
+  inputEl.value = '';
+  renderWordDisplay('');
+
+  // Auto-skip after 1 failed retry
+  if (retryCount >= 2) {
+    currentWordIndex++;
+    loadWord();
+  }
+}
+
+function renderLog() {
+  const log = document.getElementById('words-log');
+  log.innerHTML = '';
+  recentWords.forEach(w => {
+    const span = document.createElement('span');
+    span.className = 'log-word';
+    span.textContent = w;
+    log.appendChild(span);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  END GAME
+// ══════════════════════════════════════════════
+function endGame() {
+  stopTimer();
+  gameActive = false;
+
+  const elapsed = (Date.now() - startTime) / 1000 / 60;
+  const wpm = elapsed > 0 ? Math.round((totalCorrectChars / 5) / elapsed) : 0;
+  const total = score.correct + score.wrong;
+  const accuracy = total > 0 ? Math.round((score.correct / total) * 100) : 0;
+
+  // localStorage best
+  const storageKey = `speedtyping_best_${selectedCategory}`;
+  const prev = parseInt(localStorage.getItem(storageKey) || '0', 10);
+  const isRecord = wpm > prev;
+  if (isRecord) localStorage.setItem(storageKey, wpm);
+  const best = isRecord ? wpm : Math.max(wpm, prev);
+
+  document.getElementById('res-wpm').textContent = wpm;
+  document.getElementById('res-correct').textContent = score.correct;
+  document.getElementById('res-wrong').textContent = score.wrong;
+  document.getElementById('res-accuracy').textContent = accuracy + '%';
+  document.getElementById('res-best').textContent = best;
+  document.getElementById('record-badge').classList.toggle('show', isRecord && wpm > 0);
+
+  showScreen('screen-result');
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+renderCategories();
+applyUI();
+</script>
+</body>
+</html>
