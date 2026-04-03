@@ -19,7 +19,7 @@
       touch-action: none;
     }
 
-    .container { max-width: 520px; width: 100%; }
+    .container { max-width: 640px; width: 100%; }
 
     .back-link {
       display: inline-block;
@@ -38,7 +38,8 @@
     #menu { text-align: center; }
     #menu h2 { font-size: 1.1rem; color: #ccc; margin-bottom: 20px; }
 
-    .diff-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .diff-grid { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+    .diff-card { flex: 1 1 140px; max-width: 180px; }
 
     .diff-card {
       background: rgba(255,255,255,0.06);
@@ -208,17 +209,27 @@
       <div class="diff-card" style="--c:#34d399" onclick="startGame('easy')">
         <div class="dc-icon">😊</div>
         <div class="dc-title">Easy</div>
-        <div class="dc-info">8×8 grid<br>8 words<br>3 minutes</div>
+        <div class="dc-info">8×8 grid<br>8 words<br>6 minutes</div>
       </div>
       <div class="diff-card" style="--c:#60a5fa" onclick="startGame('medium')">
         <div class="dc-icon">🤔</div>
         <div class="dc-title">Medium</div>
-        <div class="dc-info">10×10 grid<br>10 words<br>2 minutes</div>
+        <div class="dc-info">10×10 grid<br>10 words<br>4 minutes</div>
       </div>
       <div class="diff-card" style="--c:#f87171" onclick="startGame('hard')">
         <div class="dc-icon">💀</div>
         <div class="dc-title">Hard</div>
-        <div class="dc-info">12×12 grid<br>12 words<br>90 seconds</div>
+        <div class="dc-info">12×12 grid<br>12 words<br>3 minutes</div>
+      </div>
+      <div class="diff-card" style="--c:#e879f9" onclick="startGame('expert')">
+        <div class="dc-icon">🔥</div>
+        <div class="dc-title">Expert</div>
+        <div class="dc-info">16×16 grid<br>14 words<br>2.5 minutes</div>
+      </div>
+      <div class="diff-card" style="--c:#f43f5e" onclick="startGame('master')">
+        <div class="dc-icon">💥</div>
+        <div class="dc-title">Master</div>
+        <div class="dc-info">24×24 grid<br>20 words<br>2 minutes</div>
       </div>
     </div>
   </div>
@@ -296,6 +307,18 @@ const THEMES = {
     { name:"Science 🔬",  words:["ASTRONOMY","CHEMISTRY","TELESCOPE","SATELLITE","SUPERNOVA","METEORITE","ECOSYSTEM","CHROMOSOME","MAGNETISM","ATMOSPHERE","EARTHQUAKE","HURRICANE","EVOLUTION","PHOTONICS","BIOSYSTEM"] },
     { name:"Geography 🗺️",words:["HIMALAYAN","CARIBBEAN","AMAZONIAN","ANTARCTIC","PATAGONIA","POLYNESIAN","CONTINENT","PENINSULA","ARCHIPELAGO","EQUATORIAL","RAINFOREST","MANGROVES","SAVANNAH","PERMAFROST","LOWLANDS"] },
   ],
+  expert: [
+    { name:"Dinosaurs 🦕", words:["TYRANNOSAURUS","VELOCIRAPTOR","TRICERATOPS","STEGOSAURUS","BRACHIOSAURUS","PTERODACTYL","ANKYLOSAURUS","DIPLODOCUS","IGUANODON","ALLOSAURUS","SPINOSAURUS","OVIRAPTOR","ARCHAEOPTERYX","MEGALOSAURUS","DIMETRODON","PROTOCERATOPS"] },
+    { name:"Geography 🗺️",words:["MEDITERRANEAN","SCANDINAVIA","KILIMANJARO","MESOPOTAMIA","YELLOWSTONE","BOSPHORUS","EVERGLADES","HIGHLANDS","WATERSHED","LANDLOCKED","CONTINENTAL","SUBTROPICAL","ARCHIPELAGO","EQUATORIAL","RAINFOREST","PENINSULAR"] },
+    { name:"Science 🔬",  words:["PHOTOSYNTHESIS","ELECTROMAGNETIC","THERMODYNAMICS","RADIOACTIVITY","ASTROPHYSICS","MICROORGANISM","SPECTROSCOPY","BIOCHEMISTRY","NEUROSCIENCE","PALEONTOLOGY","GEOPHYSICS","CRYSTALLINE","RELATIVITY","ATMOSPHERE","CHROMOSOME","NANOTECHNOLOGY"] },
+    { name:"Big Words 📚", words:["EXTRAORDINARY","PHILOSOPHICAL","COMMUNICATION","INTERNATIONAL","REVOLUTIONARY","COLLABORATION","ENTERTAINMENT","SOPHISTICATED","ORGANIZATION","ACCOMPLISHED","CATASTROPHIC","PROFESSIONAL","DEMONSTRATION","APPRECIATION","INDEPENDENT","CONSTITUTIONAL"] },
+  ],
+  master: [
+    { name:"Dinosaurs 🦕", words:["TYRANNOSAURUS","VELOCIRAPTOR","TRICERATOPS","STEGOSAURUS","BRACHIOSAURUS","PTERODACTYL","ANKYLOSAURUS","DIPLODOCUS","IGUANODON","ALLOSAURUS","SPINOSAURUS","OVIRAPTOR","ARCHAEOPTERYX","MEGALOSAURUS","DIMETRODON","PROTOCERATOPS","PACHYCEPHALOSAURUS","PARASAUROLOPHUS","EDMONTOSAURUS","CARNOTAURUS"] },
+    { name:"Geography 🗺️",words:["MEDITERRANEAN","SCANDINAVIA","KILIMANJARO","MESOPOTAMIA","YELLOWSTONE","BOSPHORUS","EVERGLADES","HIGHLANDS","WATERSHED","LANDLOCKED","CONTINENTAL","SUBTROPICAL","ARCHIPELAGO","EQUATORIAL","RAINFOREST","PENINSULAR","TRANSCONTINENTAL","CIRCUMNAVIGATION","INTERMOUNTAIN","STRATOSPHERE"] },
+    { name:"Science 🔬",  words:["PHOTOSYNTHESIS","ELECTROMAGNETIC","THERMODYNAMICS","RADIOACTIVITY","ASTROPHYSICS","MICROORGANISM","SPECTROSCOPY","BIOCHEMISTRY","NEUROSCIENCE","PALEONTOLOGY","NANOTECHNOLOGY","CRYSTALLOGRAPHY","BIOLUMINESCENCE","SEMICONDUCTORS","PHARMACOLOGY","BIOTECHNOLOGY","METEOROLOGY","OCEANOGRAPHY","IMMUNODEFICIENCY","NEUROPSYCHOLOGY"] },
+    { name:"Big Words 📚", words:["EXTRAORDINARY","PHILOSOPHICAL","COMMUNICATION","INTERNATIONAL","REVOLUTIONARY","COLLABORATION","ENTERTAINMENT","SOPHISTICATED","ORGANIZATION","CATASTROPHIC","UNCONSTITUTIONAL","MULTIDISCIPLINARY","COUNTERINTELLIGENCE","ANTIESTABLISHMENT","CIRCUMFERENCE","ARCHAEOLOGICAL","ENTREPRENEURSHIP","INDUSTRIALIZATION","INCOMPREHENSIBLE","ELECTROMAGNETIC"] },
+  ],
 };
 
 const WORD_COLORS = [
@@ -305,9 +328,11 @@ const WORD_COLORS = [
 ];
 
 const CONFIG = {
-  easy:   { n: 8,  count: 8,  time: 180 },
-  medium: { n: 10, count: 10, time: 120 },
-  hard:   { n: 12, count: 12, time: 90  },
+  easy:   { n: 8,  count: 8,  time: 360 },
+  medium: { n: 10, count: 10, time: 240 },
+  hard:   { n: 12, count: 12, time: 180 },
+  expert: { n: 16, count: 14, time: 150 },
+  master: { n: 24, count: 20, time: 120 },
 };
 
 const DIRS = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
@@ -432,9 +457,13 @@ function renderGrid() {
   gridEl.style.gridTemplateColumns = `repeat(${N}, 1fr)`;
 
   const wrap  = document.querySelector('.grid-wrap');
-  const avail = Math.min(wrap.offsetWidth, 460);
-  const sz    = Math.floor((avail - (N - 1) * 3) / N);
-  const fs    = Math.max(Math.floor(sz * 0.44), 10);
+  const gap   = N > 16 ? 2 : N > 12 ? 2 : 3;
+  const cap   = N > 16 ? 600 : N > 12 ? 520 : 460;
+  const avail = Math.min(wrap.offsetWidth, cap);
+  const sz    = Math.floor((avail - (N - 1) * gap) / N);
+  const fs    = Math.max(Math.floor(sz * 0.44), 9);
+
+  gridEl.style.gap = gap + 'px';
 
   for (let r = 0; r < N; r++) {
     for (let c = 0; c < N; c++) {
