@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Blitz</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      padding: 20px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 16px;
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 32px;
+      font-size: 0.95rem;
+    }
+
+    /* ── MENU ─────────────────────────────── */
+    #menu { text-align: center; }
+    #menu h2 {
+      font-size: 1.1rem;
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+
+    .age-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .age-card {
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 24px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .age-card:hover {
+      background: rgba(255,255,255,0.11);
+      transform: translateY(-4px);
+      border-color: var(--color);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .age-card .card-icon { font-size: 2.4rem; margin-bottom: 10px; }
+    .age-card .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color);
+      margin-bottom: 4px;
+    }
+    .age-card .card-ages {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 8px;
+    }
+    .age-card .card-desc {
+      font-size: 0.82rem;
+      color: #aaa;
+      line-height: 1.4;
+    }
+
+    /* ── COUNTDOWN ────────────────────────── */
+    #countdown {
+      display: none;
+      text-align: center;
+    }
+    .countdown-number {
+      font-size: 8rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: popIn 0.5s ease;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.4); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+    .countdown-label {
+      color: #aaa;
+      font-size: 1rem;
+      margin-top: 8px;
+    }
+
+    /* ── QUIZ ─────────────────────────────── */
+    #quiz { display: none; }
+
+    .timer-section {
+      margin-bottom: 20px;
+    }
+    .timer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .timer-display {
+      font-size: 2rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      transition: color 0.3s;
+    }
+    .timer-display.urgent { color: #ef4444; animation: pulse 0.5s ease infinite alternate; }
+    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.08); } }
+
+    .score-display {
+      font-size: 1rem;
+      color: #aaa;
+    }
+    .score-display span { color: #10b981; font-weight: 700; font-size: 1.2rem; }
+
+    .timer-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .timer-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #10b981, #6366f1);
+      transition: width 0.25s linear, background 0.5s;
+    }
+    .timer-fill.urgent { background: linear-gradient(90deg, #ef4444, #f59e0b); }
+
+    .question-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .question-type-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      background: rgba(99,102,241,0.2);
+      border: 1px solid rgba(99,102,241,0.3);
+      color: #a5b4fc;
+      margin-bottom: 16px;
+    }
+
+    .question-text {
+      font-size: 2.6rem;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -1px;
+    }
+
+    .answers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .answer-btn {
+      padding: 18px;
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 1.4rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .answer-btn:hover:not(.disabled) {
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    .answer-btn.correct {
+      background: rgba(16,185,129,0.3);
+      border-color: #10b981;
+      animation: correctFlash 0.3s ease;
+    }
+    .answer-btn.wrong {
+      background: rgba(239,68,68,0.25);
+      border-color: #ef4444;
+    }
+    .answer-btn.reveal {
+      border-color: #10b981;
+      opacity: 0.7;
+    }
+    .answer-btn.disabled { cursor: default; pointer-events: none; }
+
+    @keyframes correctFlash {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    .streak-bar {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 0.85rem;
+      color: #f59e0b;
+      min-height: 20px;
+    }
+
+    /* ── RESULT ───────────────────────────── */
+    #result { display: none; text-align: center; }
+
+    .result-card {
+      background: rgba(255,255,255,0.06);
+      border-radius: 20px;
+      padding: 40px 24px;
+      margin-bottom: 20px;
+    }
+
+    .result-emoji { font-size: 3.5rem; margin-bottom: 8px; }
+
+    .result-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #e2e8f0;
+    }
+
+    .result-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-box {
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 14px 8px;
+    }
+    .stat-box .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+    }
+    .stat-box .stat-label {
+      font-size: 0.75rem;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .play-again-btn {
+      padding: 14px 40px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .play-again-btn:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="../index.html" class="back-link">← Back to Arcade</a>
+  <h1>🔢 Math Blitz</h1>
+  <p class="subtitle">60 seconds. How many can you solve?</p>
+
+  <!-- MENU -->
+  <div id="menu">
+    <h2>Choose your age group</h2>
+    <div class="age-grid">
+
+      <div class="age-card" style="--color:#34d399" onclick="startGame('little')">
+        <div class="card-icon">🌟</div>
+        <div class="card-title">Little Stars</div>
+        <div class="card-ages">Ages 5 – 7</div>
+        <div class="card-desc">Counting, adding &amp; taking away small numbers</div>
+      </div>
+
+      <div class="age-card" style="--color:#60a5fa" onclick="startGame('junior')">
+        <div class="card-icon">🚀</div>
+        <div class="card-title">Juniors</div>
+        <div class="card-ages">Ages 8 – 10</div>
+        <div class="card-desc">Bigger sums, times tables &amp; simple division</div>
+      </div>
+
+      <div class="age-card" style="--color:#f59e0b" onclick="startGame('champion')">
+        <div class="card-icon">⚡</div>
+        <div class="card-title">Champions</div>
+        <div class="card-ages">Ages 11 – 13</div>
+        <div class="card-desc">Full times tables, negatives &amp; two-step problems</div>
+      </div>
+
+      <div class="age-card" style="--color:#f87171" onclick="startGame('master')">
+        <div class="card-icon">🔥</div>
+        <div class="card-title">Masters</div>
+        <div class="card-ages">Ages 14+</div>
+        <div class="card-desc">Percentages, powers, fractions &amp; order of operations</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- COUNTDOWN -->
+  <div id="countdown">
+    <div class="countdown-number" id="countdown-num">3</div>
+    <div class="countdown-label">Get ready!</div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz">
+    <div class="timer-section">
+      <div class="timer-row">
+        <div class="timer-display" id="timer-display">60</div>
+        <div class="score-display">Score: <span id="score">0</span></div>
+      </div>
+      <div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div>
+    </div>
+
+    <div class="question-card">
+      <div class="question-type-badge" id="q-type"></div>
+      <div class="question-text" id="q-text"></div>
+    </div>
+
+    <div class="answers-grid" id="answers"></div>
+    <div class="streak-bar" id="streak-bar"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result">
+    <div class="result-card">
+      <div class="result-emoji" id="result-emoji"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-stats">
+        <div class="stat-box">
+          <div class="stat-value" style="color:#10b981" id="res-score">0</div>
+          <div class="stat-label">Correct</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" style="color:#ef4444" id="res-wrong">0</div>
+          <div class="stat-label">Wrong</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" style="color:#f59e0b" id="res-streak">0</div>
+          <div class="stat-label">Best Streak</div>
+        </div>
+      </div>
+    </div>
+    <button class="play-again-btn" onclick="backToMenu()">Play Again</button>
+  </div>
+
+</div>
+
+<script>
+// ─── Question generators ───────────────────────────────────────────────────
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// Returns { type, question, answer }
+function generateQuestion(level) {
+  const generators = GENERATORS[level];
+  const gen = pick(generators);
+  return gen();
+}
+
+const GENERATORS = {
+
+  little: [
+    // Simple addition ≤ 10
+    () => { const a = rand(1,9), b = rand(1, 10-a);
+      return { type:'Addition', question:`${a} + ${b} = ?`, answer: a+b }; },
+    // Simple subtraction ≥ 0
+    () => { const a = rand(2,10), b = rand(1,a);
+      return { type:'Subtraction', question:`${a} − ${b} = ?`, answer: a-b }; },
+    // What number comes next?
+    () => { const a = rand(1,18);
+      return { type:'Counting', question:`${a}, ${a+1}, ${a+2}, __?`, answer: a+3 }; },
+    // Which is bigger presented as fill-in
+    () => { const a = rand(1,9), b = rand(1,10);
+      if (a === b) return GENERATORS.little[0]();
+      const bigger = Math.max(a,b);
+      return { type:'Compare', question:`Bigger of ${a} and ${b}?`, answer: bigger }; },
+    // Double a number
+    () => { const a = rand(1,5);
+      return { type:'Doubles', question:`Double ${a} = ?`, answer: a*2 }; },
+  ],
+
+  junior: [
+    // Addition within 100
+    () => { const a = rand(10,60), b = rand(10, 99-a);
+      return { type:'Addition', question:`${a} + ${b} = ?`, answer: a+b }; },
+    // Subtraction within 100
+    () => { const a = rand(20,99), b = rand(5, a-5);
+      return { type:'Subtraction', question:`${a} − ${b} = ?`, answer: a-b }; },
+    // Times tables 2,3,4,5,10
+    () => { const t = pick([2,3,4,5,10]), n = rand(2,12);
+      return { type:'Multiply', question:`${t} × ${n} = ?`, answer: t*n }; },
+    // Simple division
+    () => { const d = pick([2,3,4,5,10]), q = rand(2,12);
+      return { type:'Division', question:`${d*q} ÷ ${d} = ?`, answer: q }; },
+    // Missing number in addition
+    () => { const a = rand(5,30), b = rand(5,30);
+      return { type:'Missing ＋', question:`${a} + ? = ${a+b}`, answer: b }; },
+    // Missing number in times table
+    () => { const t = pick([2,3,4,5,10]), n = rand(2,10);
+      return { type:'Missing ×', question:`${t} × ? = ${t*n}`, answer: n }; },
+    // Halving
+    () => { const a = pick([4,6,8,10,12,14,16,18,20,22,24,30,40,50]);
+      return { type:'Half', question:`Half of ${a} = ?`, answer: a/2 }; },
+  ],
+
+  champion: [
+    // Full times tables up to 12
+    () => { const a = rand(6,12), b = rand(6,12);
+      return { type:'Multiply', question:`${a} × ${b} = ?`, answer: a*b }; },
+    // Division up to 12×12
+    () => { const a = rand(6,12), b = rand(6,12);
+      return { type:'Division', question:`${a*b} ÷ ${a} = ?`, answer: b }; },
+    // Two-step: a × b + c
+    () => { const a = rand(2,9), b = rand(2,9), c = rand(1,20);
+      return { type:'Two-step', question:`${a} × ${b} + ${c} = ?`, answer: a*b+c }; },
+    // Two-step: a × b − c
+    () => { const a = rand(3,9), b = rand(3,9), c = rand(1, a*b-1);
+      return { type:'Two-step', question:`${a} × ${b} − ${c} = ?`, answer: a*b-c }; },
+    // Squares up to 12
+    () => { const n = rand(2,12);
+      return { type:'Squares', question:`${n}² = ?`, answer: n*n }; },
+    // Negative numbers: addition
+    () => { const a = rand(1,15), b = rand(1,a-1);
+      return { type:'Negatives', question:`−${b} + ${a} = ?`, answer: a-b }; },
+    // Negative: a − b where result is negative
+    () => { const a = rand(1,10), b = rand(a+1, a+10);
+      return { type:'Negatives', question:`${a} − ${b} = ?`, answer: a-b }; },
+    // Missing number in equation a × ? = b
+    () => { const a = rand(3,12), b = rand(3,12);
+      return { type:'Missing ×', question:`${a} × ? = ${a*b}`, answer: b }; },
+    // Addition with carry: three digit
+    () => { const a = rand(100,500), b = rand(100,500-a+400);
+      return { type:'Addition', question:`${a} + ${b} = ?`, answer: a+b }; },
+  ],
+
+  master: [
+    // Percentage of a number
+    () => {
+      const pcts = [10,20,25,50,5,75,30,40];
+      const p = pick(pcts);
+      const n = pick([20,40,50,60,80,100,120,150,200,250,300,400,500]);
+      return { type:'Percent', question:`${p}% of ${n} = ?`, answer: Math.round(n*p/100) };
+    },
+    // Powers of 2
+    () => { const n = rand(2,8);
+      return { type:'Powers', question:`2^${n} = ?`, answer: Math.pow(2,n) }; },
+    // Powers of 3
+    () => { const n = rand(2,5);
+      return { type:'Powers', question:`3^${n} = ?`, answer: Math.pow(3,n) }; },
+    // Square roots of perfect squares
+    () => { const n = pick([4,9,16,25,36,49,64,81,100,121,144]);
+      return { type:'√ Root', question:`√${n} = ?`, answer: Math.round(Math.sqrt(n)) }; },
+    // Order of operations: (a + b) × c
+    () => { const a = rand(2,10), b = rand(2,10), c = rand(2,9);
+      return { type:'BODMAS', question:`(${a} + ${b}) × ${c} = ?`, answer: (a+b)*c }; },
+    // Order of operations: a × b + c × d
+    () => { const a = rand(2,8), b = rand(2,8), c = rand(2,6), d = rand(2,6);
+      return { type:'BODMAS', question:`${a}×${b} + ${c}×${d} = ?`, answer: a*b+c*d }; },
+    // Negative multiplication
+    () => { const a = rand(2,12), b = rand(2,12);
+      return { type:'Negatives', question:`−${a} × ${b} = ?`, answer: -(a*b) }; },
+    // Fractions of a number
+    () => {
+      const fracs = [{n:1,d:2},{n:1,d:4},{n:3,d:4},{n:1,d:5},{n:2,d:5},{n:1,d:3},{n:2,d:3}];
+      const f = pick(fracs);
+      const multiples = [];
+      for (let i = 1; i <= 20; i++) multiples.push(i * f.d);
+      const whole = pick(multiples);
+      return { type:'Fractions', question:`${f.n}/${f.d} of ${whole} = ?`, answer: Math.round(whole*f.n/f.d) };
+    },
+    // Cube roots
+    () => { const n = pick([8,27,64,125]);
+      return { type:'∛ Root', question:`∛${n} = ?`, answer: Math.round(Math.cbrt(n)) }; },
+  ],
+};
+
+// ─── Wrong answer generation ───────────────────────────────────────────────
+
+function generateChoices(answer, level) {
+  const choices = new Set([answer]);
+  const range = level === 'little' ? 3 : level === 'junior' ? 8 : level === 'champion' ? 15 : 25;
+
+  let attempts = 0;
+  while (choices.size < 4 && attempts < 200) {
+    attempts++;
+    let wrong;
+    const r = Math.random();
+    if (r < 0.5) {
+      // nearby value
+      wrong = answer + rand(-range, range);
+    } else if (r < 0.75) {
+      // common off-by-one style errors
+      wrong = answer + pick([-1, 1, -2, 2, -10, 10, 5, -5]);
+    } else {
+      wrong = rand(Math.max(answer - range, -200), answer + range);
+    }
+    if (wrong !== answer) choices.add(wrong);
+  }
+  return shuffle([...choices]);
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ─── Game state ────────────────────────────────────────────────────────────
+
+const DURATION = 60;
+let level, timerInterval, timeLeft, score, wrongCount, streak, bestStreak, answered;
+
+function startGame(lvl) {
+  level = lvl;
+  document.getElementById('menu').style.display = 'none';
+  runCountdown(3);
+}
+
+function runCountdown(n) {
+  const el = document.getElementById('countdown');
+  const num = document.getElementById('countdown-num');
+  el.style.display = 'block';
+  num.style.animation = 'none';
+  num.textContent = n;
+  void num.offsetWidth; // reflow to restart animation
+  num.style.animation = 'popIn 0.5s ease';
+
+  if (n > 0) {
+    setTimeout(() => runCountdown(n - 1), 800);
+  } else {
+    num.textContent = 'GO!';
+    setTimeout(() => {
+      el.style.display = 'none';
+      beginQuiz();
+    }, 700);
+  }
+}
+
+function beginQuiz() {
+  score = 0; wrongCount = 0; streak = 0; bestStreak = 0; timeLeft = DURATION; answered = false;
+  document.getElementById('score').textContent = 0;
+  document.getElementById('streak-bar').textContent = '';
+  document.getElementById('quiz').style.display = 'block';
+
+  updateTimerDisplay();
+  nextQuestion();
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      endGame();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const disp = document.getElementById('timer-display');
+  const fill = document.getElementById('timer-fill');
+  disp.textContent = timeLeft;
+  fill.style.width = `${(timeLeft / DURATION) * 100}%`;
+  const urgent = timeLeft <= 10;
+  disp.className = 'timer-display' + (urgent ? ' urgent' : '');
+  fill.className = 'timer-fill' + (urgent ? ' urgent' : '');
+}
+
+let currentQuestion;
+
+function nextQuestion() {
+  answered = false;
+  currentQuestion = generateQuestion(level);
+  const choices = generateChoices(currentQuestion.answer, level);
+
+  document.getElementById('q-type').textContent = currentQuestion.type;
+  document.getElementById('q-text').textContent = currentQuestion.question;
+
+  const grid = document.getElementById('answers');
+  grid.innerHTML = '';
+  choices.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = c;
+    btn.addEventListener('click', () => handleAnswer(btn, c));
+    grid.appendChild(btn);
+  });
+}
+
+function handleAnswer(btn, value) {
+  if (answered) return;
+  answered = true;
+
+  const allBtns = document.querySelectorAll('.answer-btn');
+  allBtns.forEach(b => b.classList.add('disabled'));
+
+  const correct = value === currentQuestion.answer;
+  if (correct) {
+    btn.classList.add('correct');
+    score++;
+    streak++;
+    if (streak > bestStreak) bestStreak = streak;
+    document.getElementById('score').textContent = score;
+    const streakBar = document.getElementById('streak-bar');
+    streakBar.textContent = streak >= 3 ? `🔥 ${streak} in a row!` : '';
+  } else {
+    btn.classList.add('wrong');
+    wrongCount++;
+    streak = 0;
+    document.getElementById('streak-bar').textContent = '';
+    allBtns.forEach(b => {
+      if (Number(b.textContent) === currentQuestion.answer) b.classList.add('reveal');
+    });
+  }
+
+  setTimeout(nextQuestion, correct ? 400 : 900);
+}
+
+function endGame() {
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+
+  const total = score + wrongCount;
+  const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+
+  const grades = [
+    { min:90, emoji:'🏆', title:'Perfect! You\'re a Math genius!' },
+    { min:70, emoji:'🌟', title:'Brilliant! Superstar performance!' },
+    { min:50, emoji:'😊', title:'Great work! Keep it up!' },
+    { min:30, emoji:'💪', title:'Good effort! Practice makes perfect!' },
+    { min:0,  emoji:'🎯', title:'Keep going — you\'re learning!' },
+  ];
+  const grade = grades.find(g => pct >= g.min);
+
+  document.getElementById('result-emoji').textContent = grade.emoji;
+  document.getElementById('result-title').textContent = grade.title;
+  document.getElementById('res-score').textContent = score;
+  document.getElementById('res-wrong').textContent = wrongCount;
+  document.getElementById('res-streak').textContent = bestStreak;
+}
+
+function backToMenu() {
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('menu').style.display = 'block';
+}
+</script>
+</body>
+</html>

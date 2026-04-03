@@ -10,6 +10,7 @@ A collection of small, fun browser games built for my kids. No backend, no accou
 |------|---------------------------------------------------------|
 | 🌍 **Fun with Flags** | Identify country flags from 249 nations across the globe |
 | ⚽ **Guess the Player** | Recognize famous soccer players from their photos       |
+| 🔢 **Math Blitz** | 60-second math quiz with age-appropriate difficulty levels |
 
 More games coming soon!
 
