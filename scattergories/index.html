@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scattergories</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      min-height: 100vh;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* Stars */
+    .stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .star {
+      position: absolute; background: #fff; border-radius: 50%;
+      animation: twinkle var(--d) ease-in-out infinite alternate; opacity: 0;
+    }
+    @keyframes twinkle {
+      from { opacity: 0; transform: scale(0.8); }
+      to   { opacity: 0.8; transform: scale(1.2); }
+    }
+
+    .content {
+      position: relative; z-index: 1;
+      max-width: 860px; margin: 0 auto; padding: 40px 20px 60px;
+    }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: rgba(255,255,255,0.6); text-decoration: none;
+      font-size: 0.875rem; margin-bottom: 28px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    /* Language toggle */
+    .lang-bar {
+      display: flex; justify-content: flex-end; margin-bottom: 20px; gap: 8px;
+    }
+    .lang-btn {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      color: #fff; padding: 6px 16px; border-radius: 20px; cursor: pointer;
+      font-size: 0.85rem; transition: all 0.2s;
+    }
+    .lang-btn.active { background: #6366f1; border-color: #6366f1; font-weight: 600; }
+    .lang-btn:hover:not(.active) { background: rgba(255,255,255,0.15); }
+
+    /* ============ MENU SCREEN ============ */
+    #screen-menu { text-align: center; }
+    .game-title {
+      font-size: clamp(2.4rem, 6vw, 3.6rem);
+      font-weight: 800; margin-bottom: 14px;
+      background: linear-gradient(90deg, #a78bfa, #6366f1, #38bdf8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .game-subtitle {
+      font-size: 1.05rem; color: rgba(255,255,255,0.7);
+      max-width: 540px; margin: 0 auto 40px; line-height: 1.5;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none; color: #fff; font-size: 1.1rem; font-weight: 700;
+      padding: 14px 44px; border-radius: 50px; cursor: pointer;
+      box-shadow: 0 4px 24px rgba(99,102,241,0.45);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(99,102,241,0.6); }
+    .btn-primary:active { transform: translateY(0); }
+
+    /* ============ PLAYING SCREEN ============ */
+    #screen-play { display: none; }
+
+    .play-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+
+    .letter-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, #6366f1, #a78bfa);
+      padding: 10px 24px; border-radius: 50px;
+      font-size: 1rem; font-weight: 600;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.4);
+    }
+    .letter-badge .big-letter {
+      font-size: 2rem; font-weight: 900; line-height: 1;
+    }
+
+    /* Timer */
+    .timer-wrap { text-align: right; min-width: 120px; }
+    .timer-display {
+      font-size: 1.8rem; font-weight: 800; letter-spacing: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .timer-display.warning { color: #f97316; }
+    .timer-display.danger  { color: #ef4444; animation: pulse 0.5s infinite alternate; }
+    @keyframes pulse { from { opacity: 1; } to { opacity: 0.5; } }
+    .timer-bar-track {
+      height: 6px; background: rgba(255,255,255,0.1);
+      border-radius: 4px; margin-top: 6px; overflow: hidden;
+    }
+    .timer-bar-fill {
+      height: 100%; border-radius: 4px;
+      background: linear-gradient(90deg, #6366f1, #a78bfa);
+      transition: width 1s linear, background 0.5s;
+    }
+    .timer-bar-fill.warning { background: linear-gradient(90deg, #f97316, #fb923c); }
+    .timer-bar-fill.danger  { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+    /* Category rows */
+    .categories-grid {
+      display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px;
+    }
+    .cat-row {
+      display: grid; grid-template-columns: 1fr 2fr;
+      align-items: center; gap: 12px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; padding: 12px 16px;
+      transition: background 0.2s;
+    }
+    .cat-row:focus-within { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.4); }
+    .cat-label {
+      font-size: 0.9rem; font-weight: 600; color: rgba(255,255,255,0.85);
+    }
+    .cat-input {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px; color: #fff; font-size: 1rem; padding: 8px 14px;
+      outline: none; width: 100%; transition: border-color 0.2s, background 0.2s;
+    }
+    .cat-input::placeholder { color: rgba(255,255,255,0.3); }
+    .cat-input:focus { border-color: #6366f1; background: rgba(255,255,255,0.12); }
+
+    /* Submit button */
+    .submit-wrap { text-align: center; }
+    .btn-submit {
+      background: linear-gradient(135deg, #059669, #10b981);
+      border: none; color: #fff; font-size: 1rem; font-weight: 700;
+      padding: 12px 40px; border-radius: 50px; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(16,185,129,0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(16,185,129,0.55); }
+
+    /* ============ RESULT SCREEN ============ */
+    #screen-result { display: none; }
+
+    .result-header { text-align: center; margin-bottom: 32px; }
+    .result-title {
+      font-size: 1.8rem; font-weight: 800; margin-bottom: 8px;
+    }
+    .result-letter-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.4);
+      padding: 6px 20px; border-radius: 50px; font-size: 1rem;
+      margin-bottom: 20px;
+    }
+    .result-letter-badge .big-letter {
+      font-size: 1.6rem; font-weight: 900;
+      background: linear-gradient(90deg, #a78bfa, #6366f1);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Score display */
+    .score-block {
+      display: inline-block; text-align: center;
+      background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(167,139,250,0.2));
+      border: 1px solid rgba(99,102,241,0.4); border-radius: 16px;
+      padding: 18px 40px; margin-bottom: 10px;
+    }
+    .score-number {
+      font-size: 3rem; font-weight: 900;
+      background: linear-gradient(90deg, #a78bfa, #6366f1, #38bdf8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; line-height: 1;
+    }
+    .score-label { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-top: 4px; }
+    .grade-msg { font-size: 1.4rem; font-weight: 700; margin: 12px 0 28px; }
+
+    /* Results table */
+    .results-table {
+      width: 100%; border-collapse: collapse; margin-bottom: 32px;
+    }
+    .results-table th {
+      text-align: left; font-size: 0.78rem; text-transform: uppercase;
+      letter-spacing: 0.08em; color: rgba(255,255,255,0.5);
+      padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .results-table td {
+      padding: 10px 12px; font-size: 0.92rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .results-table tr:last-child td { border-bottom: none; }
+    .results-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+    .td-cat { font-weight: 600; color: rgba(255,255,255,0.85); }
+    .td-answer { color: #fff; }
+    .td-status { font-size: 1.2rem; text-align: center; }
+    .td-example { color: rgba(255,255,255,0.55); font-style: italic; }
+    .example-letter {
+      color: #a78bfa; font-style: normal; font-weight: 700;
+    }
+    .row-correct td { background: rgba(16,185,129,0.06); }
+    .row-wrong   td { background: rgba(239,68,68,0.04); }
+
+    .play-again-wrap { text-align: center; }
+
+    /* Utility */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="content">
+
+  <!-- Back link -->
+  <a href="../index.html" class="back-link">← Back to Arcade</a>
+
+  <!-- Language toggle -->
+  <div class="lang-bar">
+    <button class="lang-btn active" id="btn-en" onclick="setLang('en')">🇬🇧 English</button>
+    <button class="lang-btn"        id="btn-de" onclick="setLang('de')">🇩🇪 Deutsch</button>
+  </div>
+
+  <!-- SCREEN: MENU -->
+  <div id="screen-menu">
+    <h1 class="game-title">🎲 Scattergories</h1>
+    <p class="game-subtitle" id="ui-subtitle"></p>
+    <button class="btn-primary" onclick="startGame()">Start Game</button>
+  </div>
+
+  <!-- SCREEN: PLAYING -->
+  <div id="screen-play">
+    <div class="play-header">
+      <div class="letter-badge">
+        <span id="ui-letter-label"></span>:&nbsp;<span class="big-letter" id="current-letter">B</span>
+      </div>
+      <div class="timer-wrap">
+        <div class="timer-display" id="timer-display">2:00</div>
+        <div class="timer-bar-track">
+          <div class="timer-bar-fill" id="timer-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="categories-grid" id="categories-grid"></div>
+
+    <div class="submit-wrap">
+      <button class="btn-submit" id="btn-submit" onclick="submitAnswers()"></button>
+    </div>
+  </div>
+
+  <!-- SCREEN: RESULT -->
+  <div id="screen-result">
+    <div class="result-header">
+      <div class="result-letter-badge">
+        <span id="res-letter-label"></span>:&nbsp;<span class="big-letter" id="res-letter"></span>
+      </div>
+      <div class="score-block">
+        <div class="score-number" id="res-score-number">0 / 9</div>
+        <div class="score-label" id="res-score-label"></div>
+      </div>
+      <div class="grade-msg" id="res-grade"></div>
+    </div>
+    <table class="results-table" id="results-table">
+      <thead>
+        <tr>
+          <th id="th-cat">Category</th>
+          <th id="th-answer">Your Answer</th>
+          <th></th>
+          <th id="th-example">Example</th>
+        </tr>
+      </thead>
+      <tbody id="results-tbody"></tbody>
+    </table>
+    <div class="play-again-wrap">
+      <button class="btn-primary" id="btn-play-again" onclick="startGame()"></button>
+    </div>
+  </div>
+
+</div><!-- .content -->
+
+<script>
+// ─── CONSTANTS ───────────────────────────────────────────────────────────────
+const LETTERS = 'ABCDEFGHIJKLMNOPRSTW'.split('');
+const CATS    = ['city','country','color','instrument','drink','school','clothing','sport','vip'];
+const TOTAL_SECONDS = 120;
+
+// ─── STRINGS ─────────────────────────────────────────────────────────────────
+const STRINGS = {
+  en: {
+    subtitle:   "Think of a word for each category — starting with the same letter!",
+    letterLabel:"Letter",
+    timeUp:     "Time's up!",
+    submitBtn:  "Submit Answers",
+    playAgain:  "Play Again",
+    yourAnswer: "Your Answer",
+    example:    "Example",
+    scoreLabel: "Score",
+    catLabels:  { city:"City", country:"Country", color:"Color", instrument:"Music Instrument",
+                  drink:"Drink", school:"In School", clothing:"Clothing", sport:"Sport", vip:"Famous Person" }
+  },
+  de: {
+    subtitle:   "Denk dir für jede Kategorie ein Wort aus — das mit dem gleichen Buchstaben beginnt!",
+    letterLabel:"Buchstabe",
+    timeUp:     "Zeit abgelaufen!",
+    submitBtn:  "Antworten abgeben",
+    playAgain:  "Nochmal spielen",
+    yourAnswer: "Deine Antwort",
+    example:    "Beispiel",
+    scoreLabel: "Punkte",
+    catLabels:  { city:"Stadt", country:"Land", color:"Farbe", instrument:"Musikinstrument",
+                  drink:"Getränk", school:"In der Schule", clothing:"Kleidung", sport:"Sport", vip:"Prominente Person" }
+  }
+};
+
+// ─── WORD LISTS ───────────────────────────────────────────────────────────────
+const WORDS = {
+  city: {
+    en: ["amsterdam","athens","austin","abu dhabi","ankara","accra","adelaide","antwerp","algiers","almaty","berlin","barcelona","budapest","brussels","bogota","buenos aires","bangkok","bangalore","beirut","bucharest","cairo","chicago","cape town","casablanca","copenhagen","caracas","chennai","colombo","dubai","delhi","dhaka","dublin","denver","dakar","edinburgh","florence","frankfurt","fukuoka","geneva","glasgow","guangzhou","hamburg","hanoi","havana","helsinki","houston","hong kong","istanbul","islamabad","jakarta","jerusalem","johannesburg","karachi","kyiv","kuala lumpur","kabul","london","lima","lisbon","lagos","los angeles","moscow","madrid","mumbai","manila","melbourne","milan","montreal","nairobi","naples","oslo","ottawa","paris","prague","perth","phoenix","rome","riyadh","rio de janeiro","sydney","seoul","singapore","stockholm","santiago","tokyo","toronto","taipei","tehran","ulaanbaatar","vienna","vancouver","venice","warsaw","washington","yokohama","zurich","zagreb"],
+    de: ["amsterdam","athen","austin","abu dhabi","ankara","accra","adelaide","antwerpen","algier","almaty","berlin","barcelona","budapest","brüssel","bogotá","buenos aires","bangkok","bangalore","beirut","bukarest","kairo","chicago","kapstadt","casablanca","kopenhagen","caracas","chennai","colombo","dubai","delhi","dhaka","dublin","denver","dakar","edinburgh","florenz","frankfurt","fukuoka","genf","glasgow","guangzhou","hamburg","hanoi","havanna","helsinki","houston","hongkong","istanbul","islamabad","jakarta","jerusalem","johannesburg","karachi","kiew","kuala lumpur","kabul","london","lima","lissabon","lagos","los angeles","moskau","madrid","mumbai","manila","melbourne","mailand","montreal","nairobi","neapel","oslo","ottawa","paris","prag","perth","phoenix","rom","riad","rio de janeiro","sydney","seoul","singapur","stockholm","santiago","tokio","toronto","taipeh","teheran","ulaanbaatar","wien","vancouver","venedig","warschau","washington","yokohama","zürich","zagreb","münchen","düsseldorf","köln","stuttgart","bremen","hannover","leipzig","nürnberg","bonn","augsburg","wiesbaden","freiburg","heidelberg","erfurt","potsdam","rostock","kiel"]
+  },
+  country: {
+    en: ["afghanistan","albania","algeria","andorra","angola","argentina","armenia","australia","austria","azerbaijan","bahamas","bahrain","bangladesh","belarus","belgium","belize","benin","bhutan","bolivia","botswana","brazil","brunei","bulgaria","burkina faso","burundi","cambodia","cameroon","canada","chad","chile","china","colombia","comoros","congo","croatia","cuba","cyprus","czech republic","denmark","djibouti","dominican republic","ecuador","egypt","eritrea","estonia","ethiopia","fiji","finland","france","gabon","gambia","georgia","germany","ghana","greece","guatemala","guinea","guyana","haiti","honduras","hungary","iceland","india","indonesia","iran","iraq","ireland","israel","italy","jamaica","japan","jordan","kazakhstan","kenya","kuwait","kyrgyzstan","laos","latvia","lebanon","lesotho","liberia","libya","liechtenstein","lithuania","luxembourg","madagascar","malawi","malaysia","maldives","mali","malta","mauritania","mauritius","mexico","moldova","monaco","mongolia","montenegro","morocco","mozambique","myanmar","namibia","nepal","netherlands","new zealand","nicaragua","niger","nigeria","norway","oman","pakistan","panama","paraguay","peru","philippines","poland","portugal","qatar","romania","russia","rwanda","saudi arabia","senegal","serbia","singapore","slovakia","slovenia","somalia","south africa","spain","sri lanka","sudan","sweden","switzerland","syria","taiwan","tajikistan","tanzania","thailand","togo","trinidad","tunisia","turkey","turkmenistan","uganda","ukraine","united kingdom","united states","uruguay","uzbekistan","venezuela","vietnam","yemen","zambia","zimbabwe"],
+    de: ["afghanistan","albanien","algerien","andorra","angola","argentinien","armenien","australien","österreich","aserbaidschan","bahamas","bahrain","bangladesch","weißrussland","belgien","belize","benin","bhutan","bolivien","botswana","brasilien","brunei","bulgarien","burkina faso","burundi","kambodscha","kamerun","kanada","tschad","chile","china","kolumbien","komoren","kongo","kroatien","kuba","zypern","tschechien","dänemark","dschibuti","dominikanische republik","ecuador","ägypten","eritrea","estland","äthiopien","fidschi","finnland","frankreich","gabun","gambia","georgien","deutschland","ghana","griechenland","guatemala","guinea","guyana","haiti","honduras","ungarn","island","indien","indonesien","iran","irak","irland","israel","italien","jamaika","japan","jordanien","kasachstan","kenia","kuwait","kirgisistan","laos","lettland","libanon","lesotho","liberia","libyen","liechtenstein","litauen","luxemburg","madagaskar","malawi","malaysia","malediven","mali","malta","mauretanien","mauritius","mexiko","moldau","monaco","mongolei","montenegro","marokko","mosambik","myanmar","namibia","nepal","niederlande","neuseeland","nicaragua","niger","nigeria","norwegen","oman","pakistan","panama","paraguay","peru","philippinen","polen","portugal","katar","rumänien","russland","ruanda","saudi-arabien","senegal","serbien","singapur","slowakei","slowenien","somalia","südafrika","spanien","sri lanka","sudan","schweden","schweiz","syrien","taiwan","tadschikistan","tansania","thailand","togo","trinidad","tunesien","türkei","turkmenistan","uganda","ukraine","vereinigtes königreich","vereinigte staaten","uruguay","usbekistan","venezuela","vietnam","jemen","sambia","simbabwe"]
+  },
+  color: {
+    en: ["red","orange","yellow","green","blue","purple","violet","pink","brown","black","white","gray","grey","gold","silver","teal","turquoise","beige","indigo","magenta","maroon","olive","navy","crimson","coral","salmon","lavender","cyan","lime","amber","azure","ivory","khaki","mauve","ochre","peach","rose","ruby","scarlet","tan","taupe","vermilion"],
+    de: ["rot","orange","gelb","grün","blau","lila","violett","rosa","braun","schwarz","weiß","grau","gold","silber","türkis","beige","indigo","magenta","dunkelrot","olivgrün","dunkelblau","karmesin","koralle","lachs","lavendel","cyan","limette","bernstein","azurblau","elfenbein","khaki","malve","ocker","pfirsich","rubinrot","scharlachrot","taupe","purpur"]
+  },
+  instrument: {
+    en: ["piano","guitar","violin","drums","flute","trumpet","cello","bass","harp","saxophone","clarinet","oboe","trombone","tuba","accordion","banjo","mandolin","ukulele","bassoon","viola","sitar","bagpipes","xylophone","harmonica","bongo","tambourine","kazoo","lute","organ","synthesizer","marimba","dulcimer","harpsichord","didgeridoo","recorder","zither","french horn"],
+    de: ["klavier","gitarre","violine","geige","schlagzeug","flöte","trompete","cello","bass","harfe","saxophon","klarinette","oboe","posaune","tuba","akkordeon","banjo","mandoline","ukulele","fagott","bratsche","sitar","dudelsack","xylophon","mundharmonika","bongo","tamburin","kazoo","laute","orgel","synthesizer","marimba","cembalo","didgeridoo","blockflöte","zither","waldhorn"]
+  },
+  drink: {
+    en: ["water","wine","beer","juice","coffee","tea","milk","soda","lemonade","whiskey","vodka","rum","gin","tequila","champagne","brandy","cider","smoothie","cocktail","espresso","cappuccino","latte","cola","sprite","fanta","orange juice","apple juice","green tea","black tea","hot chocolate","milkshake","punch","mojito","martini","sangria","prosecco","mead","sake","kombucha"],
+    de: ["wasser","wein","bier","saft","kaffee","tee","milch","limonade","lemonade","whiskey","wodka","rum","gin","tequila","sekt","champagner","cognac","apfelwein","smoothie","cocktail","espresso","cappuccino","latte","cola","sprite","fanta","orangensaft","apfelsaft","grüntee","schwarztee","kakao","milchshake","punsch","mojito","martini","sangria","prosecco","met","sake","kombucha","mineralwasser","sprudel","radler","malzbier"]
+  },
+  school: {
+    en: ["pencil","pen","paper","book","ruler","eraser","notebook","backpack","desk","chair","board","chalk","teacher","student","class","homework","test","exam","calculator","scissors","glue","compass","map","globe","library","dictionary","art","math","science","english","history","geography","biology","chemistry","physics","lunch","locker","gymnasium","cafeteria"],
+    de: ["stift","bleistift","papier","buch","lineal","radiergummi","heft","rucksack","schreibtisch","stuhl","tafel","kreide","lehrer","schüler","klasse","hausaufgaben","test","prüfung","taschenrechner","schere","kleber","zirkel","karte","globus","bibliothek","wörterbuch","kunst","mathe","mathematik","naturwissenschaft","englisch","geschichte","geografie","biologie","chemie","physik","mittagessen","spind","turnhalle","kantine","kugelschreiber","füller","mäppchen"]
+  },
+  clothing: {
+    en: ["shirt","pants","jeans","jacket","coat","dress","skirt","socks","shoes","boots","hat","scarf","gloves","sweater","hoodie","blouse","tie","belt","underwear","bra","shorts","swimsuit","bikini","pajamas","robe","vest","cardigan","blazer","trench coat","raincoat","sneakers","sandals","heels","cap","beanie","mittens","leggings","tights","uniform","suit"],
+    de: ["hemd","hose","jeans","jacke","mantel","kleid","rock","socken","schuhe","stiefel","hut","schal","handschuhe","pullover","hoodie","bluse","krawatte","gürtel","unterwäsche","shorts","badeanzug","bikini","schlafanzug","bademantel","weste","strickjacke","blazer","trenchcoat","regenmantel","turnschuhe","sandalen","absatzschuhe","mütze","fäustlinge","leggings","strumpfhose","uniform","anzug","kappe"]
+  },
+  sport: {
+    en: ["soccer","football","basketball","tennis","baseball","golf","swimming","running","cycling","volleyball","boxing","wrestling","judo","karate","gymnastics","athletics","skiing","snowboarding","surfing","rowing","sailing","archery","badminton","table tennis","hockey","rugby","cricket","polo","fencing","triathlon","marathon","weightlifting","rock climbing","skateboarding","bowling","darts","billiards","curling"],
+    de: ["fußball","basketball","tennis","baseball","golf","schwimmen","laufen","radfahren","volleyball","boxen","ringen","judo","karate","turnen","leichtathletik","skifahren","snowboarden","surfen","rudern","segeln","bogenschießen","badminton","tischtennis","hockey","rugby","cricket","polo","fechten","triathlon","marathon","gewichtheben","klettern","skateboarden","bowling","darts","billard","curling","handball","reiten"]
+  },
+  vip: {
+    en: ["albert einstein","abraham lincoln","angela merkel","andy warhol","adele","arnold schwarzenegger","beyonce","bill gates","bob dylan","bruce lee","charles darwin","charlie chaplin","dalai lama","david beckham","einstein","elton john","elvis presley","elon musk","emma watson","fred astaire","freddie mercury","gandhi","george washington","jack nicholson","jackie chan","james dean","jennifer lopez","john lennon","julia roberts","julius caesar","kanye west","kim kardashian","lady gaga","lebron james","leonardo da vinci","madonna","marilyn monroe","mark zuckerberg","michael jackson","michael jordan","napoleon","nelson mandela","oprah winfrey","pablo picasso","princess diana","queen elizabeth","robin williams","rihanna","roger federer","ronaldo","serena williams","shakespeare","steve jobs","taylor swift","tiger woods","tom hanks","winston churchill"],
+    de: ["albert einstein","angela merkel","arnold schwarzenegger","beethoven","bertha von suttner","bismarck","conchita wurst","david hasselhoff","einstein","falco","franz beckenbauer","friedrich schiller","goethe","gottlieb daimler","helmut kohl","herbert grönemeyer","immanuel kant","ina müller","jakob grimm","johannes brahms","karl marx","katharina die große","konrad adenauer","lena meyer-landrut","ludwig van beethoven","maria theresia","marlene dietrich","martin luther","michael schumacher","mozart","napoleon","nena","nikolaus kopernikus","otto von bismarck","rammstein","robert koch","rosa luxemburg","schiller","sigmund freud","stefan zweig","till lindemann","udo jürgens","voltaire","werner heisenberg","willy brandt","yoko ono"]
+  }
+};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let lang          = 'en';
+let currentLetter = 'B';
+let timerInterval = null;
+let secondsLeft   = TOTAL_SECONDS;
+
+// ─── STARS ────────────────────────────────────────────────────────────────────
+(function createStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*4+2).toFixed(1)}s;animation-delay:${(Math.random()*6).toFixed(1)}s`;
+    container.appendChild(s);
+  }
+})();
+
+// ─── LANGUAGE ─────────────────────────────────────────────────────────────────
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  document.getElementById('btn-de').classList.toggle('active', l === 'de');
+  renderUI();
+}
+
+function renderUI() {
+  const s = STRINGS[lang];
+  document.getElementById('ui-subtitle').textContent    = s.subtitle;
+  document.getElementById('ui-letter-label').textContent = s.letterLabel;
+  document.getElementById('res-letter-label').textContent = s.letterLabel;
+  document.getElementById('btn-submit').textContent      = s.submitBtn;
+  document.getElementById('btn-play-again').textContent  = s.playAgain;
+  document.getElementById('th-cat').textContent          = CATS.length ? s.catLabels['city'] ? 'Category' : 'Kategorie' : 'Category';
+  document.getElementById('th-answer').textContent       = s.yourAnswer;
+  document.getElementById('th-example').textContent      = s.example;
+  document.getElementById('res-score-label').textContent = s.scoreLabel;
+  // Re-render category labels if play screen is visible
+  CATS.forEach(cat => {
+    const lbl = document.getElementById('label-' + cat);
+    if (lbl) lbl.textContent = s.catLabels[cat];
+  });
+}
+
+// ─── SCREEN HELPERS ───────────────────────────────────────────────────────────
+function showScreen(id) {
+  ['screen-menu','screen-play','screen-result'].forEach(s => {
+    document.getElementById(s).style.display = (s === id) ? 'block' : 'none';
+  });
+}
+
+// ─── GAME FLOW ────────────────────────────────────────────────────────────────
+function startGame() {
+  stopTimer();
+  currentLetter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+  document.getElementById('current-letter').textContent = currentLetter;
+  document.getElementById('res-letter').textContent     = currentLetter;
+  buildGrid();
+  renderUI();
+  secondsLeft = TOTAL_SECONDS;
+  updateTimerDisplay();
+  showScreen('screen-play');
+  // focus first input
+  const first = document.querySelector('.cat-input');
+  if (first) setTimeout(() => first.focus(), 100);
+  startTimer();
+}
+
+function buildGrid() {
+  const grid = document.getElementById('categories-grid');
+  grid.innerHTML = '';
+  const s = STRINGS[lang];
+  CATS.forEach(cat => {
+    const row = document.createElement('div');
+    row.className = 'cat-row';
+    row.innerHTML = `
+      <span class="cat-label" id="label-${cat}">${s.catLabels[cat]}</span>
+      <input class="cat-input" id="input-${cat}" type="text"
+             placeholder="${currentLetter.toLowerCase()}…"
+             autocomplete="off" spellcheck="false" />
+    `;
+    grid.appendChild(row);
+  });
+}
+
+// ─── TIMER ────────────────────────────────────────────────────────────────────
+function startTimer() {
+  timerInterval = setInterval(() => {
+    secondsLeft--;
+    updateTimerDisplay();
+    if (secondsLeft <= 0) {
+      stopTimer();
+      submitAnswers(true);
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(secondsLeft / 60);
+  const s = secondsLeft % 60;
+  const disp = document.getElementById('timer-display');
+  const bar  = document.getElementById('timer-bar');
+  const pct  = (secondsLeft / TOTAL_SECONDS) * 100;
+  disp.textContent = `${m}:${String(s).padStart(2,'0')}`;
+  bar.style.width  = pct + '%';
+
+  const cls = secondsLeft <= 10 ? 'danger' : secondsLeft <= 30 ? 'warning' : '';
+  disp.className = 'timer-display' + (cls ? ' ' + cls : '');
+  bar.className  = 'timer-bar-fill' + (cls ? ' ' + cls : '');
+}
+
+// ─── SUBMIT ───────────────────────────────────────────────────────────────────
+function submitAnswers(timedOut = false) {
+  stopTimer();
+  if (timedOut) {
+    // brief flash message
+    const disp = document.getElementById('timer-display');
+    disp.textContent = STRINGS[lang].timeUp;
+    disp.className = 'timer-display danger';
+  }
+
+  const letter = currentLetter.toLowerCase();
+  let score = 0;
+  const results = [];
+
+  CATS.forEach(cat => {
+    const raw     = document.getElementById('input-' + cat).value;
+    const trimmed = raw.trim().toLowerCase();
+    const valid   = checkAnswer(cat, trimmed, letter);
+    if (valid) score++;
+    const example = getExample(cat, letter);
+    results.push({ cat, answer: raw.trim(), valid, example });
+  });
+
+  renderResults(results, score);
+  showScreen('screen-result');
+}
+
+function checkAnswer(cat, word, letter) {
+  if (!word) return false;
+  if (!word.startsWith(letter)) return false;
+  const list = WORDS[cat][lang];
+  return list.includes(word);
+}
+
+function getExample(cat, letter) {
+  const list = WORDS[cat][lang];
+  const matches = list.filter(w => w.startsWith(letter));
+  if (matches.length === 0) {
+    // fall back to other lang
+    const other = lang === 'en' ? 'de' : 'en';
+    const fb = WORDS[cat][other].filter(w => w.startsWith(letter));
+    return fb.length > 0 ? fb[0] : '—';
+  }
+  return matches[Math.floor(Math.random() * Math.min(matches.length, 5))];
+}
+
+function renderResults(results, score) {
+  const s = STRINGS[lang];
+
+  // Score
+  document.getElementById('res-score-number').textContent = `${score} / 9`;
+  document.getElementById('res-letter').textContent        = currentLetter;
+  document.getElementById('res-letter-label').textContent  = s.letterLabel;
+  document.getElementById('res-score-label').textContent   = s.scoreLabel;
+  document.getElementById('th-answer').textContent         = s.yourAnswer;
+  document.getElementById('th-example').textContent        = s.example;
+
+  // Grade
+  let grade = '';
+  if (lang === 'en') {
+    if (score === 9)      grade = '🏆 Perfect!';
+    else if (score >= 7)  grade = '🌟 Excellent!';
+    else if (score >= 5)  grade = '😊 Good job!';
+    else if (score >= 3)  grade = '💪 Keep practicing!';
+    else                  grade = '🎯 Better luck next time!';
+  } else {
+    if (score === 9)      grade = '🏆 Perfekt!';
+    else if (score >= 7)  grade = '🌟 Ausgezeichnet!';
+    else if (score >= 5)  grade = '😊 Gut gemacht!';
+    else if (score >= 3)  grade = '💪 Weiter üben!';
+    else                  grade = '🎯 Nächstes Mal klappt\'s!';
+  }
+  document.getElementById('res-grade').textContent = grade;
+
+  // Table
+  const tbody = document.getElementById('results-tbody');
+  tbody.innerHTML = '';
+  results.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.className = r.valid ? 'row-correct' : 'row-wrong';
+
+    // Highlight first letter in example
+    const exLow = r.example.toLowerCase();
+    const letter = currentLetter.toLowerCase();
+    let exHtml = r.example;
+    if (exLow.startsWith(letter)) {
+      const prefix = r.example.slice(0, letter.length);
+      const rest   = r.example.slice(letter.length);
+      exHtml = `<span class="example-letter">${escHtml(prefix)}</span>${escHtml(rest)}`;
+    }
+
+    tr.innerHTML = `
+      <td class="td-cat">${escHtml(s.catLabels[r.cat])}</td>
+      <td class="td-answer">${escHtml(r.answer || '—')}</td>
+      <td class="td-status">${r.valid ? '✅' : '❌'}</td>
+      <td class="td-example">${exHtml}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('btn-play-again').textContent = s.playAgain;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+renderUI();
+showScreen('screen-menu');
+</script>
+</body>
+</html>
