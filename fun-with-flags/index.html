@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fun with Flags</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 32px;
+      font-size: 0.95rem;
+    }
+
+    /* Menu screen */
+    #menu { text-align: center; }
+
+    #menu h2 {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      color: #ccc;
+    }
+
+    .continent-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .continent-btn {
+      padding: 14px 10px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .continent-btn:hover {
+      background: rgba(255,255,255,0.15);
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+
+    .continent-btn.all {
+      grid-column: 1 / -1;
+      background: rgba(99, 102, 241, 0.25);
+      border-color: rgba(99, 102, 241, 0.5);
+    }
+
+    .continent-btn.all:hover {
+      background: rgba(99, 102, 241, 0.4);
+    }
+
+    /* Quiz screen */
+    #quiz { display: none; }
+
+    .score-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      font-size: 0.95rem;
+    }
+
+    .score-bar .label { color: #aaa; }
+    .score-bar .value { font-weight: 700; font-size: 1.1rem; }
+    .streak { color: #f59e0b; }
+    .correct-count { color: #10b981; }
+
+    .flag-display {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .flag-display img {
+      width: 260px;
+      height: 170px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      border: 3px solid rgba(255,255,255,0.1);
+    }
+
+    .options {
+      display: grid;
+      gap: 12px;
+    }
+
+    .option-btn {
+      padding: 16px;
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 1.05rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .option-btn:hover:not(.disabled) {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.25);
+    }
+
+    .option-btn.correct {
+      background: rgba(16, 185, 129, 0.3);
+      border-color: #10b981;
+    }
+
+    .option-btn.wrong {
+      background: rgba(239, 68, 68, 0.3);
+      border-color: #ef4444;
+    }
+
+    .option-btn.disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+
+    .option-btn.reveal {
+      border-color: #10b981;
+      opacity: 1;
+    }
+
+    /* Result screen */
+    #result { display: none; text-align: center; }
+
+    .result-card {
+      background: rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 40px 30px;
+      margin-bottom: 24px;
+    }
+
+    .result-card .big-score {
+      font-size: 4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #10b981, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .result-card .out-of {
+      font-size: 1.2rem;
+      color: #aaa;
+      margin-top: 4px;
+    }
+
+    .result-card .percentage {
+      font-size: 1.5rem;
+      margin-top: 12px;
+      color: #e2e8f0;
+    }
+
+    .result-card .best-streak {
+      margin-top: 12px;
+      color: #f59e0b;
+      font-size: 1rem;
+    }
+
+    .play-again-btn {
+      padding: 14px 40px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .play-again-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #10b981);
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Fun with Flags</h1>
+    <p class="subtitle">How well do you know your country flags?</p>
+
+    <!-- Menu -->
+    <div id="menu">
+      <h2>Choose a region</h2>
+      <div class="continent-grid">
+        <button class="continent-btn all" onclick="startQuiz('all')">All Countries</button>
+        <button class="continent-btn" onclick="startQuiz('Africa')">Africa</button>
+        <button class="continent-btn" onclick="startQuiz('Asia')">Asia</button>
+        <button class="continent-btn" onclick="startQuiz('Europe')">Europe</button>
+        <button class="continent-btn" onclick="startQuiz('North America')">North America</button>
+        <button class="continent-btn" onclick="startQuiz('South America')">South America</button>
+        <button class="continent-btn" onclick="startQuiz('Oceania')">Oceania</button>
+      </div>
+    </div>
+
+    <!-- Quiz -->
+    <div id="quiz">
+      <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+      <div class="score-bar">
+        <div><span class="label">Score: </span><span class="value correct-count" id="score">0</span></div>
+        <div><span class="label">Question: </span><span class="value" id="qnum">1/10</span></div>
+        <div><span class="label">Streak: </span><span class="value streak" id="streak">0</span></div>
+      </div>
+      <div class="flag-display">
+        <img id="flag-img" src="" alt="Country flag">
+      </div>
+      <div class="options" id="options"></div>
+    </div>
+
+    <!-- Result -->
+    <div id="result">
+      <div class="result-card">
+        <div class="big-score" id="final-score">0</div>
+        <div class="out-of" id="final-total">out of 10</div>
+        <div class="percentage" id="final-pct">0%</div>
+        <div class="best-streak" id="final-streak">Best streak: 0</div>
+      </div>
+      <button class="play-again-btn" onclick="backToMenu()">Play Again</button>
+    </div>
+  </div>
+
+<script>
+const COUNTRIES = [
+  // Africa
+  {name:"Algeria",code:"dz",continent:"Africa"},{name:"Angola",code:"ao",continent:"Africa"},{name:"Benin",code:"bj",continent:"Africa"},{name:"Botswana",code:"bw",continent:"Africa"},{name:"Burkina Faso",code:"bf",continent:"Africa"},{name:"Burundi",code:"bi",continent:"Africa"},{name:"Cameroon",code:"cm",continent:"Africa"},{name:"Cape Verde",code:"cv",continent:"Africa"},{name:"Central African Republic",code:"cf",continent:"Africa"},{name:"Chad",code:"td",continent:"Africa"},{name:"Comoros",code:"km",continent:"Africa"},{name:"Congo",code:"cg",continent:"Africa"},{name:"DR Congo",code:"cd",continent:"Africa"},{name:"Djibouti",code:"dj",continent:"Africa"},{name:"Egypt",code:"eg",continent:"Africa"},{name:"Equatorial Guinea",code:"gq",continent:"Africa"},{name:"Eritrea",code:"er",continent:"Africa"},{name:"Eswatini",code:"sz",continent:"Africa"},{name:"Ethiopia",code:"et",continent:"Africa"},{name:"Gabon",code:"ga",continent:"Africa"},{name:"Gambia",code:"gm",continent:"Africa"},{name:"Ghana",code:"gh",continent:"Africa"},{name:"Guinea",code:"gn",continent:"Africa"},{name:"Guinea-Bissau",code:"gw",continent:"Africa"},{name:"Ivory Coast",code:"ci",continent:"Africa"},{name:"Kenya",code:"ke",continent:"Africa"},{name:"Lesotho",code:"ls",continent:"Africa"},{name:"Liberia",code:"lr",continent:"Africa"},{name:"Libya",code:"ly",continent:"Africa"},{name:"Madagascar",code:"mg",continent:"Africa"},{name:"Malawi",code:"mw",continent:"Africa"},{name:"Mali",code:"ml",continent:"Africa"},{name:"Mauritania",code:"mr",continent:"Africa"},{name:"Mauritius",code:"mu",continent:"Africa"},{name:"Morocco",code:"ma",continent:"Africa"},{name:"Mozambique",code:"mz",continent:"Africa"},{name:"Namibia",code:"na",continent:"Africa"},{name:"Niger",code:"ne",continent:"Africa"},{name:"Nigeria",code:"ng",continent:"Africa"},{name:"Rwanda",code:"rw",continent:"Africa"},{name:"Senegal",code:"sn",continent:"Africa"},{name:"Seychelles",code:"sc",continent:"Africa"},{name:"Sierra Leone",code:"sl",continent:"Africa"},{name:"Somalia",code:"so",continent:"Africa"},{name:"South Africa",code:"za",continent:"Africa"},{name:"South Sudan",code:"ss",continent:"Africa"},{name:"Sudan",code:"sd",continent:"Africa"},{name:"Tanzania",code:"tz",continent:"Africa"},{name:"Togo",code:"tg",continent:"Africa"},{name:"Tunisia",code:"tn",continent:"Africa"},{name:"Uganda",code:"ug",continent:"Africa"},{name:"Zambia",code:"zm",continent:"Africa"},{name:"Zimbabwe",code:"zw",continent:"Africa"},
+  // Asia
+  {name:"Afghanistan",code:"af",continent:"Asia"},{name:"Armenia",code:"am",continent:"Asia"},{name:"Azerbaijan",code:"az",continent:"Asia"},{name:"Bahrain",code:"bh",continent:"Asia"},{name:"Bangladesh",code:"bd",continent:"Asia"},{name:"Bhutan",code:"bt",continent:"Asia"},{name:"Brunei",code:"bn",continent:"Asia"},{name:"Cambodia",code:"kh",continent:"Asia"},{name:"China",code:"cn",continent:"Asia"},{name:"Georgia",code:"ge",continent:"Asia"},{name:"India",code:"in",continent:"Asia"},{name:"Indonesia",code:"id",continent:"Asia"},{name:"Iran",code:"ir",continent:"Asia"},{name:"Iraq",code:"iq",continent:"Asia"},{name:"Israel",code:"il",continent:"Asia"},{name:"Japan",code:"jp",continent:"Asia"},{name:"Jordan",code:"jo",continent:"Asia"},{name:"Kazakhstan",code:"kz",continent:"Asia"},{name:"Kuwait",code:"kw",continent:"Asia"},{name:"Kyrgyzstan",code:"kg",continent:"Asia"},{name:"Laos",code:"la",continent:"Asia"},{name:"Lebanon",code:"lb",continent:"Asia"},{name:"Malaysia",code:"my",continent:"Asia"},{name:"Maldives",code:"mv",continent:"Asia"},{name:"Mongolia",code:"mn",continent:"Asia"},{name:"Myanmar",code:"mm",continent:"Asia"},{name:"Nepal",code:"np",continent:"Asia"},{name:"North Korea",code:"kp",continent:"Asia"},{name:"Oman",code:"om",continent:"Asia"},{name:"Pakistan",code:"pk",continent:"Asia"},{name:"Philippines",code:"ph",continent:"Asia"},{name:"Qatar",code:"qa",continent:"Asia"},{name:"Saudi Arabia",code:"sa",continent:"Asia"},{name:"Singapore",code:"sg",continent:"Asia"},{name:"South Korea",code:"kr",continent:"Asia"},{name:"Sri Lanka",code:"lk",continent:"Asia"},{name:"Syria",code:"sy",continent:"Asia"},{name:"Taiwan",code:"tw",continent:"Asia"},{name:"Tajikistan",code:"tj",continent:"Asia"},{name:"Thailand",code:"th",continent:"Asia"},{name:"Timor-Leste",code:"tl",continent:"Asia"},{name:"Turkey",code:"tr",continent:"Asia"},{name:"Turkmenistan",code:"tm",continent:"Asia"},{name:"UAE",code:"ae",continent:"Asia"},{name:"Uzbekistan",code:"uz",continent:"Asia"},{name:"Vietnam",code:"vn",continent:"Asia"},{name:"Yemen",code:"ye",continent:"Asia"},
+  // Europe
+  {name:"Albania",code:"al",continent:"Europe"},{name:"Andorra",code:"ad",continent:"Europe"},{name:"Austria",code:"at",continent:"Europe"},{name:"Belarus",code:"by",continent:"Europe"},{name:"Belgium",code:"be",continent:"Europe"},{name:"Bosnia and Herzegovina",code:"ba",continent:"Europe"},{name:"Bulgaria",code:"bg",continent:"Europe"},{name:"Croatia",code:"hr",continent:"Europe"},{name:"Cyprus",code:"cy",continent:"Europe"},{name:"Czech Republic",code:"cz",continent:"Europe"},{name:"Denmark",code:"dk",continent:"Europe"},{name:"Estonia",code:"ee",continent:"Europe"},{name:"Finland",code:"fi",continent:"Europe"},{name:"France",code:"fr",continent:"Europe"},{name:"Germany",code:"de",continent:"Europe"},{name:"Greece",code:"gr",continent:"Europe"},{name:"Hungary",code:"hu",continent:"Europe"},{name:"Iceland",code:"is",continent:"Europe"},{name:"Ireland",code:"ie",continent:"Europe"},{name:"Italy",code:"it",continent:"Europe"},{name:"Kosovo",code:"xk",continent:"Europe"},{name:"Latvia",code:"lv",continent:"Europe"},{name:"Liechtenstein",code:"li",continent:"Europe"},{name:"Lithuania",code:"lt",continent:"Europe"},{name:"Luxembourg",code:"lu",continent:"Europe"},{name:"Malta",code:"mt",continent:"Europe"},{name:"Moldova",code:"md",continent:"Europe"},{name:"Monaco",code:"mc",continent:"Europe"},{name:"Montenegro",code:"me",continent:"Europe"},{name:"Netherlands",code:"nl",continent:"Europe"},{name:"North Macedonia",code:"mk",continent:"Europe"},{name:"Norway",code:"no",continent:"Europe"},{name:"Poland",code:"pl",continent:"Europe"},{name:"Portugal",code:"pt",continent:"Europe"},{name:"Romania",code:"ro",continent:"Europe"},{name:"Russia",code:"ru",continent:"Europe"},{name:"San Marino",code:"sm",continent:"Europe"},{name:"Serbia",code:"rs",continent:"Europe"},{name:"Slovakia",code:"sk",continent:"Europe"},{name:"Slovenia",code:"si",continent:"Europe"},{name:"Spain",code:"es",continent:"Europe"},{name:"Sweden",code:"se",continent:"Europe"},{name:"Switzerland",code:"ch",continent:"Europe"},{name:"Ukraine",code:"ua",continent:"Europe"},{name:"United Kingdom",code:"gb",continent:"Europe"},{name:"Vatican City",code:"va",continent:"Europe"},
+  // North America
+  {name:"Antigua and Barbuda",code:"ag",continent:"North America"},{name:"Bahamas",code:"bs",continent:"North America"},{name:"Barbados",code:"bb",continent:"North America"},{name:"Belize",code:"bz",continent:"North America"},{name:"Canada",code:"ca",continent:"North America"},{name:"Costa Rica",code:"cr",continent:"North America"},{name:"Cuba",code:"cu",continent:"North America"},{name:"Dominica",code:"dm",continent:"North America"},{name:"Dominican Republic",code:"do",continent:"North America"},{name:"El Salvador",code:"sv",continent:"North America"},{name:"Grenada",code:"gd",continent:"North America"},{name:"Guatemala",code:"gt",continent:"North America"},{name:"Haiti",code:"ht",continent:"North America"},{name:"Honduras",code:"hn",continent:"North America"},{name:"Jamaica",code:"jm",continent:"North America"},{name:"Mexico",code:"mx",continent:"North America"},{name:"Nicaragua",code:"ni",continent:"North America"},{name:"Panama",code:"pa",continent:"North America"},{name:"Saint Kitts and Nevis",code:"kn",continent:"North America"},{name:"Saint Lucia",code:"lc",continent:"North America"},{name:"Saint Vincent",code:"vc",continent:"North America"},{name:"Trinidad and Tobago",code:"tt",continent:"North America"},{name:"United States",code:"us",continent:"North America"},
+  // South America
+  {name:"Argentina",code:"ar",continent:"South America"},{name:"Bolivia",code:"bo",continent:"South America"},{name:"Brazil",code:"br",continent:"South America"},{name:"Chile",code:"cl",continent:"South America"},{name:"Colombia",code:"co",continent:"South America"},{name:"Ecuador",code:"ec",continent:"South America"},{name:"Guyana",code:"gy",continent:"South America"},{name:"Paraguay",code:"py",continent:"South America"},{name:"Peru",code:"pe",continent:"South America"},{name:"Suriname",code:"sr",continent:"South America"},{name:"Uruguay",code:"uy",continent:"South America"},{name:"Venezuela",code:"ve",continent:"South America"},
+  // Oceania
+  {name:"Australia",code:"au",continent:"Oceania"},{name:"Fiji",code:"fj",continent:"Oceania"},{name:"Kiribati",code:"ki",continent:"Oceania"},{name:"Marshall Islands",code:"mh",continent:"Oceania"},{name:"Micronesia",code:"fm",continent:"Oceania"},{name:"Nauru",code:"nr",continent:"Oceania"},{name:"New Zealand",code:"nz",continent:"Oceania"},{name:"Palau",code:"pw",continent:"Oceania"},{name:"Papua New Guinea",code:"pg",continent:"Oceania"},{name:"Samoa",code:"ws",continent:"Oceania"},{name:"Solomon Islands",code:"sb",continent:"Oceania"},{name:"Tonga",code:"to",continent:"Oceania"},{name:"Tuvalu",code:"tv",continent:"Oceania"},{name:"Vanuatu",code:"vu",continent:"Oceania"}
+];
+
+let pool = [];
+let questions = [];
+let currentQ = 0;
+let score = 0;
+let streak = 0;
+let bestStreak = 0;
+let totalQuestions = 10;
+let answered = false;
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function flagUrl(code) {
+  return `https://flagcdn.com/w320/${code}.png`;
+}
+
+function startQuiz(region) {
+  pool = region === 'all' ? [...COUNTRIES] : COUNTRIES.filter(c => c.continent === region);
+
+  if (pool.length < 4) return;
+
+  totalQuestions = Math.min(pool.length, region === 'all' ? 20 : 10);
+  questions = shuffle([...pool]).slice(0, totalQuestions);
+  currentQ = 0;
+  score = 0;
+  streak = 0;
+  bestStreak = 0;
+
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  document.getElementById('result').style.display = 'none';
+
+  showQuestion();
+}
+
+function showQuestion() {
+  answered = false;
+  const q = questions[currentQ];
+
+  document.getElementById('score').textContent = score;
+  document.getElementById('qnum').textContent = `${currentQ + 1}/${totalQuestions}`;
+  document.getElementById('streak').textContent = streak;
+  document.getElementById('progress').style.width = `${((currentQ) / totalQuestions) * 100}%`;
+  document.getElementById('flag-img').src = flagUrl(q.code);
+
+  // Build 4 options: 1 correct + 3 wrong from pool
+  const wrong = shuffle(pool.filter(c => c.code !== q.code)).slice(0, 3);
+  const options = shuffle([q, ...wrong]);
+
+  const optionsEl = document.getElementById('options');
+  optionsEl.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt.name;
+    btn.addEventListener('click', () => handleAnswer(btn, opt.code === q.code, q.code));
+    optionsEl.appendChild(btn);
+  });
+}
+
+function handleAnswer(btn, isCorrect, correctCode) {
+  if (answered) return;
+  answered = true;
+
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => b.classList.add('disabled'));
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    score++;
+    streak++;
+    if (streak > bestStreak) bestStreak = streak;
+  } else {
+    btn.classList.add('wrong');
+    streak = 0;
+    // Reveal correct answer
+    const correctName = pool.find(c => c.code === correctCode).name;
+    allBtns.forEach(b => {
+      if (b.textContent === correctName) b.classList.add('reveal');
+    });
+  }
+
+  document.getElementById('score').textContent = score;
+  document.getElementById('streak').textContent = streak;
+
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ < totalQuestions) {
+      showQuestion();
+    } else {
+      showResult();
+    }
+  }, 1200);
+}
+
+function showResult() {
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+
+  const pct = Math.round((score / totalQuestions) * 100);
+  document.getElementById('final-score').textContent = score;
+  document.getElementById('final-total').textContent = `out of ${totalQuestions}`;
+  document.getElementById('final-pct').textContent = `${pct}% correct`;
+  document.getElementById('final-streak').textContent = `Best streak: ${bestStreak}`;
+  document.getElementById('progress').style.width = '100%';
+}
+
+function backToMenu() {
+  document.getElementById('menu').style.display = 'block';
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('result').style.display = 'none';
+}
+</script>
+</body>
+</html>
+
