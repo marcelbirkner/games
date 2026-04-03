@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Word Chain</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      min-height: 100vh;
+      color: #fff;
+      padding: 24px 16px 60px;
+    }
+
+    .container { max-width: 560px; margin: 0 auto; }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 16px;
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 0.9rem;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    .back-link:hover { opacity: 1; }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 6px;
+      background: linear-gradient(90deg, #06b6d4, #6366f1, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      text-align: center;
+      color: #a5b4fc;
+      margin-bottom: 32px;
+      font-size: 0.95rem;
+    }
+
+    /* ── MENU ── */
+    #menu { text-align: center; }
+    .menu-section { margin-bottom: 28px; }
+    .menu-section h2 { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 14px; }
+
+    .btn-group { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+
+    .pick-btn {
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: 2px solid rgba(6,182,212,0.35);
+      background: rgba(6,182,212,0.08);
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pick-btn:hover, .pick-btn.active {
+      border-color: #06b6d4;
+      background: rgba(6,182,212,0.22);
+      color: #fff;
+    }
+    .pick-btn.active { box-shadow: 0 0 12px rgba(6,182,212,0.4); }
+
+    .speed-btn {
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: 2px solid rgba(99,102,241,0.35);
+      background: rgba(99,102,241,0.08);
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .speed-btn:hover, .speed-btn.active {
+      border-color: #6366f1;
+      background: rgba(99,102,241,0.22);
+      color: #fff;
+    }
+    .speed-btn.active { box-shadow: 0 0 12px rgba(99,102,241,0.4); }
+    .speed-sub { font-size: 0.72rem; color: #94a3b8; font-weight: 400; display: block; margin-top: 2px; }
+
+    .start-btn {
+      margin-top: 8px;
+      padding: 16px 48px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg, #06b6d4, #6366f1);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .start-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+    /* ── GAME ── */
+    #game { display: none; }
+
+    .timer-bar-wrap {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .timer-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #06b6d4, #6366f1);
+      transition: width 0.25s linear, background 0.4s;
+    }
+    .timer-bar-fill.urgent { background: linear-gradient(90deg, #ef4444, #f97316); }
+
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .hud-item { text-align: center; }
+    .hud-val { font-size: 1.5rem; font-weight: 800; }
+    .hud-label { font-size: 0.68rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+    .hud-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 99px;
+      background: rgba(6,182,212,0.15);
+      border: 1px solid rgba(6,182,212,0.3);
+      color: #67e8f9;
+    }
+    .hud-val.urgent { color: #ef4444; animation: pulse 0.5s ease infinite alternate; }
+    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.12); } }
+
+    /* Current word display */
+    .word-display {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 28px 24px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .word-display-label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .current-word {
+      font-size: 2.8rem;
+      font-weight: 900;
+      letter-spacing: 6px;
+      line-height: 1;
+      word-break: break-all;
+    }
+    .current-word .regular { color: #e2e8f0; }
+    .current-word .last-letter {
+      color: #06b6d4;
+      animation: glow 1.2s ease-in-out infinite alternate;
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 8px rgba(6,182,212,0.5); }
+      to   { text-shadow: 0 0 22px rgba(6,182,212,0.9), 0 0 40px rgba(6,182,212,0.4); }
+    }
+    .next-hint {
+      margin-top: 14px;
+      font-size: 1rem;
+      color: #94a3b8;
+    }
+    .next-letter {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #06b6d4;
+    }
+
+    /* Input area */
+    .input-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .word-input {
+      flex: 1;
+      padding: 14px 18px;
+      border-radius: 12px;
+      border: 2px solid rgba(6,182,212,0.3);
+      background: rgba(255,255,255,0.07);
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      outline: none;
+      transition: border-color 0.2s;
+      text-transform: uppercase;
+    }
+    .word-input::placeholder { color: #4b5563; font-weight: 400; letter-spacing: 1px; font-size: 0.95rem; }
+    .word-input:focus { border-color: #06b6d4; }
+    .word-input.shake { animation: shake 0.35s ease; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%       { transform: translateX(-8px); }
+      40%       { transform: translateX(8px); }
+      60%       { transform: translateX(-6px); }
+      80%       { transform: translateX(6px); }
+    }
+    .submit-btn {
+      padding: 14px 22px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #06b6d4, #6366f1);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* Feedback */
+    .feedback {
+      min-height: 28px;
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      transition: opacity 0.3s;
+    }
+    .feedback.ok   { color: #34d399; }
+    .feedback.err  { color: #f87171; }
+    .feedback.info { color: #94a3b8; }
+
+    /* Chain history */
+    .chain-wrap {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+    .chain-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+    .chain-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-height: 130px;
+      overflow-y: auto;
+    }
+    .chain-chip {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 11px;
+      border-radius: 99px;
+      background: rgba(6,182,212,0.12);
+      border: 1px solid rgba(6,182,212,0.25);
+      color: #67e8f9;
+      letter-spacing: 1px;
+    }
+    .chain-chip:last-child {
+      background: rgba(6,182,212,0.28);
+      border-color: #06b6d4;
+      color: #fff;
+    }
+
+    /* ── RESULT ── */
+    #result { display: none; text-align: center; }
+    .result-card {
+      background: rgba(255,255,255,0.06);
+      border-radius: 20px;
+      padding: 36px 24px;
+      margin-bottom: 20px;
+    }
+    .result-icon   { font-size: 3.5rem; margin-bottom: 10px; }
+    .result-chain  {
+      font-size: 3rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #06b6d4, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 4px;
+    }
+    .result-sub  { color: #94a3b8; font-size: 0.9rem; margin-bottom: 24px; }
+    .result-msg  { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
+    .result-detail { color: #94a3b8; font-size: 0.85rem; margin-bottom: 20px; }
+
+    .result-words {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      max-height: 120px;
+      overflow-y: auto;
+      margin-bottom: 4px;
+    }
+    .result-chip {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 11px;
+      border-radius: 99px;
+      background: rgba(99,102,241,0.15);
+      border: 1px solid rgba(99,102,241,0.3);
+      color: #a5b4fc;
+      letter-spacing: 1px;
+    }
+
+    .btn-row { display: flex; gap: 10px; margin-top: 16px; }
+    .btn {
+      flex: 1; padding: 13px; border: none; border-radius: 12px;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+    .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+    .btn-primary { background: linear-gradient(135deg, #06b6d4, #6366f1); color: #fff; }
+    .btn-ghost   { background: rgba(255,255,255,0.08); color: #ccc; border: 1px solid rgba(255,255,255,0.15); }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="../index.html" class="back-link">← Back to Arcade</a>
+  <h1>🔗 Word Chain</h1>
+  <p class="subtitle">Each word must start with the last letter of the previous!</p>
+
+  <!-- MENU -->
+  <div id="menu">
+    <div class="menu-section">
+      <h2>Category</h2>
+      <div class="btn-group" id="cat-btns">
+        <button class="pick-btn active" data-cat="animals">🐾 Animals</button>
+        <button class="pick-btn" data-cat="countries">🌍 Countries</button>
+        <button class="pick-btn" data-cat="food">🍕 Food</button>
+        <button class="pick-btn" data-cat="nature">🌿 Nature</button>
+      </div>
+    </div>
+    <div class="menu-section">
+      <h2>Speed</h2>
+      <div class="btn-group" id="speed-btns">
+        <button class="speed-btn active" data-speed="25">😊 Relaxed<span class="speed-sub">25 sec per word</span></button>
+        <button class="speed-btn" data-speed="15">⚡ Normal<span class="speed-sub">15 sec per word</span></button>
+        <button class="speed-btn" data-speed="8">🔥 Fast<span class="speed-sub">8 sec per word</span></button>
+      </div>
+    </div>
+    <button class="start-btn" onclick="startGame()">Start →</button>
+  </div>
+
+  <!-- GAME -->
+  <div id="game">
+    <div class="timer-bar-wrap">
+      <div class="timer-bar-fill" id="timer-fill"></div>
+    </div>
+    <div class="hud">
+      <div class="hud-item">
+        <div class="hud-val" id="hud-chain" style="color:#06b6d4">0</div>
+        <div class="hud-label">Chain</div>
+      </div>
+      <div class="hud-badge" id="cat-badge">Animals 🐾</div>
+      <div class="hud-item">
+        <div class="hud-val" id="hud-timer">25</div>
+        <div class="hud-label">Seconds</div>
+      </div>
+    </div>
+
+    <div class="word-display">
+      <div class="word-display-label">Current word</div>
+      <div class="current-word" id="current-word"></div>
+      <div class="next-hint">Your word must start with <span class="next-letter" id="next-letter">?</span></div>
+    </div>
+
+    <div class="input-row">
+      <input class="word-input" id="word-input" type="text"
+             placeholder="type your word…"
+             autocomplete="off" autocorrect="off" autocapitalize="characters"
+             spellcheck="false" />
+      <button class="submit-btn" onclick="submitWord()">→</button>
+    </div>
+    <div class="feedback info" id="feedback">Type a word and press Enter</div>
+
+    <div class="chain-wrap">
+      <div class="chain-label">Chain so far</div>
+      <div class="chain-list" id="chain-list"></div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result">
+    <div class="result-card">
+      <div class="result-icon" id="res-icon">🔗</div>
+      <div class="result-chain" id="res-chain">0</div>
+      <div class="result-sub">words in chain</div>
+      <div class="result-msg" id="res-msg"></div>
+      <div class="result-detail" id="res-detail"></div>
+      <div class="result-words" id="res-words"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="retryGame()">🔄 Play Again</button>
+      <button class="btn btn-ghost"   onclick="backToMenu()">⬅ Menu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Word lists ───────────────────────────────────────────────────────────────
+const WORD_LISTS = {
+  animals: [
+    "AARDVARK","ALBATROSS","ALLIGATOR","ANACONDA","ANTELOPE","APE","ARMADILLO","AXOLOTL",
+    "BABOON","BADGER","BEAR","BEAVER","BISON","BOAR","BUFFALO","BUTTERFLY","BUZZARD",
+    "CAMEL","CARDINAL","CAT","CHEETAH","CHIPMUNK","COBRA","COW","COYOTE","CRANE","CROCODILE","CROW",
+    "DEER","DINGO","DOG","DOLPHIN","DONKEY","DRAGONFLY","DUCK","DUNG BEETLE",
+    "EAGLE","EEL","ELAND","ELEPHANT","EMU","ERMINE",
+    "FALCON","FERRET","FINCH","FLAMINGO","FOX","FROG",
+    "GECKO","GIRAFFE","GOAT","GORILLA","GROUSE","GNU",
+    "HAMSTER","HAWK","HEDGEHOG","HERON","HIPPO","HORSE","HYENA",
+    "IBIS","IGUANA","IMPALA",
+    "JAGUAR","JAY","JELLYFISH",
+    "KANGAROO","KITE","KOALA","KOOKABURRA",
+    "LEMUR","LION","LIZARD","LLAMA","LOBSTER","LYNX",
+    "MANTA","MOLE","MONKEY","MOOSE","MOUSE","MEERKAT",
+    "NARWHAL","NEWT","NIGHTINGALE",
+    "OCELOT","OCTOPUS","ORANGUTAN","OSTRICH","OTTER","OWL",
+    "PANDA","PARROT","PELICAN","PENGUIN","PIRANHA","PLATYPUS","PORCUPINE","PUMA",
+    "QUAIL","QUOKKA",
+    "RABBIT","RACCOON","RAVEN","RHINOCEROS","ROBIN",
+    "SALAMANDER","SHARK","SNAKE","SPARROW","SQUIRREL","STORK","SWAN",
+    "TARANTULA","TIGER","TORTOISE","TOUCAN","TURKEY",
+    "URIAL",
+    "VULTURE","VIPER",
+    "WALRUS","WHALE","WOLF","WOLVERINE","WOMBAT","WREN",
+    "XERUS",
+    "YAK",
+    "ZEBRA","ZEBU"
+  ],
+  countries: [
+    "AFGHANISTAN","ALBANIA","ALGERIA","ANGOLA","ARGENTINA","ARMENIA","AUSTRALIA","AUSTRIA","AZERBAIJAN",
+    "BAHRAIN","BANGLADESH","BELARUS","BELGIUM","BELIZE","BOLIVIA","BRAZIL","BULGARIA",
+    "CAMBODIA","CAMEROON","CANADA","CHILE","CHINA","COLOMBIA","CROATIA","CUBA","CYPRUS",
+    "DENMARK",
+    "ECUADOR","EGYPT","ENGLAND","ETHIOPIA",
+    "FINLAND","FRANCE",
+    "GEORGIA","GERMANY","GHANA","GREECE","GUATEMALA","GUINEA",
+    "HAITI","HUNGARY",
+    "ICELAND","INDIA","INDONESIA","IRAN","IRAQ","IRELAND","ISRAEL","ITALY",
+    "JAMAICA","JAPAN","JORDAN",
+    "KAZAKHSTAN","KENYA","KUWAIT","KYRGYZSTAN",
+    "LAOS","LATVIA","LEBANON","LIBYA","LITHUANIA","LUXEMBOURG",
+    "MADAGASCAR","MALAYSIA","MALI","MEXICO","MOLDOVA","MONGOLIA","MOROCCO","MOZAMBIQUE","MYANMAR",
+    "NAMIBIA","NEPAL","NETHERLANDS","NICARAGUA","NIGER","NIGERIA","NORWAY",
+    "OMAN",
+    "PAKISTAN","PANAMA","PARAGUAY","PERU","PHILIPPINES","POLAND","PORTUGAL",
+    "QATAR",
+    "ROMANIA","RUSSIA","RWANDA",
+    "SENEGAL","SERBIA","SOMALIA","SPAIN","SUDAN","SWEDEN","SWITZERLAND","SYRIA",
+    "TAIWAN","TAJIKISTAN","TANZANIA","THAILAND","TUNISIA","TURKEY","TURKMENISTAN",
+    "UGANDA","UKRAINE","URUGUAY","UZBEKISTAN",
+    "VENEZUELA","VIETNAM",
+    "WALES",
+    "YEMEN",
+    "ZAMBIA","ZIMBABWE"
+  ],
+  food: [
+    "ALMOND","APPLE","APRICOT","ASPARAGUS","AVOCADO",
+    "BANANA","BASIL","BEAN","BEET","BREAD","BROCCOLI","BROWNIE","BUTTER",
+    "CABBAGE","CARAMEL","CARROT","CHEESE","CHERRY","CHICKEN","CHILI","CHOCOLATE","CINNAMON","COCONUT","COFFEE","COOKIE","CORN","CREAM","CROISSANT",
+    "DATE","DILL","DUMPLING",
+    "EGG","EGGPLANT",
+    "FIG","FISH","FLOUR","FUDGE",
+    "GARLIC","GINGER","GRAPE","GUAVA",
+    "HAZELNUT","HONEY","HUMMUS",
+    "JAM","JELLY",
+    "KALE","KIWI",
+    "LEMON","LETTUCE","LIME","LYCHEE","LASAGNE",
+    "MANGO","MELON","MINT","MUSHROOM","MUSTARD","MACARON",
+    "NOODLE","NUTMEG",
+    "OATS","OLIVE","ONION","ORANGE","OREGANO",
+    "PAPAYA","PAPRIKA","PARSLEY","PEACH","PEAR","PEPPER","PINEAPPLE","PLUM","POTATO","PRETZEL","PANCAKE",
+    "QUINOA",
+    "RADISH","RAISIN","RASPBERRY","RICE","ROSEMARY","RHUBARB",
+    "SAGE","SALMON","SALT","SHRIMP","SPINACH","STRAWBERRY","SUGAR",
+    "TAMARIND","THYME","TOFU","TOMATO","TRUFFLE","TUNA","TURNIP",
+    "VANILLA",
+    "WALNUT","WATERMELON","WHEAT","WAFFLE",
+    "YAM","YOGURT",
+    "ZUCCHINI"
+  ],
+  nature: [
+    "ARCTIC","AURORA","AVALANCHE","ATOLL",
+    "BAY","BEACH","BLIZZARD","BOULDER","BOG",
+    "CANYON","CAVE","CLIFF","CLOUD","COAST","CORAL","CREEK","CRATER","CURRENT",
+    "DELTA","DESERT","DUNE","DROUGHT",
+    "EARTHQUAKE","ESTUARY","EROSION",
+    "FJORD","FLOOD","FOREST","FOUNTAIN","FOG",
+    "GEYSER","GLACIER","GORGE","GROVE","GULF",
+    "HURRICANE","HILL","HAIL",
+    "ICEBERG","ISLAND","INLET",
+    "JUNGLE",
+    "LAGOON","LAKE","LAVA","LIGHTNING",
+    "MEADOW","MOUNTAIN","MARSH","MONSOON","MESA",
+    "OASIS","OCEAN",
+    "PENINSULA","PLATEAU","PRAIRIE",
+    "RAINFOREST","RAVINE","REEF","RIVER","ROCK","RAPIDS",
+    "SAVANNA","SEA","SPRING","STORM","STREAM","SWAMP","STRAIT",
+    "TIDE","TORNADO","TUNDRA","TAIGA",
+    "VALLEY","VOLCANO",
+    "WATERFALL","WETLAND","WIND","WAVE"
+  ]
+};
+
+const CAT_LABELS = {
+  animals: "Animals 🐾",
+  countries: "Countries 🌍",
+  food: "Food 🍕",
+  nature: "Nature 🌿"
+};
+
+// Letters considered "safe" to end a starting word on (have multiple followers)
+const SAFE_END = new Set('AEILNORSTGY');
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let selectedCat   = 'animals';
+let selectedSpeed = 25;
+let wordList      = [];
+let usedWords     = new Set();
+let chainWords    = [];
+let currentWord   = '';
+let timeLeft      = 25;
+let totalTime     = 25;
+let timerInterval = null;
+let gameActive    = false;
+
+// ─── Menu setup ───────────────────────────────────────────────────────────────
+document.querySelectorAll('[data-cat]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedCat = btn.dataset.cat;
+  });
+});
+
+document.querySelectorAll('[data-speed]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-speed]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedSpeed = +btn.dataset.speed;
+  });
+});
+
+document.getElementById('word-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitWord();
+});
+
+// ─── Game start ───────────────────────────────────────────────────────────────
+function startGame() {
+  wordList   = WORD_LISTS[selectedCat].filter(w => !w.includes(' '));
+  usedWords  = new Set();
+  chainWords = [];
+  gameActive = true;
+  totalTime  = selectedSpeed;
+
+  document.getElementById('menu').style.display   = 'none';
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('game').style.display   = 'block';
+  document.getElementById('cat-badge').textContent = CAT_LABELS[selectedCat];
+  document.getElementById('chain-list').innerHTML  = '';
+  document.getElementById('feedback').textContent  = 'Type a word and press Enter';
+  document.getElementById('feedback').className    = 'feedback info';
+  document.getElementById('word-input').value      = '';
+
+  const start = pickStartWord();
+  useWord(start);
+}
+
+function pickStartWord() {
+  const safe = wordList.filter(w => SAFE_END.has(w[w.length - 1]));
+  const pool = safe.length ? safe : wordList;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function useWord(word) {
+  currentWord = word;
+  usedWords.add(word);
+  chainWords.push(word);
+
+  renderCurrentWord(word);
+  renderChain();
+  document.getElementById('hud-chain').textContent = chainWords.length;
+  document.getElementById('word-input').value = '';
+  document.getElementById('word-input').focus();
+
+  resetTimer();
+}
+
+// ─── Submit ───────────────────────────────────────────────────────────────────
+function submitWord() {
+  if (!gameActive) return;
+  const raw   = document.getElementById('word-input').value.trim().toUpperCase();
+  const input = document.getElementById('word-input');
+
+  if (!raw) return;
+
+  const required = currentWord[currentWord.length - 1];
+
+  if (raw[0] !== required) {
+    showFeedback(`Must start with ${required}!`, 'err');
+    shake(input);
+    return;
+  }
+  if (!wordList.includes(raw)) {
+    showFeedback(`"${raw}" not in the ${CAT_LABELS[selectedCat]} list!`, 'err');
+    shake(input);
+    return;
+  }
+  if (usedWords.has(raw)) {
+    showFeedback(`Already used!`, 'err');
+    shake(input);
+    return;
+  }
+
+  showFeedback(`✓ Nice!`, 'ok');
+  useWord(raw);
+
+  // Check if any moves remain
+  const nextLetter = raw[raw.length - 1];
+  const remaining  = wordList.filter(w => !usedWords.has(w) && w[0] === nextLetter);
+  if (remaining.length === 0) {
+    setTimeout(() => endGame('stuck'), 600);
+  }
+}
+
+// ─── Timer ────────────────────────────────────────────────────────────────────
+function resetTimer() {
+  clearInterval(timerInterval);
+  timeLeft = totalTime;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      gameActive = false;
+      endGame('timeout');
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const el   = document.getElementById('hud-timer');
+  const fill = document.getElementById('timer-fill');
+  const pct  = (timeLeft / totalTime) * 100;
+  const urg  = timeLeft <= Math.min(5, totalTime * 0.3);
+
+  el.textContent = timeLeft;
+  el.className   = 'hud-val' + (urg ? ' urgent' : '');
+  fill.style.width = pct + '%';
+  fill.className   = 'timer-bar-fill' + (urg ? ' urgent' : '');
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function renderCurrentWord(word) {
+  const last = word[word.length - 1];
+  const body = word.slice(0, -1);
+  document.getElementById('current-word').innerHTML =
+    `<span class="regular">${body}</span><span class="last-letter">${last}</span>`;
+  document.getElementById('next-letter').textContent = last;
+}
+
+function renderChain() {
+  const list = document.getElementById('chain-list');
+  list.innerHTML = '';
+  chainWords.forEach(w => {
+    const chip = document.createElement('div');
+    chip.className = 'chain-chip';
+    chip.textContent = w;
+    list.appendChild(chip);
+  });
+  list.scrollTop = list.scrollHeight;
+}
+
+function showFeedback(msg, type) {
+  const el = document.getElementById('feedback');
+  el.textContent = msg;
+  el.className   = 'feedback ' + type;
+}
+
+function shake(el) {
+  el.classList.remove('shake');
+  void el.offsetWidth; // reflow
+  el.classList.add('shake');
+}
+
+// ─── End game ─────────────────────────────────────────────────────────────────
+function endGame(reason) {
+  clearInterval(timerInterval);
+  gameActive = false;
+
+  const count = chainWords.length;
+  let icon, msg, detail;
+
+  if (count >= 20)      { icon = '🏆'; msg = 'Incredible chain!';   }
+  else if (count >= 12) { icon = '🔥'; msg = 'On fire!';            }
+  else if (count >= 7)  { icon = '⭐'; msg = 'Great chain!';        }
+  else if (count >= 3)  { icon = '👍'; msg = 'Nice start!';         }
+  else                  { icon = '🔗'; msg = 'Keep practising!';    }
+
+  if (reason === 'timeout') detail = 'Time ran out!';
+  else                      detail = 'No more valid words — nice run!';
+
+  document.getElementById('game').style.display   = 'none';
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('res-icon').textContent   = icon;
+  document.getElementById('res-chain').textContent  = count;
+  document.getElementById('res-msg').textContent    = msg;
+  document.getElementById('res-detail').textContent = detail;
+
+  const wordsEl = document.getElementById('res-words');
+  wordsEl.innerHTML = '';
+  chainWords.forEach(w => {
+    const chip = document.createElement('div');
+    chip.className = 'result-chip';
+    chip.textContent = w;
+    wordsEl.appendChild(chip);
+  });
+}
+
+function retryGame() {
+  document.getElementById('result').style.display = 'none';
+  startGame();
+}
+
+function backToMenu() {
+  clearInterval(timerInterval);
+  gameActive = false;
+  document.getElementById('game').style.display   = 'none';
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('menu').style.display   = 'block';
+}
+</script>
+</body>
+</html>
