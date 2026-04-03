@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Arcade</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      min-height: 100vh;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* Animated stars background */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .star {
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+      animation: twinkle var(--d) ease-in-out infinite alternate;
+      opacity: 0;
+    }
+    @keyframes twinkle {
+      from { opacity: 0; transform: scale(0.8); }
+      to   { opacity: 0.8; transform: scale(1.2); }
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 24px 64px;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .arcade-sign {
+      display: inline-block;
+      font-size: 3.2rem;
+      font-weight: 900;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #f59e0b, #ef4444, #6366f1, #10b981, #f59e0b);
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shine 5s linear infinite;
+      line-height: 1.1;
+    }
+    @keyframes shine {
+      from { background-position: 0% center; }
+      to   { background-position: 300% center; }
+    }
+    .tagline {
+      margin-top: 12px;
+      color: #a5b4fc;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+    }
+    .joystick {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 8px;
+      animation: bounce 2s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+
+    /* Game grid */
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    .game-card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .game-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      background: var(--glow);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .game-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      background: rgba(255, 255, 255, 0.11);
+      border-color: var(--accent);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 20px var(--shadow-color);
+    }
+    .game-card:hover::before {
+      opacity: 1;
+    }
+
+    .game-card .icon {
+      font-size: 3.5rem;
+      line-height: 1;
+      filter: drop-shadow(0 0 12px var(--accent));
+      transition: transform 0.2s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .game-card:hover .icon {
+      transform: scale(1.15) rotate(-5deg);
+    }
+
+    .game-card .game-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+      position: relative;
+      z-index: 1;
+    }
+
+    .game-card .game-desc {
+      font-size: 0.9rem;
+      color: #a5b4fc;
+      line-height: 1.5;
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      background: var(--accent);
+      color: #fff;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Play button on card */
+    .play-btn {
+      margin-top: 4px;
+      padding: 8px 28px;
+      border-radius: 99px;
+      border: 2px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      position: relative;
+      z-index: 1;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .game-card:hover .play-btn {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* Coming soon card */
+    .game-card.coming-soon {
+      opacity: 0.5;
+      cursor: default;
+    }
+    .game-card.coming-soon:hover {
+      transform: none;
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow: none;
+    }
+    .game-card.coming-soon::before { display: none; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 64px;
+      color: rgba(255,255,255,0.3);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 480px) {
+      .arcade-sign { font-size: 2.2rem; letter-spacing: 2px; }
+      .games-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stars" id="stars"></div>
+
+  <div class="content">
+    <header>
+      <span class="joystick">🕹️</span>
+      <div class="arcade-sign">Game Arcade</div>
+      <p class="tagline">Pick a game and start playing!</p>
+    </header>
+
+    <div class="games-grid">
+
+      <!-- Fun with Flags -->
+      <a href="./fun-with-flags/index.html" class="game-card"
+         style="--accent:#6366f1; --glow:linear-gradient(135deg,rgba(99,102,241,0.08),transparent); --shadow-color:rgba(99,102,241,0.3);">
+        <span class="icon">🌍</span>
+        <div class="game-title">Fun with Flags</div>
+        <div class="game-desc">Can you name all 249 countries from their flags? Test your geography skills!</div>
+        <span class="badge" style="background:#6366f1;">Geography</span>
+        <span class="play-btn">Play</span>
+      </a>
+
+      <!-- Coming soon placeholders -->
+      <div class="game-card coming-soon"
+           style="--accent:#10b981; --glow:linear-gradient(135deg,rgba(16,185,129,0.08),transparent); --shadow-color:rgba(16,185,129,0.3);">
+        <span class="icon">🔢</span>
+        <div class="game-title">Math Blitz</div>
+        <div class="game-desc">Race against the clock to solve math puzzles before time runs out!</div>
+        <span class="badge" style="background:#10b981;">Math</span>
+        <span class="play-btn" style="border-color:#10b981; color:#10b981;">Coming Soon</span>
+      </div>
+
+      <div class="game-card coming-soon"
+           style="--accent:#f59e0b; --glow:linear-gradient(135deg,rgba(245,158,11,0.08),transparent); --shadow-color:rgba(245,158,11,0.3);">
+        <span class="icon">🔤</span>
+        <div class="game-title">Word Hunt</div>
+        <div class="game-desc">Find hidden words in a scrambled letter grid before the timer hits zero!</div>
+        <span class="badge" style="background:#f59e0b;">Word</span>
+        <span class="play-btn" style="border-color:#f59e0b; color:#f59e0b;">Coming Soon</span>
+      </div>
+
+      <div class="game-card coming-soon"
+           style="--accent:#ef4444; --glow:linear-gradient(135deg,rgba(239,68,68,0.08),transparent); --shadow-color:rgba(239,68,68,0.3);">
+        <span class="icon">🧩</span>
+        <div class="game-title">Puzzle Rush</div>
+        <div class="game-desc">Solve sliding tile puzzles with increasing difficulty. How fast can you go?</div>
+        <span class="badge" style="background:#ef4444;">Puzzle</span>
+        <span class="play-btn" style="border-color:#ef4444; color:#ef4444;">Coming Soon</span>
+      </div>
+
+    </div>
+
+    <footer>Built with ❤️ &nbsp;·&nbsp; More games coming soon</footer>
+  </div>
+
+  <script>
+    // Generate twinkling stars
+    const container = document.getElementById('stars');
+    for (let i = 0; i < 120; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      const size = Math.random() * 2.5 + 0.5;
+      star.style.cssText = `
+        width:${size}px; height:${size}px;
+        top:${Math.random()*100}%;
+        left:${Math.random()*100}%;
+        --d:${(Math.random()*4+2).toFixed(1)}s;
+        animation-delay:${(Math.random()*5).toFixed(1)}s;
+      `;
+      container.appendChild(star);
+    }
+  </script>
+
+</body>
+</html>
