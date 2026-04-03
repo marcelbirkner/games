@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guess the River</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      padding: 20px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 16px;
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    h1 { text-align: center; font-size: 2rem; margin-bottom: 8px; }
+    .subtitle { text-align: center; color: #aaa; margin-bottom: 32px; font-size: 0.95rem; }
+
+    /* ── MENU ──────────────────────────────── */
+    #menu { text-align: center; }
+    #menu h2 { font-size: 1.2rem; margin-bottom: 16px; color: #ccc; }
+
+    .region-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .region-btn {
+      padding: 14px 10px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .region-btn:hover {
+      background: rgba(255,255,255,0.15);
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    .region-btn.all {
+      grid-column: 1 / -1;
+      background: rgba(56,189,248,0.18);
+      border-color: rgba(56,189,248,0.4);
+    }
+    .region-btn.all:hover { background: rgba(56,189,248,0.32); }
+
+    /* ── QUIZ ──────────────────────────────── */
+    #quiz { display: none; }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+
+    .score-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      font-size: 0.95rem;
+    }
+    .score-bar .label  { color: #aaa; }
+    .score-bar .value  { font-weight: 700; font-size: 1.1rem; }
+    .score-bar .streak { color: #f59e0b; }
+    .score-bar .correct-count { color: #10b981; }
+
+    /* River card */
+    .river-card {
+      position: relative;
+      border-radius: 20px;
+      padding: 28px 24px 24px;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, rgba(14,165,233,0.14) 0%, rgba(99,102,241,0.1) 100%);
+      border: 1px solid rgba(56,189,248,0.22);
+      overflow: hidden;
+      text-align: center;
+    }
+
+    /* Animated waves behind card */
+    .river-card::before,
+    .river-card::after {
+      content: '';
+      position: absolute;
+      left: -40px;
+      right: -40px;
+      height: 60px;
+      background: rgba(56,189,248,0.06);
+      border-radius: 50%;
+    }
+    .river-card::before { bottom: -30px; animation: wave 6s ease-in-out infinite; }
+    .river-card::after  { bottom: -20px; animation: wave 8s ease-in-out infinite reverse; opacity: 0.5; }
+    @keyframes wave {
+      0%, 100% { transform: translateX(0) scaleY(1); }
+      50%       { transform: translateX(15px) scaleY(1.1); }
+    }
+
+    .river-icon { font-size: 2.4rem; margin-bottom: 10px; display: block; }
+
+    .river-name {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, #7dd3fc, #e0e7ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .river-meta {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .river-badge {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 99px;
+      letter-spacing: 0.3px;
+    }
+    .badge-length {
+      background: rgba(56,189,248,0.18);
+      border: 1px solid rgba(56,189,248,0.3);
+      color: #7dd3fc;
+    }
+    .badge-rank {
+      background: rgba(245,158,11,0.15);
+      border: 1px solid rgba(245,158,11,0.3);
+      color: #fcd34d;
+    }
+
+    .river-fact {
+      font-size: 0.9rem;
+      color: #cbd5e1;
+      line-height: 1.6;
+      font-style: italic;
+      position: relative;
+      z-index: 1;
+    }
+
+    .question-label {
+      text-align: center;
+      font-size: 0.95rem;
+      color: #a5b4fc;
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+
+    /* Options */
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .option-btn {
+      padding: 16px 12px;
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .option-btn:hover:not(.disabled) {
+      background: rgba(255,255,255,0.13);
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    .option-btn.correct  { background: rgba(16,185,129,0.3);  border-color: #10b981; }
+    .option-btn.wrong    { background: rgba(239,68,68,0.25);   border-color: #ef4444; }
+    .option-btn.reveal   { border-color: #10b981; opacity: 0.8; }
+    .option-btn.disabled { cursor: default; pointer-events: none; }
+
+    /* ── RESULT ────────────────────────────── */
+    #result { display: none; text-align: center; }
+
+    .result-card {
+      background: rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 40px 30px;
+      margin-bottom: 24px;
+    }
+    .result-card .big-score {
+      font-size: 4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .result-card .out-of    { font-size: 1.2rem; color: #aaa; margin-top: 4px; }
+    .result-card .percentage { font-size: 1.5rem; margin-top: 12px; color: #e2e8f0; }
+    .result-card .best-streak { margin-top: 12px; color: #f59e0b; font-size: 1rem; }
+
+    .play-again-btn {
+      padding: 14px 40px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .play-again-btn:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="../index.html" class="back-link">← Back to Arcade</a>
+  <h1>🌊 Guess the River</h1>
+  <p class="subtitle">Which country does this river flow through?</p>
+
+  <!-- MENU -->
+  <div id="menu">
+    <h2>Choose a region</h2>
+    <div class="region-grid">
+      <button class="region-btn all" onclick="startQuiz('all')">🌍 All Rivers (50)</button>
+      <button class="region-btn" onclick="startQuiz('Africa')">🌍 Africa</button>
+      <button class="region-btn" onclick="startQuiz('Asia')">🌏 Asia</button>
+      <button class="region-btn" onclick="startQuiz('Europe')">🌍 Europe</button>
+      <button class="region-btn" onclick="startQuiz('North America')">🌎 North America</button>
+      <button class="region-btn" onclick="startQuiz('South America')">🌎 South America</button>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz">
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+    <div class="score-bar">
+      <div><span class="label">Score: </span><span class="value correct-count" id="score">0</span></div>
+      <div><span class="label">Question: </span><span class="value" id="qnum">1/10</span></div>
+      <div><span class="label">Streak: </span><span class="value streak" id="streak">0</span></div>
+    </div>
+
+    <div class="river-card">
+      <span class="river-icon">🏞️</span>
+      <div class="river-name" id="river-name"></div>
+      <div class="river-meta">
+        <span class="river-badge badge-length" id="river-length"></span>
+        <span class="river-badge badge-rank"   id="river-rank"></span>
+      </div>
+      <p class="river-fact" id="river-fact"></p>
+    </div>
+
+    <div class="question-label">Which country does this river flow through?</div>
+    <div class="options" id="options"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result">
+    <div class="result-card">
+      <div class="big-score" id="final-score">0</div>
+      <div class="out-of" id="final-total">out of 10</div>
+      <div class="percentage" id="final-pct">0%</div>
+      <div class="best-streak" id="final-streak">Best streak: 0</div>
+    </div>
+    <button class="play-again-btn" onclick="backToMenu()">Play Again</button>
+  </div>
+</div>
+
+<script>
+// ─── River data ─────────────────────────────────────────────────────────────
+// country  = the primary / most-associated country (correct answer)
+// allCountries = every country the river flows through (used to exclude from wrong answers)
+// rank = approximate rank by length among world's rivers
+
+const RIVERS = [
+  // AFRICA ──────────────────────────────────────────────────────────────────
+  { name:"Nile",          country:"Egypt",        allCountries:["Egypt","Sudan","South Sudan","Ethiopia","Uganda","Rwanda","Burundi","DR Congo","Eritrea","Kenya","Tanzania"], length:6650, rank:1,  continent:"Africa",        fact:"The world's longest river, flowing north through the Sahara desert to the Mediterranean Sea." },
+  { name:"Congo",         country:"DR Congo",     allCountries:["DR Congo","Republic of Congo","Central African Republic","Angola","Zambia","Rwanda","Burundi"],                length:4700, rank:8,  continent:"Africa",        fact:"The deepest river on Earth — some sections exceed 220 metres — and carries the second-greatest volume of water of any river." },
+  { name:"Niger",         country:"Nigeria",      allCountries:["Nigeria","Mali","Niger","Guinea","Benin","Cameroon"],                                                          length:4200, rank:13, continent:"Africa",        fact:"Unusual among major rivers, it starts near the ocean but flows inland before curving back to the sea." },
+  { name:"Zambezi",       country:"Zambia",       allCountries:["Zambia","Angola","Namibia","Botswana","Zimbabwe","Mozambique"],                                               length:3540, rank:18, continent:"Africa",        fact:"Home to one of the world's largest waterfalls, which locals call 'the smoke that thunders'." },
+  { name:"Orange River",  country:"South Africa", allCountries:["South Africa","Lesotho","Namibia","Botswana"],                                                               length:2092, rank:34, continent:"Africa",        fact:"The longest river on the southern tip of the African continent, flowing west to the Atlantic Ocean." },
+  { name:"Okavango",      country:"Botswana",     allCountries:["Botswana","Angola","Namibia"],                                                                               length:1600, rank:43, continent:"Africa",        fact:"One of the world's rare rivers that never reaches the sea — it drains into the Kalahari Desert, forming a vast inland delta." },
+  { name:"Limpopo",       country:"South Africa", allCountries:["South Africa","Zimbabwe","Botswana","Mozambique"],                                                           length:1800, rank:38, continent:"Africa",        fact:"Flows in a great arc through four countries before emptying into the Indian Ocean." },
+  { name:"Senegal River", country:"Senegal",      allCountries:["Senegal","Mali","Guinea","Mauritania"],                                                                      length:1600, rank:44, continent:"Africa",        fact:"Forms a natural political border along a significant part of its lower course." },
+
+  // ASIA ────────────────────────────────────────────────────────────────────
+  { name:"Yangtze",          country:"China",      allCountries:["China"],                                                          length:6300, rank:3,  continent:"Asia", fact:"The longest river in Asia, flowing entirely within a single country from the Tibetan Plateau to the East China Sea." },
+  { name:"Yellow River",     country:"China",      allCountries:["China"],                                                          length:5464, rank:6,  continent:"Asia", fact:"Called the 'Mother River' of one of the world's oldest civilisations; its yellow colour comes from enormous amounts of silt." },
+  { name:"Yenisei",          country:"Russia",     allCountries:["Russia","Mongolia"],                                              length:5539, rank:5,  continent:"Asia", fact:"The largest river system draining into the Arctic Ocean, crossing three time zones through Siberia." },
+  { name:"Ob-Irtysh",        country:"Russia",     allCountries:["Russia","Kazakhstan","China","Mongolia"],                         length:5410, rank:7,  continent:"Asia", fact:"One of the world's longest river systems, flowing through the vast Siberian plain to the Kara Sea." },
+  { name:"Amur",             country:"Russia",     allCountries:["Russia","China","Mongolia"],                                      length:4444, rank:9,  continent:"Asia", fact:"Forms one of the longest international river borders in the world over thousands of kilometres." },
+  { name:"Lena",             country:"Russia",     allCountries:["Russia"],                                                         length:4400, rank:10, continent:"Asia", fact:"Flows entirely through permafrost in Siberia, forming one of the world's largest river deltas before reaching the Arctic Ocean." },
+  { name:"Mekong",           country:"Vietnam",    allCountries:["Vietnam","China","Myanmar","Laos","Thailand","Cambodia"],         length:4350, rank:11, continent:"Asia", fact:"Flows through six countries and supports the livelihoods of over 60 million people across Southeast Asia." },
+  { name:"Brahmaputra",      country:"India",      allCountries:["India","China","Bangladesh"],                                     length:3848, rank:14, continent:"Asia", fact:"One of the few rivers to cut through the Himalayas, carving some of the deepest gorges on Earth." },
+  { name:"Salween",          country:"Myanmar",    allCountries:["Myanmar","China","Thailand"],                                     length:3289, rank:22, continent:"Asia", fact:"One of the last great free-flowing rivers in Asia, descending steeply through narrow gorges for much of its length." },
+  { name:"Indus",            country:"Pakistan",   allCountries:["Pakistan","India","China"],                                       length:3180, rank:23, continent:"Asia", fact:"One of the longest rivers in Asia and the cradle of one of the world's earliest urban civilisations, dating back 5,000 years." },
+  { name:"Rio Grande",       country:"United States", allCountries:["United States","Mexico"],                                     length:3057, rank:25, continent:"North America", fact:"Stretches over 3,000 km and forms a natural border for roughly half of its course." },
+  { name:"Syr Darya",        country:"Kazakhstan", allCountries:["Kazakhstan","Uzbekistan","Tajikistan","Kyrgyzstan"],              length:3078, rank:24, continent:"Asia", fact:"Its waters were so heavily diverted for irrigation during the 20th century that it contributed to a massive environmental disaster." },
+  { name:"Euphrates",        country:"Iraq",       allCountries:["Iraq","Turkey","Syria"],                                         length:2800, rank:28, continent:"Asia", fact:"Together with the Tigris, it defined ancient Mesopotamia — the 'cradle of civilisation' — and still irrigates millions of farmers today." },
+  { name:"Amu Darya",        country:"Uzbekistan", allCountries:["Uzbekistan","Tajikistan","Afghanistan","Turkmenistan"],           length:2400, rank:30, continent:"Asia", fact:"Known to the ancient Greeks as the Oxus, this river was a key corridor along the Silk Road trade routes." },
+  { name:"Pearl River",      country:"China",      allCountries:["China"],                                                          length:2400, rank:31, continent:"Asia", fact:"Flows past one of the world's most densely populated river deltas before emptying into the South China Sea." },
+  { name:"Irrawaddy",        country:"Myanmar",    allCountries:["Myanmar"],                                                        length:2170, rank:33, continent:"Asia", fact:"Runs the entire length of its country from north to south, serving as the nation's most important commercial waterway." },
+  { name:"Tarim",            country:"China",      allCountries:["China"],                                                          length:2179, rank:32, continent:"Asia", fact:"The longest inland river in the driest region of its country, flowing through one of the world's largest deserts." },
+  { name:"Ganges",           country:"India",      allCountries:["India","Bangladesh"],                                             length:2525, rank:27, continent:"Asia", fact:"One of the most sacred rivers in the world, revered for thousands of years by hundreds of millions of people." },
+  { name:"Tigris",           country:"Iraq",       allCountries:["Iraq","Turkey","Syria"],                                         length:1950, rank:36, continent:"Asia", fact:"The faster of the two rivers that defined ancient Mesopotamia; the capital of a major Arab country is built on its banks." },
+  { name:"Kolyma",           country:"Russia",     allCountries:["Russia"],                                                         length:2129, rank:35, continent:"Asia", fact:"One of the most remote rivers on Earth, flowing through a vast, nearly uninhabited region of northeastern Siberia." },
+
+  // EUROPE ──────────────────────────────────────────────────────────────────
+  { name:"Volga",    country:"Russia",  allCountries:["Russia"],                                                                                                  length:3531, rank:16, continent:"Europe", fact:"The longest river in Europe, draining into the world's largest inland body of water — a lake so big it's called a sea." },
+  { name:"Danube",   country:"Romania", allCountries:["Romania","Germany","Austria","Slovakia","Hungary","Croatia","Serbia","Bulgaria","Moldova","Ukraine"],       length:2860, rank:29, continent:"Europe", fact:"The only major European river flowing from west to east; it passes through or borders ten countries and four capital cities." },
+  { name:"Ural",     country:"Russia",  allCountries:["Russia","Kazakhstan"],                                                                                     length:2428, rank:32, continent:"Europe", fact:"Traditionally considered the natural geographic boundary between Europe and Asia." },
+  { name:"Dnieper",  country:"Ukraine", allCountries:["Ukraine","Russia","Belarus"],                                                                             length:2285, rank:33, continent:"Europe", fact:"The fourth-longest river in Europe; the capital of Ukraine was founded on its banks over a thousand years ago." },
+  { name:"Don",      country:"Russia",  allCountries:["Russia"],                                                                                                  length:1870, rank:38, continent:"Europe", fact:"One of Russia's great historic rivers, used for centuries as a trade and military route into the southern steppes." },
+  { name:"Pechora",  country:"Russia",  allCountries:["Russia"],                                                                                                  length:1809, rank:39, continent:"Europe", fact:"Flows north through Russian tundra and taiga to drain into the Barents Sea in the Arctic." },
+  { name:"Rhine",    country:"Germany", allCountries:["Germany","Switzerland","Austria","France","Netherlands","Liechtenstein"],                                  length:1230, rank:45, continent:"Europe", fact:"One of Europe's most commercially important waterways, flowing from the Alps through the industrial heartland of central Europe." },
+  { name:"Elbe",     country:"Germany", allCountries:["Germany","Czech Republic"],                                                                               length:1091, rank:47, continent:"Europe", fact:"A major Central European river; the famous wartime meeting of Allied and Soviet forces took place on its banks in 1945." },
+
+  // NORTH AMERICA ───────────────────────────────────────────────────────────
+  { name:"Mississippi-Missouri", country:"United States", allCountries:["United States"],          length:6275, rank:4,  continent:"North America", fact:"The largest river system in North America, draining land from 31 states and two Canadian provinces." },
+  { name:"Mackenzie",            country:"Canada",        allCountries:["Canada"],                 length:4241, rank:12, continent:"North America", fact:"The longest river in its country, flowing north through boreal forest and tundra to the Beaufort Sea." },
+  { name:"Yukon",                country:"Canada",        allCountries:["Canada","United States"], length:3190, rank:22, continent:"North America", fact:"Became world-famous during the 1896–99 Gold Rush, when tens of thousands of prospectors flooded its valley." },
+  { name:"Colorado River",       country:"United States", allCountries:["United States","Mexico"], length:2333, rank:31, continent:"North America", fact:"Carved one of the world's most spectacular natural wonders over millions of years." },
+  { name:"Columbia River",       country:"United States", allCountries:["United States","Canada"], length:1953, rank:37, continent:"North America", fact:"The largest river flowing into the Pacific Ocean from the Americas, generating enormous amounts of hydroelectric power." },
+  { name:"Nelson-Saskatchewan",  country:"Canada",        allCountries:["Canada"],                 length:2570, rank:28, continent:"North America", fact:"Drains the vast grain-growing prairies of central Canada before emptying into Hudson Bay." },
+  { name:"Arkansas River",       country:"United States", allCountries:["United States"],          length:2364, rank:30, continent:"North America", fact:"Rises in the Rocky Mountains and flows across the Great Plains as a major tributary of the Mississippi." },
+
+  // SOUTH AMERICA ───────────────────────────────────────────────────────────
+  { name:"Amazon",        country:"Brazil",    allCountries:["Brazil","Peru","Colombia"],           length:6400, rank:2,  continent:"South America", fact:"Carries roughly 20% of all fresh water that flows into the world's oceans — more than the next seven largest rivers combined." },
+  { name:"Paraná",        country:"Brazil",    allCountries:["Brazil","Paraguay","Argentina"],      length:3998, rank:19, continent:"South America", fact:"The second-longest river in South America, flowing south through the continent's heartland before meeting the Atlantic." },
+  { name:"Tocantins",     country:"Brazil",    allCountries:["Brazil"],                             length:3650, rank:17, continent:"South America", fact:"Flows entirely within one country and is dammed by one of the world's largest hydroelectric reservoirs." },
+  { name:"Orinoco",       country:"Venezuela", allCountries:["Venezuela","Colombia"],               length:2736, rank:26, continent:"South America", fact:"Its vast delta was among the first parts of the Americas glimpsed by Christopher Columbus in 1498." },
+  { name:"São Francisco", country:"Brazil",    allCountries:["Brazil"],                             length:2914, rank:24, continent:"South America", fact:"Known as the 'River of National Unity', it flows entirely within one country and crosses five states." },
+  { name:"Uruguay River", country:"Uruguay",   allCountries:["Uruguay","Brazil","Argentina"],      length:1838, rank:40, continent:"South America", fact:"Gives its name to one of the countries it borders; its basin was home to the Guaraní people for centuries." },
+
+  // OCEANIA ─────────────────────────────────────────────────────────────────
+  { name:"Murray-Darling", country:"Australia", allCountries:["Australia"], length:3750, rank:15, continent:"Oceania", fact:"The longest river system on the driest inhabited continent, supplying water to a third of the nation's food production." },
+];
+
+// ─── Country pool for wrong answers ─────────────────────────────────────────
+const COUNTRY_POOL = {
+  "Africa":        ["Egypt","Nigeria","South Africa","Kenya","Morocco","Ghana","Tanzania","Senegal","Zambia","Zimbabwe","Angola","Mozambique","Cameroon","Ivory Coast","Madagascar","Ethiopia","Uganda","Rwanda","Mali","Niger","Algeria","Tunisia","Libya","Somalia","Congo","Gabon","Botswana","Namibia","Sierra Leone","Guinea","Liberia","Sudan","Chad","Malawi","Togo","Benin","Eritrea"],
+  "Asia":          ["China","India","Japan","South Korea","Indonesia","Thailand","Vietnam","Philippines","Pakistan","Bangladesh","Malaysia","Myanmar","Kazakhstan","Uzbekistan","Mongolia","Iran","Iraq","Saudi Arabia","Turkey","Afghanistan","Nepal","Sri Lanka","Cambodia","Laos","Azerbaijan","Georgia","Armenia","Israel","Jordan","Syria","Kuwait","UAE","Oman","Yemen","Tajikistan","Kyrgyzstan","Turkmenistan","North Korea","Singapore"],
+  "Europe":        ["Russia","Germany","France","United Kingdom","Italy","Spain","Poland","Romania","Netherlands","Belgium","Czech Republic","Hungary","Sweden","Austria","Switzerland","Norway","Finland","Denmark","Portugal","Greece","Ukraine","Belarus","Serbia","Bulgaria","Slovakia","Croatia","Slovenia","Latvia","Lithuania","Estonia","Moldova","Bosnia and Herzegovina","Montenegro","Albania","North Macedonia","Ireland","Iceland","Luxembourg"],
+  "North America": ["United States","Canada","Mexico","Guatemala","Honduras","Nicaragua","Costa Rica","Panama","Cuba","Jamaica","Haiti","Dominican Republic","El Salvador","Belize","Trinidad and Tobago"],
+  "South America": ["Brazil","Argentina","Colombia","Venezuela","Peru","Chile","Ecuador","Bolivia","Paraguay","Uruguay","Guyana","Suriname"],
+  "Oceania":       ["Australia","New Zealand","Papua New Guinea","Fiji","Solomon Islands","Vanuatu","Samoa","Tonga","Indonesia","Philippines"],
+};
+
+// ─── Game state ───────────────────────────────────────────────────────────────
+let pool = [], questions = [], currentQ = 0;
+let score = 0, streak = 0, bestStreak = 0, totalQuestions = 10;
+let answered = false;
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function startQuiz(region) {
+  pool = region === 'all'
+    ? [...RIVERS]
+    : RIVERS.filter(r => r.continent === region);
+
+  if (pool.length < 4) return;
+
+  totalQuestions = Math.min(pool.length, region === 'all' ? 20 : 10);
+  questions = shuffle([...pool]).slice(0, totalQuestions);
+  currentQ = 0; score = 0; streak = 0; bestStreak = 0;
+
+  document.getElementById('menu').style.display   = 'none';
+  document.getElementById('quiz').style.display   = 'block';
+  document.getElementById('result').style.display = 'none';
+  showQuestion();
+}
+
+function showQuestion() {
+  answered = false;
+  const q = questions[currentQ];
+
+  document.getElementById('score').textContent    = score;
+  document.getElementById('qnum').textContent     = `${currentQ + 1}/${totalQuestions}`;
+  document.getElementById('streak').textContent   = streak;
+  document.getElementById('progress').style.width = `${(currentQ / totalQuestions) * 100}%`;
+
+  document.getElementById('river-name').textContent   = q.name;
+  document.getElementById('river-length').textContent = `📏 ${q.length.toLocaleString()} km`;
+  document.getElementById('river-rank').textContent   = `#${q.rank} longest`;
+  document.getElementById('river-fact').textContent   = `"${q.fact}"`;
+
+  // Build 4 options: 1 correct + 3 wrong from same continent
+  const sameContinent = (COUNTRY_POOL[q.continent] || []).filter(c => !q.allCountries.includes(c));
+  const otherCountries = Object.values(COUNTRY_POOL).flat().filter(c => !q.allCountries.includes(c) && !sameContinent.includes(c));
+
+  let wrongPool = shuffle([...sameContinent]).slice(0, 3);
+  if (wrongPool.length < 3) {
+    wrongPool = wrongPool.concat(shuffle([...otherCountries]).slice(0, 3 - wrongPool.length));
+  }
+  const options = shuffle([q.country, ...wrongPool.slice(0, 3)]);
+
+  const optionsEl = document.getElementById('options');
+  optionsEl.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    btn.addEventListener('click', () => handleAnswer(btn, opt === q.country, q.country));
+    optionsEl.appendChild(btn);
+  });
+}
+
+function handleAnswer(btn, isCorrect, correctCountry) {
+  if (answered) return;
+  answered = true;
+
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    score++; streak++;
+    if (streak > bestStreak) bestStreak = streak;
+  } else {
+    btn.classList.add('wrong');
+    streak = 0;
+    document.querySelectorAll('.option-btn').forEach(b => {
+      if (b.textContent === correctCountry) b.classList.add('reveal');
+    });
+  }
+
+  document.getElementById('score').textContent  = score;
+  document.getElementById('streak').textContent = streak;
+
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ < totalQuestions) showQuestion();
+    else showResult();
+  }, 1200);
+}
+
+function showResult() {
+  document.getElementById('quiz').style.display   = 'none';
+  document.getElementById('result').style.display = 'block';
+  const pct = Math.round((score / totalQuestions) * 100);
+  document.getElementById('final-score').textContent  = score;
+  document.getElementById('final-total').textContent  = `out of ${totalQuestions}`;
+  document.getElementById('final-pct').textContent    = `${pct}%`;
+  document.getElementById('final-streak').textContent = `Best streak: ${bestStreak} 🔥`;
+}
+
+function backToMenu() {
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('quiz').style.display   = 'none';
+  document.getElementById('menu').style.display   = 'block';
+}
+</script>
+</body>
+</html>
