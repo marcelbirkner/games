@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guess the Birth Country</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 16px;
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 0.9rem;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    .back-link:hover { opacity: 1; }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 6px;
+      background: linear-gradient(90deg, #f97316, #ef4444, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      text-align: center;
+      color: #a5b4fc;
+      margin-bottom: 36px;
+      font-size: 0.95rem;
+    }
+
+    /* Menu */
+    #menu { text-align: center; }
+    .menu-title {
+      font-size: 1.1rem;
+      color: #e2e8f0;
+      margin-bottom: 20px;
+    }
+    .menu-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+    .menu-btn {
+      padding: 12px 22px;
+      border-radius: 12px;
+      border: 2px solid rgba(249,115,22,0.5);
+      background: rgba(249,115,22,0.1);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .menu-btn:hover {
+      background: rgba(249,115,22,0.3);
+      border-color: #f97316;
+      transform: translateY(-2px);
+    }
+    .menu-btn.featured {
+      background: linear-gradient(135deg, rgba(249,115,22,0.3), rgba(239,68,68,0.2));
+      border-color: #f97316;
+      font-size: 1rem;
+      padding: 14px 28px;
+    }
+
+    /* Quiz */
+    #quiz { display: none; }
+
+    .progress-bar-wrap {
+      background: rgba(255,255,255,0.1);
+      border-radius: 99px;
+      height: 6px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #f97316, #ef4444);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    .score-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+      color: #a5b4fc;
+    }
+    .score-val { color: #f97316; font-weight: 700; font-size: 1rem; }
+    .streak-badge {
+      background: rgba(249,115,22,0.2);
+      border: 1px solid rgba(249,115,22,0.4);
+      border-radius: 99px;
+      padding: 2px 12px;
+      font-size: 0.8rem;
+      color: #fdba74;
+    }
+
+    /* Player card */
+    .player-card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 28px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+    .player-photo {
+      width: 130px;
+      height: 130px;
+      border-radius: 16px;
+      object-fit: cover;
+      object-position: top center;
+      flex-shrink: 0;
+      border: 2px solid rgba(249,115,22,0.4);
+      background: rgba(255,255,255,0.05);
+    }
+    .player-info { flex: 1; min-width: 0; }
+    .player-name {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .born-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+    .born-label { color: #94a3b8; }
+    .born-city {
+      color: #fdba74;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .question-label {
+      margin-top: 14px;
+      font-size: 0.95rem;
+      color: #e2e8f0;
+      font-weight: 600;
+    }
+
+    /* Options */
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .option-btn {
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+    }
+    .option-btn:hover:not(:disabled) {
+      background: rgba(249,115,22,0.15);
+      border-color: rgba(249,115,22,0.5);
+      transform: translateY(-1px);
+    }
+    .option-btn.correct {
+      background: rgba(16,185,129,0.25);
+      border-color: #10b981;
+      color: #6ee7b7;
+    }
+    .option-btn.wrong {
+      background: rgba(239,68,68,0.2);
+      border-color: #ef4444;
+      color: #fca5a5;
+    }
+    .option-btn:disabled { cursor: default; }
+
+    /* Feedback */
+    .feedback {
+      text-align: center;
+      padding: 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 18px;
+      display: none;
+    }
+    .feedback.correct-fb {
+      background: rgba(16,185,129,0.15);
+      border: 1px solid rgba(16,185,129,0.3);
+      color: #6ee7b7;
+    }
+    .feedback.wrong-fb {
+      background: rgba(239,68,68,0.12);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #fca5a5;
+    }
+    .birth-reveal {
+      margin-top: 4px;
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: #cbd5e1;
+    }
+
+    .next-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #f97316, #ef4444);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      display: none;
+    }
+    .next-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* Results */
+    #results { display: none; text-align: center; }
+    .result-icon { font-size: 4rem; margin-bottom: 12px; }
+    .result-score {
+      font-size: 3rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #f97316, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    .result-label { color: #a5b4fc; font-size: 1rem; margin-bottom: 28px; }
+    .result-msg {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 8px;
+    }
+    .result-detail { color: #94a3b8; font-size: 0.9rem; margin-bottom: 32px; }
+    .result-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .result-btn {
+      padding: 12px 28px;
+      border-radius: 12px;
+      border: 2px solid #f97316;
+      background: transparent;
+      color: #f97316;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .result-btn.primary {
+      background: linear-gradient(135deg, #f97316, #ef4444);
+      border-color: transparent;
+      color: #fff;
+    }
+    .result-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+    @media (max-width: 520px) {
+      .player-card { flex-direction: column; align-items: center; text-align: center; }
+      .player-photo { width: 110px; height: 110px; }
+      .born-row { justify-content: center; }
+      .options { grid-template-columns: 1fr; }
+      h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="../index.html" class="back-link">← Back to Arcade</a>
+  <h1>⚽ Guess the Birth Country</h1>
+  <p class="subtitle">Where in the world was this footballer born?</p>
+
+  <!-- Menu -->
+  <div id="menu">
+    <p class="menu-title">Choose a continent to quiz on:</p>
+    <div class="menu-grid">
+      <button class="menu-btn featured" onclick="startQuiz('all')">🌍 All Players</button>
+      <button class="menu-btn" onclick="startQuiz('Europe')">🌍 Europe</button>
+      <button class="menu-btn" onclick="startQuiz('South America')">🌎 South America</button>
+      <button class="menu-btn" onclick="startQuiz('Africa')">🌍 Africa</button>
+      <button class="menu-btn" onclick="startQuiz('Asia')">🌏 Asia</button>
+      <button class="menu-btn" onclick="startQuiz('North America')">🌎 North & Central America</button>
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div id="quiz">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="score-row">
+      <span>Question <span id="q-num">1</span> / <span id="q-total">10</span></span>
+      <span class="streak-badge" id="streak-badge">🔥 0 streak</span>
+      <span>Score: <span class="score-val" id="score-val">0</span></span>
+    </div>
+
+    <div class="player-card">
+      <img class="player-photo" id="player-photo" src="" alt="Player photo" />
+      <div class="player-info">
+        <div class="player-name" id="player-name"></div>
+        <div class="born-row">
+          <span class="born-label">Born in:</span>
+          <span class="born-city" id="born-city"></span>
+        </div>
+        <div class="question-label">Which country is this city in?</div>
+      </div>
+    </div>
+
+    <div class="options" id="options"></div>
+
+    <div class="feedback" id="feedback">
+      <div id="feedback-text"></div>
+      <div class="birth-reveal" id="feedback-detail"></div>
+    </div>
+
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next →</button>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+    <div class="result-icon" id="result-icon"></div>
+    <div class="result-score" id="result-score"></div>
+    <div class="result-label" id="result-label"></div>
+    <div class="result-msg" id="result-msg"></div>
+    <div class="result-detail" id="result-detail"></div>
+    <div class="result-actions">
+      <button class="result-btn primary" id="play-again-btn" onclick="playAgain()">Play Again</button>
+      <button class="result-btn" onclick="showMenu()">Change Squad</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PLAYERS = [
+  // Argentina
+  {name:"Lionel Messi",country:"Argentina",born:"Rosario, Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Lionel_Messi_NE_Revolution_Inter_Miami_7.9.25-178.jpg/330px-Lionel_Messi_NE_Revolution_Inter_Miami_7.9.25-178.jpg"},
+  {name:"Diego Maradona",country:"Argentina",born:"Lanús, Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Argentina_celebrando_copa_%28cropped%29.jpg/330px-Argentina_celebrando_copa_%28cropped%29.jpg"},
+  {name:"Ángel Di María",country:"Argentina",born:"Rosario, Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/NIG-ARG_%285%29.jpg/330px-NIG-ARG_%285%29.jpg"},
+  {name:"Sergio Agüero",country:"Argentina",born:"Buenos Aires, Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Ag%C3%BCero_in_2018.jpg/330px-Ag%C3%BCero_in_2018.jpg"},
+  {name:"Javier Zanetti",country:"Argentina",born:"Buenos Aires, Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Javier_Adelmar_Zanetti.jpg/330px-Javier_Adelmar_Zanetti.jpg"},
+  {name:"Gabriel Batistuta",country:"Argentina",born:"Reconquista, Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Omar_Batistuta_%282%29.jpg/330px-Omar_Batistuta_%282%29.jpg"},
+  {name:"Julián Álvarez",country:"Argentina",born:"Calchín, Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/0/03/Argentina_national_football_team_-_2_-_2022_%28Juli%C3%A1n_%C3%81lvarez%29.jpg"},
+  {name:"Paulo Dybala",country:"Argentina",born:"Laguna Larga, Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/%D0%9C%D0%B0%D1%82%D1%87_%C2%AB%D0%94%D0%B8%D0%BD%D0%B0%D0%BC%D0%BE%C2%BB_-_%C2%AB%D0%AE%D0%B2%D0%B5%D0%BD%D1%82%D1%83%D1%81%C2%BB_0-2._20_%D0%BE%D0%BA%D1%82%D1%8F%D0%B1%D1%80%D1%8F_2020_%D0%B3%D0%BE%D0%B4%D0%B0_%E2%80%94_1153905_%28cropped%29.jpg/330px-%D0%9C%D0%B0%D1%82%D1%87_%C2%AB%D0%94%D0%B8%D0%BD%D0%B0%D0%BC%D0%BE%C2%BB_-_%C2%AB%D0%AE%D0%B2%D0%B5%D0%BD%D1%82%D1%83%D1%81%C2%BB_0-2._20_%D0%BE%D0%BA%D1%82%D1%8F%D0%B1%D1%80%D1%8F_2020_%D0%B3%D0%BE%D0%B4%D0%B0_%E2%80%94_1153905_%28cropped%29.jpg"},
+  {name:"Lautaro Martínez",country:"Argentina",born:"Bahía Blanca, Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Lautaro_Martinez_ARGENTINA_VS_VENEZUELA_2017.jpg/330px-Lautaro_Martinez_ARGENTINA_VS_VENEZUELA_2017.jpg"},
+  {name:"Emiliano Martínez",country:"Argentina",born:"Mar del Plata, Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/St._Louis_City_vs_Aston_Villa_%28Jul_2025%29_14_%28Emiliano_Mart%C3%ADnez%29.jpg/330px-St._Louis_City_vs_Aston_Villa_%28Jul_2025%29_14_%28Emiliano_Mart%C3%ADnez%29.jpg"},
+  // Brazil
+  {name:"Pelé",country:"Brazil",born:"Três Corações, Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Pele_con_brasil_%28cropped%29.jpg/330px-Pele_con_brasil_%28cropped%29.jpg"},
+  {name:"Ronaldinho",country:"Brazil",born:"Porto Alegre, Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Ronaldinho_in_2019.jpg/330px-Ronaldinho_in_2019.jpg"},
+  {name:"Neymar",country:"Brazil",born:"Mogi das Cruzes, Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Neymar_Jr._with_Al_Hilal%2C_3_October_2023_-_03_%28cropped%29.jpg/330px-Neymar_Jr._with_Al_Hilal%2C_3_October_2023_-_03_%28cropped%29.jpg"},
+  {name:"Ronaldo Nazário",country:"Brazil",born:"Rio de Janeiro, Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Ronaldo_Lu%C3%ADs_Naz%C3%A1rio_de_Lima_2019_%283x4_cropped%29.jpg/330px-Ronaldo_Lu%C3%ADs_Naz%C3%A1rio_de_Lima_2019_%283x4_cropped%29.jpg"},
+  {name:"Kaká",country:"Brazil",born:"Brasília, Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Kak%C3%A1_visited_Stadium_St._Petersburg.jpg/330px-Kak%C3%A1_visited_Stadium_St._Petersburg.jpg"},
+  {name:"Rivaldo",country:"Brazil",born:"Recife, Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Rivaldo_bunyodkor_2010.jpg/330px-Rivaldo_bunyodkor_2010.jpg"},
+  {name:"Roberto Carlos",country:"Brazil",born:"Garça, Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/LS3_1288_%2853332367864%29_%28cropped%29.jpg/330px-LS3_1288_%2853332367864%29_%28cropped%29.jpg"},
+  {name:"Cafu",country:"Brazil",born:"São Paulo, Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/14_06_2019_Abertura_da_Copa_Am%C3%A9rica_Brasil_2019_%2848064408836%29_%28cropped%29.jpg/330px-14_06_2019_Abertura_da_Copa_Am%C3%A9rica_Brasil_2019_%2848064408836%29_%28cropped%29.jpg"},
+  {name:"Vinícius Júnior",country:"Brazil",born:"São Gonçalo, Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/2023_05_06_Final_de_la_Copa_del_Rey_-_52879242230_%28cropped%29.jpg/330px-2023_05_06_Final_de_la_Copa_del_Rey_-_52879242230_%28cropped%29.jpg"},
+  {name:"Romário",country:"Brazil",born:"Rio de Janeiro, Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Senadores_da_57%C2%AA_Legislatura_%2852689451805%29.jpg/330px-Senadores_da_57%C2%AA_Legislatura_%2852689451805%29.jpg"},
+  // France
+  {name:"Zinedine Zidane",country:"France",born:"Marseille, France",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Zinedine_Zidane_by_Tasnim_03.jpg/330px-Zinedine_Zidane_by_Tasnim_03.jpg"},
+  {name:"Kylian Mbappé",country:"France",born:"Paris, France",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Picture_with_Mbapp%C3%A9_%28cropped_and_rotated%29.jpg/330px-Picture_with_Mbapp%C3%A9_%28cropped_and_rotated%29.jpg"},
+  {name:"Thierry Henry",country:"France",born:"Les Ulis, France",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Thierry_Henry_%2851649035951%29_%28cropped%29.jpg/330px-Thierry_Henry_%2851649035951%29_%28cropped%29.jpg"},
+  {name:"Michel Platini",country:"France",born:"Joeuf, France",img:"https://upload.wikimedia.org/wikipedia/commons/6/66/Michel_Platini_2010_%28cropped%29.jpg"},
+  {name:"Antoine Griezmann",country:"France",born:"Mâcon, France",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/FRA-ARG_%2810%29_%28cropped%29.jpg/330px-FRA-ARG_%2810%29_%28cropped%29.jpg"},
+  {name:"Paul Pogba",country:"France",born:"Lagny-sur-Marne, France",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Paul_Pogba_at_the_2025_Cannes_Film_Festival_02.jpg/330px-Paul_Pogba_at_the_2025_Cannes_Film_Festival_02.jpg"},
+  {name:"N'Golo Kanté",country:"France",born:"Paris, France",img:"https://upload.wikimedia.org/wikipedia/commons/0/05/N%27Golo_Kant%C3%A9_%28cropped%29.jpg"},
+  {name:"Karim Benzema",country:"France",born:"Lyon, France",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Karim_Benzema_Pick.jpg/330px-Karim_Benzema_Pick.jpg"},
+  {name:"Patrick Vieira",country:"France",born:"Dakar, Senegal",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Patrick_Vieira_NYCFC_%28cropped%29.JPG/330px-Patrick_Vieira_NYCFC_%28cropped%29.JPG"},
+  {name:"Hugo Lloris",country:"France",born:"Nice, France",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Lloris_2018_%28cropped%29.jpg/330px-Lloris_2018_%28cropped%29.jpg"},
+  // Germany
+  {name:"Franz Beckenbauer",country:"Germany",born:"Munich, Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Franz_Beckenbauer_%281975%29.jpg/330px-Franz_Beckenbauer_%281975%29.jpg"},
+  {name:"Gerd Müller",country:"Germany",born:"Nördlingen, Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Gerd_M%C3%BCller_c1973_%28cropped%29.jpg/330px-Gerd_M%C3%BCller_c1973_%28cropped%29.jpg"},
+  {name:"Thomas Müller",country:"Germany",born:"Weilheim, Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/FC_Red_Bull_Salzburg_gegen_Bayern_M%C3%BCnchen_%282025-01-06_Testspiel%29_19.jpg/330px-FC_Red_Bull_Salzburg_gegen_Bayern_M%C3%BCnchen_%282025-01-06_Testspiel%29_19.jpg"},
+  {name:"Manuel Neuer",country:"Germany",born:"Gelsenkirchen, Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/20180602_FIFA_Friendly_Match_Austria_vs._Germany_Manuel_Neuer_850_0723.jpg/330px-20180602_FIFA_Friendly_Match_Austria_vs._Germany_Manuel_Neuer_850_0723.jpg"},
+  {name:"Toni Kroos",country:"Germany",born:"Greifswald, Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Toni_Kroos_Real_Madrid_2021.jpg/330px-Toni_Kroos_Real_Madrid_2021.jpg"},
+  {name:"Miroslav Klose",country:"Germany",born:"Opole, Poland",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/2016209185719_2016-07-27_Champions_for_Charity_-_Sven_-_1D_X_-_0149_-_DV3P4742_mod.jpg/330px-2016209185719_2016-07-27_Champions_for_Charity_-_Sven_-_1D_X_-_0149_-_DV3P4742_mod.jpg"},
+  {name:"Bastian Schweinsteiger",country:"Germany",born:"Kolbermoor, Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Re-publica_23_-_Tag_3_%2852957826298%29_%28cropped%29.jpg/330px-Re-publica_23_-_Tag_3_%2852957826298%29_%28cropped%29.jpg"},
+  {name:"Philipp Lahm",country:"Germany",born:"Munich, Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Philipp_Lahm_auf_der_Berlinale_2024%2C_Ausschnitt.jpg/330px-Philipp_Lahm_auf_der_Berlinale_2024%2C_Ausschnitt.jpg"},
+  {name:"Lothar Matthäus",country:"Germany",born:"Erlangen, Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/2019_Lothar_Matth%C3%A4us.jpg/330px-2019_Lothar_Matth%C3%A4us.jpg"},
+  {name:"Joshua Kimmich",country:"Germany",born:"Rottweil, Germany",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/2019-06-11_Fu%C3%9Fball%2C_M%C3%A4nner%2C_L%C3%A4nderspiel%2C_Deutschland-Estland_StP_2078_LR10_by_Stepro_%28cropped%29.jpg/330px-2019-06-11_Fu%C3%9Fball%2C_M%C3%A4nner%2C_L%C3%A4nderspiel%2C_Deutschland-Estland_StP_2078_LR10_by_Stepro_%28cropped%29.jpg"},
+  // Spain
+  {name:"Andrés Iniesta",country:"Spain",born:"Fuentealbilla, Spain",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Andr%C3%A9s_Iniesta_%28cropped%29.jpg/330px-Andr%C3%A9s_Iniesta_%28cropped%29.jpg"},
+  {name:"Xavi Hernández",country:"Spain",born:"Terrassa, Spain",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Xavi_13981129001173637176666027076571.jpg/330px-Xavi_13981129001173637176666027076571.jpg"},
+  {name:"Sergio Ramos",country:"Spain",born:"Camas, Spain",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Sergio_Ramos_Interview_2021_%28cropped%29.jpg/330px-Sergio_Ramos_Interview_2021_%28cropped%29.jpg"},
+  {name:"Iker Casillas",country:"Spain",born:"Móstoles, Spain",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Iker-Casillas-SportsTrade-2021-cropped.jpg/330px-Iker-Casillas-SportsTrade-2021-cropped.jpg"},
+  {name:"David Villa",country:"Spain",born:"Tuilla, Spain",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Spain-Tahiti%2C_Confederations_Cup_2013_%2802%29_%28Villa_crop%29.jpg/330px-Spain-Tahiti%2C_Confederations_Cup_2013_%2802%29_%28Villa_crop%29.jpg"},
+  {name:"Raúl González",country:"Spain",born:"Madrid, Spain",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/25th_Laureus_World_Sports_Awards_-_Ra%C3%BAl_-_240422_132916-2_%28cropped%29.jpg/330px-25th_Laureus_World_Sports_Awards_-_Ra%C3%BAl_-_240422_132916-2_%28cropped%29.jpg"},
+  {name:"Fernando Torres",country:"Spain",born:"Fuenlabrada, Spain",img:"https://upload.wikimedia.org/wikipedia/commons/5/57/Fernando_Torres_2017.jpg"},
+  {name:"Gerard Piqué",country:"Spain",born:"Barcelona, Spain",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Gerard_Piqu%C3%A9_Euro_2012_vs_France_01.jpg/330px-Gerard_Piqu%C3%A9_Euro_2012_vs_France_01.jpg"},
+  {name:"Pedri",country:"Spain",born:"Tegueste, Spain",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Pedri.jpg/330px-Pedri.jpg"},
+  {name:"Gavi",country:"Spain",born:"Los Palacios, Spain",img:"https://upload.wikimedia.org/wikipedia/commons/1/1e/Jugadors_pretemporada_pels_Estats_Units_%28cropped%292.jpg"},
+  // England
+  {name:"David Beckham",country:"England",born:"Leytonstone, England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/David_Beckham_UNICEF_%28cropped2%29.jpg/330px-David_Beckham_UNICEF_%28cropped2%29.jpg"},
+  {name:"Wayne Rooney",country:"England",born:"Liverpool, England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Wayne_Rooney_%2850121495731%29_%28cropped%29.jpg/330px-Wayne_Rooney_%2850121495731%29_%28cropped%29.jpg"},
+  {name:"Steven Gerrard",country:"England",born:"Whiston, England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Steven_Gerrard_2018.jpg/330px-Steven_Gerrard_2018.jpg"},
+  {name:"Frank Lampard",country:"England",born:"Romford, England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Frank_Lampard_2019.jpg/330px-Frank_Lampard_2019.jpg"},
+  {name:"Harry Kane",country:"England",born:"Walthamstow, England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Harry_Kane_on_October_10%2C_2023.jpg/330px-Harry_Kane_on_October_10%2C_2023.jpg"},
+  {name:"Gary Lineker",country:"England",born:"Leicester, England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Prime_Minister_Keir_Starmer_hosts_St_George%27s_Day_Reception_%2854470857860%29_%28cropped%29.jpg/330px-Prime_Minister_Keir_Starmer_hosts_St_George%27s_Day_Reception_%2854470857860%29_%28cropped%29.jpg"},
+  {name:"Bobby Moore",country:"England",born:"Barking, England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Bobby_Moore_1969.jpg/330px-Bobby_Moore_1969.jpg"},
+  {name:"Alan Shearer",country:"England",born:"Newcastle, England",img:"https://upload.wikimedia.org/wikipedia/commons/b/ba/Alan_Shearer_2008.jpg"},
+  {name:"Jude Bellingham",country:"England",born:"Stourbridge, England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/25th_Laureus_World_Sports_Awards_-_240422_205212_%28cropped%29.jpg/330px-25th_Laureus_World_Sports_Awards_-_240422_205212_%28cropped%29.jpg"},
+  {name:"Phil Foden",country:"England",born:"Stockport, England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/2023-10-04_Fu%C3%9Fball%2C_M%C3%A4nner%2C_UEFA_Champions_League%2C_RB_Leipzig_-_Manchester_City_FC_1DX_2613%2C_Phil_Foden.jpg/330px-2023-10-04_Fu%C3%9Fball%2C_M%C3%A4nner%2C_UEFA_Champions_League%2C_RB_Leipzig_-_Manchester_City_FC_1DX_2613%2C_Phil_Foden.jpg"},
+  // Portugal
+  {name:"Cristiano Ronaldo",country:"Portugal",born:"Funchal, Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Cristiano_Ronaldo_2275_%28cropped%29.jpg/330px-Cristiano_Ronaldo_2275_%28cropped%29.jpg"},
+  {name:"Eusébio",country:"Portugal",born:"Lourenço Marques, Mozambique",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Eusebio_en_1973.jpg/330px-Eusebio_en_1973.jpg"},
+  {name:"Luís Figo",country:"Portugal",born:"Almada, Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Luis_Figo_2023.jpg/330px-Luis_Figo_2023.jpg"},
+  {name:"Bernardo Silva",country:"Portugal",born:"Lisbon, Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Bernardo_Silva_%28Isto_%C3%89_Gozar_Com_Quem_Trabalha%2C_2024%29.png/330px-Bernardo_Silva_%28Isto_%C3%89_Gozar_Com_Quem_Trabalha%2C_2024%29.png"},
+  {name:"Bruno Fernandes",country:"Portugal",born:"Maia, Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Bruno_Fernandes_Portugal%2C_2018.jpg/330px-Bruno_Fernandes_Portugal%2C_2018.jpg"},
+  {name:"Rui Costa",country:"Portugal",born:"Amadora, Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/e/ea/Rui_Costa_2019.png"},
+  {name:"Pepe",country:"Portugal",born:"Maceió, Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Pepe_2018.jpg/330px-Pepe_2018.jpg"},
+  {name:"Deco",country:"Portugal",born:"São Bernardo do Campo, Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Deco_com_o_Fluminense_em_2013_%28cropped%29.jpg/330px-Deco_com_o_Fluminense_em_2013_%28cropped%29.jpg"},
+  {name:"João Félix",country:"Portugal",born:"Viseu, Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Portugal_national_football_team_0866_%28Jo%C3%A3o_F%C3%A9lix%29.jpg/330px-Portugal_national_football_team_0866_%28Jo%C3%A3o_F%C3%A9lix%29.jpg"},
+  {name:"Ricardo Carvalho",country:"Portugal",born:"Amarante, Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/7/74/Ricardo_Carvalho.jpg"},
+  // Italy
+  {name:"Paolo Maldini",country:"Italy",born:"Milan, Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Paolo_Maldini_AC_Milan_Technical_director_2018.jpg/330px-Paolo_Maldini_AC_Milan_Technical_director_2018.jpg"},
+  {name:"Francesco Totti",country:"Italy",born:"Rome, Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/KL-2018_%284%29.jpg/330px-KL-2018_%284%29.jpg"},
+  {name:"Andrea Pirlo",country:"Italy",born:"Flero, Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/20150616_-_Portugal_-_Italie_-_Gen%C3%A8ve_-_Andrea_Pirlo_%28cropped%29.jpg/330px-20150616_-_Portugal_-_Italie_-_Gen%C3%A8ve_-_Andrea_Pirlo_%28cropped%29.jpg"},
+  {name:"Gianluigi Buffon",country:"Italy",born:"Carrara, Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Norway_Italy_-_June_2025_A_44_%28Gianluigi_Buffon%29.jpg/330px-Norway_Italy_-_June_2025_A_44_%28Gianluigi_Buffon%29.jpg"},
+  {name:"Alessandro Del Piero",country:"Italy",born:"Conegliano, Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/25th_Laureus_World_Sports_Awards_-_Alessandro_Del_Piero_-_240421_155220_%28cropped%29.jpg/330px-25th_Laureus_World_Sports_Awards_-_Alessandro_Del_Piero_-_240421_155220_%28cropped%29.jpg"},
+  {name:"Roberto Baggio",country:"Italy",born:"Caldogno, Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/%D8%B1%D9%88%D8%A8%D8%B1%D8%AA%D9%88_%D8%A8%D8%A7%D8%AC%D9%88_%28cropped%29.jpg/330px-%D8%B1%D9%88%D8%A8%D8%B1%D8%AA%D9%88_%D8%A8%D8%A7%D8%AC%D9%88_%28cropped%29.jpg"},
+  {name:"Fabio Cannavaro",country:"Italy",born:"Naples, Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Fabio_Cannavaro_2011.jpg/330px-Fabio_Cannavaro_2011.jpg"},
+  {name:"Marco Verratti",country:"Italy",born:"Pescara, Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Verratti-2019-07-17_SG_Dynamo_Dresden_vs._Paris_Saint-Germain_by_Sandro_Halank%E2%80%93126.jpg/330px-Verratti-2019-07-17_SG_Dynamo_Dresden_vs._Paris_Saint-Germain_by_Sandro_Halank%E2%80%93126.jpg"},
+  {name:"Giorgio Chiellini",country:"Italy",born:"Pisa, Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Chiellini_Mancini_Gravina_Mattarella_2021_%28Giorgio_Chiellini%29.jpg/330px-Chiellini_Mancini_Gravina_Mattarella_2021_%28Giorgio_Chiellini%29.jpg"},
+  {name:"Franco Baresi",country:"Italy",born:"Travagliato, Italy",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Franco_Baresi_2012.jpg/330px-Franco_Baresi_2012.jpg"},
+  // Netherlands
+  {name:"Johan Cruyff",country:"Netherlands",born:"Amsterdam, Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Johan_Cruijff_%281974%29.jpg/330px-Johan_Cruijff_%281974%29.jpg"},
+  {name:"Marco van Basten",country:"Netherlands",born:"Utrecht, Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Marco_van_Basten_%282%29_%28cropped%29.jpg/330px-Marco_van_Basten_%282%29_%28cropped%29.jpg"},
+  {name:"Ruud Gullit",country:"Netherlands",born:"Amsterdam, Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/25th_Laureus_World_Sports_Awards_-_Ruud_Gullit_-_240422_131911_%28cropped%29.jpg/330px-25th_Laureus_World_Sports_Awards_-_Ruud_Gullit_-_240422_131911_%28cropped%29.jpg"},
+  {name:"Dennis Bergkamp",country:"Netherlands",born:"Amsterdam, Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/7/75/Dennis_Bergkamp_2014_%28cropped%29.jpg"},
+  {name:"Robin van Persie",country:"Netherlands",born:"Rotterdam, Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Loco-Fener_%2810%29.jpg/330px-Loco-Fener_%2810%29.jpg"},
+  {name:"Arjen Robben",country:"Netherlands",born:"Bedum, Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Arjen_Robben_v_Shakhtar_2015_%28cropped%29.jpg/330px-Arjen_Robben_v_Shakhtar_2015_%28cropped%29.jpg"},
+  {name:"Wesley Sneijder",country:"Netherlands",born:"Utrecht, Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Wesley_Sneijder_%2815487233555%29_%28cropped%29.jpg/330px-Wesley_Sneijder_%2815487233555%29_%28cropped%29.jpg"},
+  {name:"Frank Rijkaard",country:"Netherlands",born:"Amsterdam, Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/FrankRijkaard2.jpg/330px-FrankRijkaard2.jpg"},
+  {name:"Virgil van Dijk",country:"Netherlands",born:"Breda, Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/20160604_AUT_NED_8876_%28cropped%29.jpg/330px-20160604_AUT_NED_8876_%28cropped%29.jpg"},
+  {name:"Frenkie de Jong",country:"Netherlands",born:"Arkel, Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/4/42/%D0%9C%D0%B0%D1%82%D1%87_%C2%AB%D0%94%D0%B8%D0%BD%D0%B0%D0%BC%D0%BE%C2%BB_-_%C2%AB%D0%91%D0%B0%D1%80%D1%81%D0%B5%D0%BB%D0%BE%D0%BD%D0%B0%C2%BB_0-1._2_%D0%BD%D0%BE%D1%8F%D0%B1%D1%80%D1%8F_2021_%D0%B3%D0%BE%D0%B4%D0%B0._II_%E2%80%94_1289671_%28cropped%29.jpg"},
+  // Other countries
+  {name:"Luka Modrić",country:"Croatia",born:"Zadar, Croatia",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Ofrenda_de_la_Liga_y_la_Champions-57-L.Mill%C3%A1n_%2852109310843%29_%28Luka_Modri%C4%87%29.jpg/330px-Ofrenda_de_la_Liga_y_la_Champions-57-L.Mill%C3%A1n_%2852109310843%29_%28Luka_Modri%C4%87%29.jpg"},
+  {name:"Robert Lewandowski",country:"Poland",born:"Warsaw, Poland",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/2019147183134_2019-05-27_Fussball_1.FC_Kaiserslautern_vs_FC_Bayern_M%C3%BCnchen_-_Sven_-_1D_X_MK_II_-_0228_-_B70I8527_%28cropped%29.jpg/330px-2019147183134_2019-05-27_Fussball_1.FC_Kaiserslautern_vs_FC_Bayern_M%C3%BCnchen_-_Sven_-_1D_X_MK_II_-_0228_-_B70I8527_%28cropped%29.jpg"},
+  {name:"Erling Haaland",country:"Norway",born:"Leeds, England",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Erling_Haaland_June_2025.jpg/330px-Erling_Haaland_June_2025.jpg"},
+  {name:"Mohamed Salah",country:"Egypt",born:"Nagrig, Egypt",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Mohamed_Salah_2018.jpg/330px-Mohamed_Salah_2018.jpg"},
+  {name:"Sadio Mané",country:"Senegal",born:"Sédhiou, Senegal",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Esteghlal_F.C._v_Al_Nassr_FC%2C_3_March_2025%2C_Sadio_Man%C3%A9.jpg/330px-Esteghlal_F.C._v_Al_Nassr_FC%2C_3_March_2025%2C_Sadio_Man%C3%A9.jpg"},
+  {name:"Zlatan Ibrahimović",country:"Sweden",born:"Malmö, Sweden",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Zlatan_Ibrahimovi%C4%87_June_2018.jpg/330px-Zlatan_Ibrahimovi%C4%87_June_2018.jpg"},
+  {name:"George Weah",country:"Liberia",born:"Monrovia, Liberia",img:"https://upload.wikimedia.org/wikipedia/commons/5/53/Clar_Weah%2C_George_Weah%2C_Joe_Biden%2C_Jill_Biden_%28cropped%29.jpg"},
+  {name:"Samuel Eto'o",country:"Cameroon",born:"Douala, Cameroon",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Samuel_2011.jpg/330px-Samuel_2011.jpg"},
+  {name:"Didier Drogba",country:"Ivory Coast",born:"Abidjan, Ivory Coast",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Didier_Drogba_%282019%29_%28cropped2%29.jpg/330px-Didier_Drogba_%282019%29_%28cropped2%29.jpg"},
+  {name:"Son Heung-min",country:"South Korea",born:"Chuncheon, South Korea",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/BFA_2023_-2_Heung-Min_Son_%28cropped%29.jpg/330px-BFA_2023_-2_Heung-Min_Son_%28cropped%29.jpg"},
+  {name:"Keylor Navas",country:"Costa Rica",born:"San Isidro, Costa Rica",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Keylor_Navas_2018_%28cropped%29.jpg/330px-Keylor_Navas_2018_%28cropped%29.jpg"},
+  {name:"Luis Suárez",country:"Uruguay",born:"Salto, Uruguay",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Luis_Su%C3%A1rez_NE_Revolution_Inter_Miami_7.9.25-053_%28cropped%29.jpg/330px-Luis_Su%C3%A1rez_NE_Revolution_Inter_Miami_7.9.25-053_%28cropped%29.jpg"},
+  {name:"Edinson Cavani",country:"Uruguay",born:"Salto, Uruguay",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Edinson_Cavani_2018_%28cropped%29.jpg/330px-Edinson_Cavani_2018_%28cropped%29.jpg"},
+  {name:"James Rodríguez",country:"Colombia",born:"Cúcuta, Colombia",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/James_Rodriguez_2018.jpg/330px-James_Rodriguez_2018.jpg"},
+  {name:"Alexis Sánchez",country:"Chile",born:"Tocopilla, Chile",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Alexis_S%C3%A1nchez_2017.jpg/330px-Alexis_S%C3%A1nchez_2017.jpg"},
+];
+
+// All unique birth countries that appear in the dataset
+const ALL_BIRTH_COUNTRIES = [...new Set(PLAYERS.map(p => p.born.split(',').pop().trim()))];
+
+const CONTINENT = {
+  Argentina: 'South America', Brazil: 'South America', Uruguay: 'South America',
+  Colombia: 'South America', Chile: 'South America',
+  France: 'Europe', Germany: 'Europe', Spain: 'Europe', England: 'Europe',
+  Portugal: 'Europe', Italy: 'Europe', Netherlands: 'Europe', Croatia: 'Europe',
+  Poland: 'Europe', Norway: 'Europe', Sweden: 'Europe',
+  Egypt: 'Africa', Senegal: 'Africa', Liberia: 'Africa',
+  Cameroon: 'Africa', 'Ivory Coast': 'Africa', Morocco: 'Africa',
+  'South Korea': 'Asia', Japan: 'Asia',
+  'Costa Rica': 'North America', Mexico: 'North America',
+};
+
+let pool = [];
+let questions = [];
+let currentQ = 0;
+let score = 0;
+let streak = 0;
+let bestStreak = 0;
+let answered = false;
+let currentRegion = 'all';
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function birthCountry(player) {
+  return player.born.split(',').pop().trim();
+}
+
+function birthCity(player) {
+  return player.born.split(',')[0].trim();
+}
+
+function startQuiz(region) {
+  currentRegion = region;
+  if (region === 'all') {
+    pool = [...PLAYERS];
+  } else {
+    pool = PLAYERS.filter(p => CONTINENT[p.country] === region);
+  }
+
+  if (pool.length < 4) {
+    alert('Not enough players for this region yet!');
+    return;
+  }
+
+  shuffle(pool);
+  const total = Math.min(10, pool.length);
+  questions = pool.slice(0, total);
+  currentQ = 0;
+  score = 0;
+  streak = 0;
+  bestStreak = 0;
+
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  document.getElementById('q-total').textContent = total;
+
+  showQuestion();
+}
+
+function showQuestion() {
+  answered = false;
+  const q = questions[currentQ];
+  const total = questions.length;
+  const correctCountry = birthCountry(q);
+  const city = birthCity(q);
+
+  document.getElementById('q-num').textContent = currentQ + 1;
+  document.getElementById('progress-bar').style.width = ((currentQ / total) * 100) + '%';
+  document.getElementById('score-val').textContent = score;
+  document.getElementById('streak-badge').textContent = `🔥 ${streak} streak`;
+  document.getElementById('player-photo').src = q.img;
+  document.getElementById('player-photo').alt = q.name;
+  document.getElementById('player-name').textContent = q.name;
+  document.getElementById('born-city').textContent = city;
+
+  // Generate 3 wrong answers from all birth countries, excluding correct
+  const wrongs = shuffle(ALL_BIRTH_COUNTRIES.filter(c => c !== correctCountry));
+  const options = shuffle([correctCountry, ...wrongs.slice(0, 3)]);
+
+  const container = document.getElementById('options');
+  container.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    btn.onclick = () => handleAnswer(btn, opt, correctCountry, q);
+    container.appendChild(btn);
+  });
+
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+}
+
+function handleAnswer(btn, chosen, correct, q) {
+  if (answered) return;
+  answered = true;
+
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add('correct');
+  });
+
+  const fb = document.getElementById('feedback');
+  const fbText = document.getElementById('feedback-text');
+  const fbDetail = document.getElementById('feedback-detail');
+
+  if (chosen === correct) {
+    btn.classList.add('correct');
+    score++;
+    streak++;
+    if (streak > bestStreak) bestStreak = streak;
+    fb.className = 'feedback correct-fb';
+    fbText.textContent = '✓ Correct!';
+    fbDetail.textContent = `${q.name} was born in ${q.born}`;
+  } else {
+    btn.classList.add('wrong');
+    streak = 0;
+    fb.className = 'feedback wrong-fb';
+    fbText.textContent = `✗ Wrong! The answer is ${correct}`;
+    fbDetail.textContent = `${q.name} was born in ${q.born}`;
+  }
+
+  document.getElementById('score-val').textContent = score;
+  document.getElementById('streak-badge').textContent = `🔥 ${streak} streak`;
+  fb.style.display = 'block';
+
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.style.display = 'block';
+  const isLast = currentQ === questions.length - 1;
+  nextBtn.textContent = isLast ? 'See Results →' : 'Next →';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) {
+    showResults();
+  } else {
+    showQuestion();
+  }
+}
+
+function showResults() {
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+
+  const total = questions.length;
+  const pct = Math.round((score / total) * 100);
+
+  let icon, msg, detail;
+  if (pct === 100) { icon = '🏆'; msg = 'Perfect Score!'; detail = 'You know exactly where these legends were born!'; }
+  else if (pct >= 80) { icon = '⭐'; msg = 'Excellent!'; detail = 'You really know your football geography!'; }
+  else if (pct >= 60) { icon = '👍'; msg = 'Good job!'; detail = 'Solid geography knowledge!'; }
+  else if (pct >= 40) { icon = '📚'; msg = 'Keep learning!'; detail = 'Some tricky birthplaces in there!'; }
+  else { icon = '⚽'; msg = 'Keep practising!'; detail = 'Try again — you\'ll learn those birthplaces!'; }
+
+  document.getElementById('result-icon').textContent = icon;
+  document.getElementById('result-score').textContent = `${score} / ${total}`;
+  document.getElementById('result-label').textContent = `${pct}% correct`;
+  document.getElementById('result-msg').textContent = msg;
+  document.getElementById('result-detail').textContent = detail + (bestStreak > 1 ? ` Best streak: ${bestStreak}!` : '');
+
+  document.getElementById('play-again-btn').onclick = () => startQuiz(currentRegion);
+}
+
+function playAgain() {
+  startQuiz(currentRegion);
+}
+
+function showMenu() {
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('menu').style.display = 'block';
+}
+</script>
+</body>
+</html>
