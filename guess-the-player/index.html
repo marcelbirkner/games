@@ -241,9 +241,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 220px;
-      height: 280px;
-      margin: 0 auto;
+      width: 180px;
+      min-width: 180px;
+      height: 230px;
       border-radius: 16px;
       background: rgba(255,255,255,0.05);
       border: 3px solid rgba(255,255,255,0.1);
@@ -252,14 +252,13 @@
     }
 
     .player-info {
-      margin-top: 16px;
+      flex: 1;
+      min-width: 0;
       padding: 16px;
       background: rgba(255,255,255,0.06);
       border-radius: 12px;
       border: 1px solid rgba(255,255,255,0.1);
-      display: none;
       text-align: left;
-      animation: fadeIn 0.3s ease;
     }
 
     @keyframes fadeIn {
@@ -268,10 +267,16 @@
     }
 
     .player-info .info-name {
+      display: none;
       font-size: 1.15rem;
       font-weight: 700;
       margin-bottom: 10px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: rgba(99, 102, 241, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.4);
       color: #a5b4fc;
+      animation: fadeIn 0.3s ease;
     }
 
     .player-info .info-row {
@@ -348,15 +353,15 @@
       </div>
       <div class="player-display">
         <img id="player-img" src="" alt="Soccer player" referrerpolicy="no-referrer">
-        <div class="player-hint" id="player-hint"></div>
+        <div class="player-info" id="player-info">
+          <div class="info-name" id="info-name"></div>
+          <div class="info-row"><span class="info-label">Country:</span><span class="info-value" id="player-hint"></span></div>
+          <div class="info-row"><span class="info-label">Born:</span><span class="info-value" id="info-born"></span></div>
+          <div class="info-row"><span class="info-label">Teams:</span><div class="info-tags" id="info-teams"></div></div>
+          <div class="info-row"><span class="info-label">Titles:</span><div class="info-tags" id="info-titles"></div></div>
+        </div>
       </div>
       <div class="options" id="options"></div>
-      <div class="player-info" id="player-info">
-        <div class="info-name" id="info-name"></div>
-        <div class="info-row"><span class="info-label">Born:</span><span class="info-value" id="info-born"></span></div>
-        <div class="info-row"><span class="info-label">Teams:</span><div class="info-tags" id="info-teams"></div></div>
-        <div class="info-row"><span class="info-label">Titles:</span><div class="info-tags" id="info-titles"></div></div>
-      </div>
     </div>
 
     <!-- Result -->
@@ -570,8 +575,30 @@ function showQuestion() {
   const oldErr = document.querySelector('.img-error');
   if (oldErr) oldErr.remove();
 
-  document.getElementById('player-hint').textContent = `Country: ${q.country}`;
-  document.getElementById('player-info').style.display = 'none';
+  document.getElementById('player-hint').textContent = q.country;
+
+  // Populate facts panel (name hidden until answered)
+  const infoEl = document.getElementById('player-info');
+  const nameEl = document.getElementById('info-name');
+  nameEl.style.display = 'none';
+  nameEl.textContent = '';
+  document.getElementById('info-born').textContent = q.born || '';
+  const teamsEl = document.getElementById('info-teams');
+  teamsEl.innerHTML = '';
+  (q.teams || []).forEach(t => {
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.textContent = t;
+    teamsEl.appendChild(tag);
+  });
+  const titlesEl = document.getElementById('info-titles');
+  titlesEl.innerHTML = '';
+  (q.titles || []).forEach(t => {
+    const tag = document.createElement('span');
+    tag.className = 'tag title-tag';
+    tag.textContent = t;
+    titlesEl.appendChild(tag);
+  });
 
   // Build 8 options: 1 correct + 7 wrong from full PLAYERS list (same country preferred)
   const sameCountry = PLAYERS.filter(p => p.name !== q.name && p.country === q.country);
@@ -617,28 +644,11 @@ function handleAnswer(btn, isCorrect, correctName) {
   document.getElementById('score').textContent = score;
   document.getElementById('streak').textContent = streak;
 
-  // Show player info card
+  // Reveal player name
   const q = questions[currentQ];
-  const infoEl = document.getElementById('player-info');
-  document.getElementById('info-name').textContent = q.name;
-  document.getElementById('info-born').textContent = q.born || '';
-  const teamsEl = document.getElementById('info-teams');
-  teamsEl.innerHTML = '';
-  (q.teams || []).forEach(t => {
-    const tag = document.createElement('span');
-    tag.className = 'tag';
-    tag.textContent = t;
-    teamsEl.appendChild(tag);
-  });
-  const titlesEl = document.getElementById('info-titles');
-  titlesEl.innerHTML = '';
-  (q.titles || []).forEach(t => {
-    const tag = document.createElement('span');
-    tag.className = 'tag title-tag';
-    tag.textContent = t;
-    titlesEl.appendChild(tag);
-  });
-  infoEl.style.display = 'block';
+  const nameEl = document.getElementById('info-name');
+  nameEl.textContent = q.name;
+  nameEl.style.display = 'block';
 
   setTimeout(() => {
     currentQ++;
