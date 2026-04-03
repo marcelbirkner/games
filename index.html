@@ -49,7 +49,7 @@
     /* Header */
     header {
       text-align: center;
-      margin-bottom: 56px;
+      margin-bottom: 48px;
     }
     .arcade-sign {
       display: inline-block;
@@ -84,6 +84,34 @@
     @keyframes bounce {
       0%, 100% { transform: translateY(0); }
       50%       { transform: translateY(-10px); }
+    }
+
+    /* Category sections */
+    .category {
+      margin-bottom: 52px;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .category-icon {
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+    .category-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--cat-color, #a5b4fc);
+    }
+    .category-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--cat-color, #a5b4fc), transparent);
+      opacity: 0.3;
     }
 
     /* Game grid */
@@ -232,121 +260,163 @@
       <p class="tagline">Pick a game and start playing!</p>
     </header>
 
-    <div class="games-grid">
+    <!-- ⚽ Football -->
+    <div class="category">
+      <div class="category-header" style="--cat-color:#10b981">
+        <span class="category-icon">⚽</span>
+        <span class="category-title" style="color:#10b981">Football</span>
+        <div class="category-line" style="background:linear-gradient(90deg,#10b981,transparent);"></div>
+      </div>
+      <div class="games-grid">
 
-      <!-- Fun with Flags -->
-      <a href="./fun-with-flags/index.html" class="game-card"
-         style="--accent:#6366f1; --glow:linear-gradient(135deg,rgba(99,102,241,0.08),transparent); --shadow-color:rgba(99,102,241,0.3);">
-        <span class="icon">🌍</span>
-        <div class="game-title">Fun with Flags</div>
-        <div class="game-desc">Can you name all 249 countries from their flags? Test your geography skills!</div>
-        <span class="badge" style="background:#6366f1;">Geography</span>
-        <span class="play-btn">Play</span>
-      </a>
+        <a href="./guess-the-player/index.html" class="game-card"
+           style="--accent:#10b981; --glow:linear-gradient(135deg,rgba(16,185,129,0.08),transparent); --shadow-color:rgba(16,185,129,0.3);">
+          <span class="icon">⚽</span>
+          <div class="game-title">Guess the Player</div>
+          <div class="game-desc">Can you identify famous soccer players from their photos? Test your football knowledge!</div>
+          <span class="badge" style="background:#10b981;">Football</span>
+          <span class="play-btn">Play</span>
+        </a>
 
-      <!-- Guess the Capital -->
-      <a href="./guess-the-capital/index.html" class="game-card"
-         style="--accent:#14b8a6; --glow:linear-gradient(135deg,rgba(20,184,166,0.08),transparent); --shadow-color:rgba(20,184,166,0.3);">
-        <span class="icon">🌐</span>
-        <div class="game-title">Guess the Capital</div>
-        <div class="game-desc">Can you name the capital city of every country? Pick a continent and find out!</div>
-        <span class="badge" style="background:#14b8a6;">Geography</span>
-        <span class="play-btn" style="border-color:#14b8a6; color:#14b8a6;">Play</span>
-      </a>
+        <a href="./guess-the-footballer/index.html" class="game-card"
+           style="--accent:#f97316; --glow:linear-gradient(135deg,rgba(249,115,22,0.08),transparent); --shadow-color:rgba(249,115,22,0.3);">
+          <span class="icon">🏟️</span>
+          <div class="game-title">Guess the Footballer</div>
+          <div class="game-desc">Birthplace, country & club — can you name the footballer from these clues? 4 options to choose from!</div>
+          <span class="badge" style="background:#f97316;">Football</span>
+          <span class="play-btn" style="border-color:#f97316; color:#f97316;">Play</span>
+        </a>
 
-      <!-- Guess the River -->
-      <a href="./guess-the-river/index.html" class="game-card"
-         style="--accent:#38bdf8; --glow:linear-gradient(135deg,rgba(56,189,248,0.08),transparent); --shadow-color:rgba(56,189,248,0.3);">
-        <span class="icon">🌊</span>
-        <div class="game-title">Guess the River</div>
-        <div class="game-desc">Which country do the world's 50 largest rivers flow through? Pick a region and find out!</div>
-        <span class="badge" style="background:#38bdf8; color:#0c4a6e;">Geography</span>
-        <span class="play-btn" style="border-color:#38bdf8; color:#38bdf8;">Play</span>
-      </a>
+        <a href="./guess-the-birth-country/index.html" class="game-card"
+           style="--accent:#fb923c; --glow:linear-gradient(135deg,rgba(251,146,60,0.08),transparent); --shadow-color:rgba(251,146,60,0.3);">
+          <span class="icon">🗺️</span>
+          <div class="game-title">Guess the Birth Country</div>
+          <div class="game-desc">You know their name — but where in the world were they born? Test your football geography!</div>
+          <span class="badge" style="background:#fb923c;">Football</span>
+          <span class="play-btn" style="border-color:#fb923c; color:#fb923c;">Play</span>
+        </a>
 
-      <!-- Guess the Player -->
-      <a href="./guess-the-player/index.html" class="game-card"
-         style="--accent:#10b981; --glow:linear-gradient(135deg,rgba(16,185,129,0.08),transparent); --shadow-color:rgba(16,185,129,0.3);">
-        <span class="icon">⚽</span>
-        <div class="game-title">Guess the Player</div>
-        <div class="game-desc">Can you identify famous soccer players from their photos? Test your football knowledge!</div>
-        <span class="badge" style="background:#10b981;">Football</span>
-        <span class="play-btn">Play</span>
-      </a>
-
-      <!-- Guess the Footballer -->
-      <a href="./guess-the-footballer/index.html" class="game-card"
-         style="--accent:#f97316; --glow:linear-gradient(135deg,rgba(249,115,22,0.08),transparent); --shadow-color:rgba(249,115,22,0.3);">
-        <span class="icon">🏟️</span>
-        <div class="game-title">Guess the Footballer</div>
-        <div class="game-desc">Birthplace, country & club — can you name the footballer from these clues? 4 options to choose from!</div>
-        <span class="badge" style="background:#f97316;">Football</span>
-        <span class="play-btn" style="border-color:#f97316; color:#f97316;">Play</span>
-      </a>
-
-      <!-- Math Blitz -->
-      <a href="./math-blitz/index.html" class="game-card"
-         style="--accent:#f59e0b; --glow:linear-gradient(135deg,rgba(245,158,11,0.08),transparent); --shadow-color:rgba(245,158,11,0.3);">
-        <span class="icon">🔢</span>
-        <div class="game-title">Math Blitz</div>
-        <div class="game-desc">Race against the clock to solve math puzzles before time runs out!</div>
-        <span class="badge" style="background:#f59e0b;">Math</span>
-        <span class="play-btn" style="border-color:#f59e0b; color:#f59e0b;">Play</span>
-      </a>
-
-      <!-- Word Hunt -->
-      <a href="./word-hunt/index.html" class="game-card"
-         style="--accent:#f59e0b; --glow:linear-gradient(135deg,rgba(245,158,11,0.08),transparent); --shadow-color:rgba(245,158,11,0.3);">
-        <span class="icon">🔍</span>
-        <div class="game-title">Word Hunt</div>
-        <div class="game-desc">Find all hidden words in the letter grid before time runs out!</div>
-        <span class="badge" style="background:#f59e0b;">Word</span>
-        <span class="play-btn" style="border-color:#f59e0b; color:#f59e0b;">Play</span>
-      </a>
-
-      <!-- Tic Tac Toe -->
-      <a href="./tic-tac-toe/index.html" class="game-card"
-         style="--accent:#a78bfa; --glow:linear-gradient(135deg,rgba(167,139,250,0.08),transparent); --shadow-color:rgba(167,139,250,0.3);">
-        <span class="icon">⭕</span>
-        <div class="game-title">Tic Tac Toe</div>
-        <div class="game-desc">Play with a friend or challenge the computer. Three in a row wins!</div>
-        <span class="badge" style="background:#a78bfa;">2 Players</span>
-        <span class="play-btn" style="border-color:#a78bfa; color:#a78bfa;">Play</span>
-      </a>
-
-      <!-- Word Chain -->
-      <a href="./word-chain/index.html" class="game-card"
-         style="--accent:#06b6d4; --glow:linear-gradient(135deg,rgba(6,182,212,0.08),transparent); --shadow-color:rgba(6,182,212,0.3);">
-        <span class="icon">🔗</span>
-        <div class="game-title">Word Chain</div>
-        <div class="game-desc">Each word must start with the last letter of the previous. How long can you keep the chain going?</div>
-        <span class="badge" style="background:#06b6d4; color:#083344;">Words</span>
-        <span class="play-btn" style="border-color:#06b6d4; color:#06b6d4;">Play</span>
-      </a>
-
-      <!-- Guess the Birth Country -->
-      <a href="./guess-the-birth-country/index.html" class="game-card"
-         style="--accent:#f97316; --glow:linear-gradient(135deg,rgba(249,115,22,0.08),transparent); --shadow-color:rgba(249,115,22,0.3);">
-        <span class="icon">🌍</span>
-        <div class="game-title">Guess the Birth Country</div>
-        <div class="game-desc">You know their name — but where in the world were they born? Test your football geography!</div>
-        <span class="badge" style="background:#f97316;">Football</span>
-        <span class="play-btn" style="border-color:#f97316; color:#f97316;">Play</span>
-      </a>
-
-      <!-- Puzzle Rush -->
-      <a href="./puzzle-rush/index.html" class="game-card"
-         style="--accent:#ef4444; --glow:linear-gradient(135deg,rgba(239,68,68,0.08),transparent); --shadow-color:rgba(239,68,68,0.3);">
-        <span class="icon">🧩</span>
-        <div class="game-title">Puzzle Rush</div>
-        <div class="game-desc">Slide tiles into order before time runs out. How fast can you go?</div>
-        <span class="badge" style="background:#ef4444;">Puzzle</span>
-        <span class="play-btn" style="border-color:#ef4444; color:#ef4444;">Play</span>
-      </a>
-
+      </div>
     </div>
 
-    <footer>Built with ❤️ &nbsp;·&nbsp; More games coming soon</footer>
+    <!-- 🌍 Geography -->
+    <div class="category">
+      <div class="category-header" style="--cat-color:#6366f1">
+        <span class="category-icon">🌍</span>
+        <span class="category-title" style="color:#6366f1">Geography</span>
+        <div class="category-line" style="background:linear-gradient(90deg,#6366f1,transparent);"></div>
+      </div>
+      <div class="games-grid">
+
+        <a href="./fun-with-flags/index.html" class="game-card"
+           style="--accent:#6366f1; --glow:linear-gradient(135deg,rgba(99,102,241,0.08),transparent); --shadow-color:rgba(99,102,241,0.3);">
+          <span class="icon">🌍</span>
+          <div class="game-title">Fun with Flags</div>
+          <div class="game-desc">Can you name all 249 countries from their flags? Test your geography skills!</div>
+          <span class="badge" style="background:#6366f1;">Geography</span>
+          <span class="play-btn">Play</span>
+        </a>
+
+        <a href="./guess-the-capital/index.html" class="game-card"
+           style="--accent:#14b8a6; --glow:linear-gradient(135deg,rgba(20,184,166,0.08),transparent); --shadow-color:rgba(20,184,166,0.3);">
+          <span class="icon">🌐</span>
+          <div class="game-title">Guess the Capital</div>
+          <div class="game-desc">Can you name the capital city of every country? Pick a continent and find out!</div>
+          <span class="badge" style="background:#14b8a6;">Geography</span>
+          <span class="play-btn" style="border-color:#14b8a6; color:#14b8a6;">Play</span>
+        </a>
+
+        <a href="./guess-the-river/index.html" class="game-card"
+           style="--accent:#38bdf8; --glow:linear-gradient(135deg,rgba(56,189,248,0.08),transparent); --shadow-color:rgba(56,189,248,0.3);">
+          <span class="icon">🌊</span>
+          <div class="game-title">Guess the River</div>
+          <div class="game-desc">Which country do the world's 50 largest rivers flow through? Pick a region and find out!</div>
+          <span class="badge" style="background:#38bdf8; color:#0c4a6e;">Geography</span>
+          <span class="play-btn" style="border-color:#38bdf8; color:#38bdf8;">Play</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- 🔤 Words -->
+    <div class="category">
+      <div class="category-header" style="--cat-color:#a78bfa">
+        <span class="category-icon">🔤</span>
+        <span class="category-title" style="color:#a78bfa">Words</span>
+        <div class="category-line" style="background:linear-gradient(90deg,#a78bfa,transparent);"></div>
+      </div>
+      <div class="games-grid">
+
+        <a href="./word-hunt/index.html" class="game-card"
+           style="--accent:#a78bfa; --glow:linear-gradient(135deg,rgba(167,139,250,0.08),transparent); --shadow-color:rgba(167,139,250,0.3);">
+          <span class="icon">🔍</span>
+          <div class="game-title">Word Hunt</div>
+          <div class="game-desc">Find all hidden words in the letter grid before time runs out!</div>
+          <span class="badge" style="background:#a78bfa;">Words</span>
+          <span class="play-btn" style="border-color:#a78bfa; color:#a78bfa;">Play</span>
+        </a>
+
+        <a href="./word-chain/index.html" class="game-card"
+           style="--accent:#06b6d4; --glow:linear-gradient(135deg,rgba(6,182,212,0.08),transparent); --shadow-color:rgba(6,182,212,0.3);">
+          <span class="icon">🔗</span>
+          <div class="game-title">Word Chain</div>
+          <div class="game-desc">Each word must start with the last letter of the previous. How long can you keep the chain going?</div>
+          <span class="badge" style="background:#06b6d4; color:#083344;">Words</span>
+          <span class="play-btn" style="border-color:#06b6d4; color:#06b6d4;">Play</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- 🧠 Brain & Math -->
+    <div class="category">
+      <div class="category-header" style="--cat-color:#f59e0b">
+        <span class="category-icon">🧠</span>
+        <span class="category-title" style="color:#f59e0b">Brain &amp; Math</span>
+        <div class="category-line" style="background:linear-gradient(90deg,#f59e0b,transparent);"></div>
+      </div>
+      <div class="games-grid">
+
+        <a href="./math-blitz/index.html" class="game-card"
+           style="--accent:#f59e0b; --glow:linear-gradient(135deg,rgba(245,158,11,0.08),transparent); --shadow-color:rgba(245,158,11,0.3);">
+          <span class="icon">🔢</span>
+          <div class="game-title">Math Blitz</div>
+          <div class="game-desc">Race against the clock to solve math puzzles before time runs out!</div>
+          <span class="badge" style="background:#f59e0b;">Math</span>
+          <span class="play-btn" style="border-color:#f59e0b; color:#f59e0b;">Play</span>
+        </a>
+
+        <a href="./tic-tac-toe/index.html" class="game-card"
+           style="--accent:#ec4899; --glow:linear-gradient(135deg,rgba(236,72,153,0.08),transparent); --shadow-color:rgba(236,72,153,0.3);">
+          <span class="icon">⭕</span>
+          <div class="game-title">Tic Tac Toe</div>
+          <div class="game-desc">Play with a friend or challenge the computer. Three in a row wins!</div>
+          <span class="badge" style="background:#ec4899;">2 Players</span>
+          <span class="play-btn" style="border-color:#ec4899; color:#ec4899;">Play</span>
+        </a>
+
+        <a href="./puzzle-rush/index.html" class="game-card"
+           style="--accent:#ef4444; --glow:linear-gradient(135deg,rgba(239,68,68,0.08),transparent); --shadow-color:rgba(239,68,68,0.3);">
+          <span class="icon">🧩</span>
+          <div class="game-title">Puzzle Rush</div>
+          <div class="game-desc">Slide tiles into order before time runs out. How fast can you go?</div>
+          <span class="badge" style="background:#ef4444;">Puzzle</span>
+          <span class="play-btn" style="border-color:#ef4444; color:#ef4444;">Play</span>
+        </a>
+
+      </div>
+    </div>
+
+    <footer>
+      Built with ❤️ &nbsp;·&nbsp; More games coming soon
+      &nbsp;·&nbsp;
+      <a href="https://github.com/marcelbirkner/games" target="_blank" rel="noopener"
+         style="color:rgba(255,255,255,0.4); text-decoration:none; transition:color 0.2s;"
+         onmouseover="this.style.color='rgba(255,255,255,0.8)'"
+         onmouseout="this.style.color='rgba(255,255,255,0.4)'">
+        GitHub ↗
+      </a>
+    </footer>
   </div>
 
   <script>
