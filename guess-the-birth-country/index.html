@@ -22,14 +22,15 @@
 
     .back-link {
       display: inline-block;
-      margin-bottom: 16px;
+      margin-top: 16px;
+      margin-bottom: 20px;
       color: #a5b4fc;
       text-decoration: none;
-      font-size: 0.9rem;
-      opacity: 0.8;
-      transition: opacity 0.2s;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: color 0.2s;
     }
-    .back-link:hover { opacity: 1; }
+    .back-link:hover { color: #fff; }
 
     h1 {
       font-size: 2rem;
@@ -301,19 +302,19 @@
 <body>
 <div class="container">
   <a href="../index.html" class="back-link">← Back to Arcade</a>
-  <h1>⚽ Guess the Birth Country</h1>
+  <h1>Guess the Birth Country</h1>
   <p class="subtitle">Where in the world was this footballer born?</p>
 
   <!-- Menu -->
   <div id="menu">
     <p class="menu-title">Choose a continent to quiz on:</p>
     <div class="menu-grid">
-      <button class="menu-btn featured" onclick="startQuiz('all')">🌍 All Players</button>
-      <button class="menu-btn" onclick="startQuiz('Europe')">🌍 Europe</button>
-      <button class="menu-btn" onclick="startQuiz('South America')">🌎 South America</button>
-      <button class="menu-btn" onclick="startQuiz('Africa')">🌍 Africa</button>
-      <button class="menu-btn" onclick="startQuiz('Asia')">🌏 Asia</button>
-      <button class="menu-btn" onclick="startQuiz('North America')">🌎 North & Central America</button>
+      <button class="menu-btn featured" onclick="startQuiz('all')">All Players</button>
+      <button class="menu-btn" onclick="startQuiz('Europe')">Europe</button>
+      <button class="menu-btn" onclick="startQuiz('South America')">South America</button>
+      <button class="menu-btn" onclick="startQuiz('Africa')">Africa</button>
+      <button class="menu-btn" onclick="startQuiz('Asia')">Asia</button>
+      <button class="menu-btn" onclick="startQuiz('North America')">North & Central America</button>
     </div>
   </div>
 
@@ -324,7 +325,7 @@
     </div>
     <div class="score-row">
       <span>Question <span id="q-num">1</span> / <span id="q-total">10</span></span>
-      <span class="streak-badge" id="streak-badge">🔥 0 streak</span>
+      <span class="streak-badge" id="streak-badge">0 streak</span>
       <span>Score: <span class="score-val" id="score-val">0</span></span>
     </div>
 
@@ -357,6 +358,7 @@
     <div class="result-label" id="result-label"></div>
     <div class="result-msg" id="result-msg"></div>
     <div class="result-detail" id="result-detail"></div>
+    <div id="res-best" style="text-align:center;color:#a5b4fc;font-size:0.95rem;margin-bottom:12px"></div>
     <div class="result-actions">
       <button class="result-btn primary" id="play-again-btn" onclick="playAgain()">Play Again</button>
       <button class="result-btn" onclick="showMenu()">Change Squad</button>
@@ -364,6 +366,7 @@
   </div>
 </div>
 
+<script src="../scores.js"></script>
 <script>
 const PLAYERS = [
   // Argentina
@@ -562,7 +565,7 @@ function showQuestion() {
   document.getElementById('q-num').textContent = currentQ + 1;
   document.getElementById('progress-bar').style.width = ((currentQ / total) * 100) + '%';
   document.getElementById('score-val').textContent = score;
-  document.getElementById('streak-badge').textContent = `🔥 ${streak} streak`;
+  document.getElementById('streak-badge').innerHTML = `<svg viewBox="0 0 16 16" fill="currentColor" style="width:.9em;height:.9em;vertical-align:-.1em"><path d="M8 16c3.314 0 6-2 6-5.5 0-1.5-.5-4-2.5-6 .25 1.5-1.25 2-1.25 2C11 4 9 .5 6 0c.357 2 .5 4-2 6-1.25 1-2 2.729-2 4.5C2 14 4.686 16 8 16m0-1c-1.657 0-3-1-3-2.75 0-.75.25-2 1.25-3C6.125 10 7 10.5 7 10.5c-.375-1.25.5-3.25 2-3.5-.179 1-.25 2 1 3 .625.5 1 1.364 1 2.25C11 14 9.657 15 8 15"/></svg> ${streak} streak`;
   document.getElementById('player-photo').src = q.img;
   document.getElementById('player-photo').alt = q.name;
   document.getElementById('player-name').textContent = q.name;
@@ -617,7 +620,7 @@ function handleAnswer(btn, chosen, correct, q) {
   }
 
   document.getElementById('score-val').textContent = score;
-  document.getElementById('streak-badge').textContent = `🔥 ${streak} streak`;
+  document.getElementById('streak-badge').innerHTML = `<svg viewBox="0 0 16 16" fill="currentColor" style="width:.9em;height:.9em;vertical-align:-.1em"><path d="M8 16c3.314 0 6-2 6-5.5 0-1.5-.5-4-2.5-6 .25 1.5-1.25 2-1.25 2C11 4 9 .5 6 0c.357 2 .5 4-2 6-1.25 1-2 2.729-2 4.5C2 14 4.686 16 8 16m0-1c-1.657 0-3-1-3-2.75 0-.75.25-2 1.25-3C6.125 10 7 10.5 7 10.5c-.375-1.25.5-3.25 2-3.5-.179 1-.25 2 1 3 .625.5 1 1.364 1 2.25C11 14 9.657 15 8 15"/></svg> ${streak} streak`;
   fb.style.display = 'block';
 
   const nextBtn = document.getElementById('next-btn');
@@ -636,6 +639,8 @@ function nextQuestion() {
 }
 
 function showResults() {
+  const isRecord  = ArcadeScores.save('guess-the-birth-country', score);
+  const bestEntry = ArcadeScores.get('guess-the-birth-country');
   document.getElementById('quiz').style.display = 'none';
   document.getElementById('results').style.display = 'block';
 
@@ -643,17 +648,22 @@ function showResults() {
   const pct = Math.round((score / total) * 100);
 
   let icon, msg, detail;
-  if (pct === 100) { icon = '🏆'; msg = 'Perfect Score!'; detail = 'You know exactly where these legends were born!'; }
-  else if (pct >= 80) { icon = '⭐'; msg = 'Excellent!'; detail = 'You really know your football geography!'; }
-  else if (pct >= 60) { icon = '👍'; msg = 'Good job!'; detail = 'Solid geography knowledge!'; }
-  else if (pct >= 40) { icon = '📚'; msg = 'Keep learning!'; detail = 'Some tricky birthplaces in there!'; }
-  else { icon = '⚽'; msg = 'Keep practising!'; detail = 'Try again — you\'ll learn those birthplaces!'; }
+  if (pct === 100) { icon = ''; msg = 'Perfect Score!'; detail = 'You know exactly where these legends were born!'; }
+  else if (pct >= 80) { icon = ''; msg = 'Excellent!'; detail = 'You really know your football geography!'; }
+  else if (pct >= 60) { icon = ''; msg = 'Good job!'; detail = 'Solid geography knowledge!'; }
+  else if (pct >= 40) { icon = ''; msg = 'Keep learning!'; detail = 'Some tricky birthplaces in there!'; }
+  else { icon = ''; msg = 'Keep practising!'; detail = 'Try again — you\'ll learn those birthplaces!'; }
 
   document.getElementById('result-icon').textContent = icon;
   document.getElementById('result-score').textContent = `${score} / ${total}`;
   document.getElementById('result-label').textContent = `${pct}% correct`;
   document.getElementById('result-msg').textContent = msg;
   document.getElementById('result-detail').textContent = detail + (bestStreak > 1 ? ` Best streak: ${bestStreak}!` : '');
+
+  const bestEl = document.getElementById('res-best');
+  if (isRecord) bestEl.textContent = '🏆 New Record!';
+  else if (bestEntry) bestEl.textContent = `🏆 Best: ${bestEntry.score} correct`;
+  else bestEl.textContent = '';
 
   document.getElementById('play-again-btn').onclick = () => startQuiz(currentRegion);
 }

@@ -19,14 +19,15 @@
 
     .back-link {
       display: inline-block;
-      margin-bottom: 16px;
+      margin-top: 16px;
+      margin-bottom: 20px;
       color: #a5b4fc;
       text-decoration: none;
-      font-size: 0.9rem;
-      opacity: 0.8;
-      transition: opacity 0.2s;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: color 0.2s;
     }
-    .back-link:hover { opacity: 1; }
+    .back-link:hover { color: #fff; }
 
     h1 {
       font-size: 2rem;
@@ -353,16 +354,16 @@
 <body>
 <div class="container">
   <a href="../index.html" class="back-link">← Back to Arcade</a>
-  <h1>🔗 Word Chain</h1>
-  <p class="subtitle">Each word must start with the last letter of the previous!</p>
+  <h1 id="page-title">Word Chain</h1>
+  <p class="subtitle" id="page-subtitle">Each word must start with the last letter of the previous!</p>
 
   <!-- MENU -->
   <div id="menu">
     <div class="menu-section">
       <h2>Language</h2>
       <div class="btn-group">
-        <button id="lang-en" class="lang-btn active" onclick="setLang('en')">🇬🇧 English</button>
-        <button id="lang-de" class="lang-btn"        onclick="setLang('de')">🇩🇪 Deutsch</button>
+        <button id="lang-en" class="lang-btn active" onclick="setLang('en')"><svg viewBox="0 0 60 30" style="width:1.4em;height:.7em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><clipPath id="a"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#a)"><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30m0-30L0 30" clip-path="url(#b)" stroke="#C8102E" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/></g></svg> English</button>
+        <button id="lang-de" class="lang-btn"        onclick="setLang('de')"><svg viewBox="0 0 5 3" style="width:1.4em;height:.84em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="3" y="0" fill="#000"/><rect width="5" height="2" y="1" fill="#D00"/><rect width="5" height="1" y="2" fill="#FFCE00"/></svg> Deutsch</button>
       </div>
     </div>
     <div class="menu-section">
@@ -372,9 +373,9 @@
     <div class="menu-section">
       <h2>Speed</h2>
       <div class="btn-group" id="speed-btns">
-        <button class="speed-btn active" data-speed="25">😊 Relaxed<span class="speed-sub">25 sec per word</span></button>
-        <button class="speed-btn" data-speed="15">⚡ Normal<span class="speed-sub">15 sec per word</span></button>
-        <button class="speed-btn" data-speed="8">🔥 Fast<span class="speed-sub">8 sec per word</span></button>
+        <button class="speed-btn active" data-speed="25">Relaxed<span class="speed-sub">25 sec per word</span></button>
+        <button class="speed-btn" data-speed="15">Normal<span class="speed-sub">15 sec per word</span></button>
+        <button class="speed-btn" data-speed="8">Fast<span class="speed-sub">8 sec per word</span></button>
       </div>
     </div>
     <button class="start-btn" onclick="startGame()">Start →</button>
@@ -390,7 +391,7 @@
         <div class="hud-val" id="hud-chain" style="color:#06b6d4">0</div>
         <div class="hud-label">Chain</div>
       </div>
-      <div class="hud-badge" id="cat-badge">Animals 🐾</div>
+      <div class="hud-badge" id="cat-badge">Animals</div>
       <div class="hud-item">
         <div class="hud-val" id="hud-timer">25</div>
         <div class="hud-label">Seconds</div>
@@ -406,7 +407,7 @@
     <div class="input-row">
       <input class="word-input" id="word-input" type="text"
              placeholder="type your word…"
-             autocomplete="off" autocorrect="off" autocapitalize="characters"
+             autocomplete="off" autocorrect="off" autocapitalize="none"
              spellcheck="false" />
       <button class="submit-btn" onclick="submitWord()">→</button>
     </div>
@@ -421,299 +422,31 @@
   <!-- RESULT -->
   <div id="result">
     <div class="result-card">
-      <div class="result-icon" id="res-icon">🔗</div>
+      <div class="result-icon" id="res-icon"></div>
       <div class="result-chain" id="res-chain">0</div>
       <div class="result-sub">words in chain</div>
       <div class="result-msg" id="res-msg"></div>
       <div class="result-detail" id="res-detail"></div>
       <div class="result-words" id="res-words"></div>
+      <div id="res-best-row" style="display:none; text-align:center; margin:10px 0 0; font-size:0.9rem; color:#a78bfa; font-weight:600">
+        <span id="res-best"></span>
+      </div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="retryGame()">🔄 Play Again</button>
+      <button class="btn btn-primary" onclick="retryGame()">Play Again</button>
       <button class="btn btn-ghost"   onclick="backToMenu()">⬅ Menu</button>
     </div>
   </div>
 </div>
 
+<script src="../scores.js"></script>
+<script src="../data/word-lists.js"></script>
 <script>
 // ─── Categories per language ─────────────────────────────────────────────────
-const CATEGORIES = {
-  en: [
-    { key:'animals',   label:'🐾 Animals'   },
-    { key:'countries', label:'🌍 Countries'  },
-    { key:'food',      label:'🍕 Food'       },
-    { key:'nature',    label:'🌿 Nature'     },
-    { key:'cities',    label:'🏙️ Cities'     },
-  ],
-  de: [
-    { key:'de_tiere',   label:'🐾 Tiere'    },
-    { key:'de_laender', label:'🌍 Länder'   },
-    { key:'de_essen',   label:'🍕 Essen'    },
-    { key:'de_natur',   label:'🌿 Natur'    },
-    { key:'de_staedte', label:'🏙️ Städte'   },
-  ],
-};
 
 // ─── Word lists ───────────────────────────────────────────────────────────────
-const WORD_LISTS = {
-  animals: [
-    "AARDVARK","ALBATROSS","ALLIGATOR","ANACONDA","ANTELOPE","APE","ARMADILLO","AXOLOTL",
-    "BABOON","BADGER","BEAR","BEAVER","BISON","BOAR","BUFFALO","BUTTERFLY","BUZZARD",
-    "CAMEL","CARDINAL","CAT","CHEETAH","CHIPMUNK","COBRA","COW","COYOTE","CRANE","CROCODILE","CROW",
-    "DEER","DINGO","DOG","DOLPHIN","DONKEY","DRAGONFLY","DUCK","DUNG BEETLE",
-    "EAGLE","EEL","ELAND","ELEPHANT","EMU","ERMINE",
-    "FALCON","FERRET","FINCH","FLAMINGO","FOX","FROG",
-    "GECKO","GIRAFFE","GOAT","GORILLA","GROUSE","GNU",
-    "HAMSTER","HAWK","HEDGEHOG","HERON","HIPPO","HORSE","HYENA",
-    "IBIS","IGUANA","IMPALA",
-    "JAGUAR","JAY","JELLYFISH",
-    "KANGAROO","KITE","KOALA","KOOKABURRA",
-    "LEMUR","LION","LIZARD","LLAMA","LOBSTER","LYNX",
-    "MANTA","MOLE","MONKEY","MOOSE","MOUSE","MEERKAT",
-    "NARWHAL","NEWT","NIGHTINGALE",
-    "OCELOT","OCTOPUS","ORANGUTAN","OSTRICH","OTTER","OWL",
-    "PANDA","PARROT","PELICAN","PENGUIN","PIRANHA","PLATYPUS","PORCUPINE","PUMA",
-    "QUAIL","QUOKKA",
-    "RABBIT","RACCOON","RAVEN","RHINOCEROS","ROBIN",
-    "SALAMANDER","SHARK","SNAKE","SPARROW","SQUIRREL","STORK","SWAN",
-    "TARANTULA","TIGER","TORTOISE","TOUCAN","TURKEY",
-    "URIAL",
-    "VULTURE","VIPER",
-    "WALRUS","WHALE","WOLF","WOLVERINE","WOMBAT","WREN",
-    "XERUS",
-    "YAK",
-    "ZEBRA","ZEBU"
-  ],
-  countries: [
-    "AFGHANISTAN","ALBANIA","ALGERIA","ANGOLA","ARGENTINA","ARMENIA","AUSTRALIA","AUSTRIA","AZERBAIJAN",
-    "BAHRAIN","BANGLADESH","BELARUS","BELGIUM","BELIZE","BOLIVIA","BRAZIL","BULGARIA",
-    "CAMBODIA","CAMEROON","CANADA","CHILE","CHINA","COLOMBIA","CROATIA","CUBA","CYPRUS",
-    "DENMARK",
-    "ECUADOR","EGYPT","ENGLAND","ETHIOPIA",
-    "FINLAND","FRANCE",
-    "GEORGIA","GERMANY","GHANA","GREECE","GUATEMALA","GUINEA",
-    "HAITI","HUNGARY",
-    "ICELAND","INDIA","INDONESIA","IRAN","IRAQ","IRELAND","ISRAEL","ITALY",
-    "JAMAICA","JAPAN","JORDAN",
-    "KAZAKHSTAN","KENYA","KUWAIT","KYRGYZSTAN",
-    "LAOS","LATVIA","LEBANON","LIBYA","LITHUANIA","LUXEMBOURG",
-    "MADAGASCAR","MALAYSIA","MALI","MEXICO","MOLDOVA","MONGOLIA","MOROCCO","MOZAMBIQUE","MYANMAR",
-    "NAMIBIA","NEPAL","NETHERLANDS","NICARAGUA","NIGER","NIGERIA","NORWAY",
-    "OMAN",
-    "PAKISTAN","PANAMA","PARAGUAY","PERU","PHILIPPINES","POLAND","PORTUGAL",
-    "QATAR",
-    "ROMANIA","RUSSIA","RWANDA",
-    "SENEGAL","SERBIA","SOMALIA","SPAIN","SUDAN","SWEDEN","SWITZERLAND","SYRIA",
-    "TAIWAN","TAJIKISTAN","TANZANIA","THAILAND","TUNISIA","TURKEY","TURKMENISTAN",
-    "UGANDA","UKRAINE","URUGUAY","UZBEKISTAN",
-    "VENEZUELA","VIETNAM",
-    "WALES",
-    "YEMEN",
-    "ZAMBIA","ZIMBABWE"
-  ],
-  food: [
-    "ALMOND","APPLE","APRICOT","ASPARAGUS","AVOCADO",
-    "BANANA","BASIL","BEAN","BEET","BREAD","BROCCOLI","BROWNIE","BUTTER",
-    "CABBAGE","CARAMEL","CARROT","CHEESE","CHERRY","CHICKEN","CHILI","CHOCOLATE","CINNAMON","COCONUT","COFFEE","COOKIE","CORN","CREAM","CROISSANT",
-    "DATE","DILL","DUMPLING",
-    "EGG","EGGPLANT",
-    "FIG","FISH","FLOUR","FUDGE",
-    "GARLIC","GINGER","GRAPE","GUAVA",
-    "HAZELNUT","HONEY","HUMMUS",
-    "JAM","JELLY",
-    "KALE","KIWI",
-    "LEMON","LETTUCE","LIME","LYCHEE","LASAGNE",
-    "MANGO","MELON","MINT","MUSHROOM","MUSTARD","MACARON",
-    "NOODLE","NUTMEG",
-    "OATS","OLIVE","ONION","ORANGE","OREGANO",
-    "PAPAYA","PAPRIKA","PARSLEY","PEACH","PEAR","PEPPER","PINEAPPLE","PLUM","POTATO","PRETZEL","PANCAKE",
-    "QUINOA",
-    "RADISH","RAISIN","RASPBERRY","RICE","ROSEMARY","RHUBARB",
-    "SAGE","SALMON","SALT","SHRIMP","SPINACH","STRAWBERRY","SUGAR",
-    "TAMARIND","THYME","TOFU","TOMATO","TRUFFLE","TUNA","TURNIP",
-    "VANILLA",
-    "WALNUT","WATERMELON","WHEAT","WAFFLE",
-    "YAM","YOGURT",
-    "ZUCCHINI"
-  ],
-  nature: [
-    "ARCTIC","AURORA","AVALANCHE","ATOLL",
-    "BAY","BEACH","BLIZZARD","BOULDER","BOG",
-    "CANYON","CAVE","CLIFF","CLOUD","COAST","CORAL","CREEK","CRATER","CURRENT",
-    "DELTA","DESERT","DUNE","DROUGHT",
-    "EARTHQUAKE","ESTUARY","EROSION",
-    "FJORD","FLOOD","FOREST","FOUNTAIN","FOG",
-    "GEYSER","GLACIER","GORGE","GROVE","GULF",
-    "HURRICANE","HILL","HAIL",
-    "ICEBERG","ISLAND","INLET",
-    "JUNGLE",
-    "LAGOON","LAKE","LAVA","LIGHTNING",
-    "MEADOW","MOUNTAIN","MARSH","MONSOON","MESA",
-    "OASIS","OCEAN",
-    "PENINSULA","PLATEAU","PRAIRIE",
-    "RAINFOREST","RAVINE","REEF","RIVER","ROCK","RAPIDS",
-    "SAVANNA","SEA","SPRING","STORM","STREAM","SWAMP","STRAIT",
-    "TIDE","TORNADO","TUNDRA","TAIGA",
-    "VALLEY","VOLCANO",
-    "WATERFALL","WETLAND","WIND","WAVE"
-  ],
-
-  // ── German lists (A-Z only, no umlauts) ─────────────────────────────────────
-  de_tiere: [
-    "ADLER","AMEISE","AXOLOTL",
-    "BIBER","BIENE",
-    "DACHS","DELFIN",
-    "EICHHORNCHEN","ELEFANT","ENTE",
-    "FALKE","FISCH","FROSCH","FUCHS",
-    "GECKO","GEPARD","GIRAFFE","GORILLA",
-    "HASE","HUND","HYAENE",
-    "IGEL",
-    "JAGUAR",
-    "KATZE","KOALA","KROKODIL",
-    "LIBELLE","LOEWE","LUCHS",
-    "MARDER","MAUS",
-    "NASHORN","NILPFERD",
-    "OTTER",
-    "PAPAGEI","PFERD","PINGUIN",
-    "RABE","RATTE",
-    "SCHAF","SCHLANGE","SCHMETTERLING","SEEHUND","SPINNE","STORCH",
-    "TIGER","TINTENFISCH",
-    "UHU",
-    "VOGEL",
-    "WASCHBAER","WOLF",
-    "ZEBRA","ZIEGE"
-  ],
-  de_laender: [
-    "AEGYPTEN","AETHIOPIEN","ALBANIEN","ALGERIEN","ANGOLA","ARGENTINIEN","AUSTRALIEN","AUSTRIA",
-    "BELGIEN","BOLIVIEN","BRASILIEN","BULGARIEN",
-    "CHILE","CHINA","DAENEMARK","DEUTSCHLAND",
-    "ECUADOR","ENGLAND",
-    "FINNLAND","FRANKREICH",
-    "GEORGIEN","GHANA","GRIECHENLAND","GUATEMALA",
-    "INDIEN","INDONESIEN","IRAK","IRAN","IRLAND","ISLAND","ISRAEL","ITALIEN",
-    "JAMAIKA","JAPAN","JORDANIEN",
-    "KAMERUN","KANADA","KENIA","KOLUMBIEN","KROATIEN","KUBA",
-    "LAOS","LETTLAND","LIBYEN","LITAUEN","LUXEMBURG",
-    "MALI","MEXIKO","MOLDAWIEN","MONGOLEI","MAROKKO",
-    "NAMIBIA","NEPAL","NIEDERLANDE","NIGERIA","NORWEGEN",
-    "OMAN",
-    "PAKISTAN","PANAMA","PERU","PHILIPPINEN","POLEN","PORTUGAL",
-    "RUMAENIEN","RUSSLAND","RUANDA",
-    "SAMBIA","SCHWEDEN","SERBIEN","SIMBABWE","SOMALIA","SPANIEN","SUDAN","SYRIEN",
-    "TAIWAN","TANSANIA","THAILAND","TUNESIEN","TUERKEI",
-    "UGANDA","UKRAINE","UNGARN","URUGUAY","USBEKISTAN",
-    "VENEZUELA","VIETNAM",
-    "WALES",
-    "JEMEN"
-  ],
-  de_essen: [
-    "APFEL","ARTISCHOCKE","AVOCADO",
-    "BANANE","BIRNE","BOHNE","BROCCOLI","BROT","BUTTER",
-    "DATTEL",
-    "EI","ERBSE",
-    "FEIGE","FISCH","FLEISCH",
-    "GEMUESE","GURKE",
-    "HONIG",
-    "INGWER",
-    "JOGHURT",
-    "KAROTTE","KARTOFFEL","KAESE","KIRSCHE","KNOBLAUCH","KOHL","KUCHEN",
-    "LACHS","LAUCH","LINSE",
-    "MAIS","MANGO","MELONE","MILCH",
-    "NUDELN","NUSS",
-    "OBST","OLIVE","ORANGE",
-    "PFIRSICH","PFLAUME","PILZ","PIZZA",
-    "QUARK",
-    "RADIESCHEN","REIS","ROSENKOHL","ROSINE",
-    "SALAT","SALZ","SCHINKEN","SCHOKOLADE","SENF","SPINAT","SUPPE",
-    "THYMIAN","TOMATE",
-    "VANILLE",
-    "WASSERMELONE","WEIZEN","WURST",
-    "ZITRONE","ZUCCHINI","ZWIEBEL"
-  ],
-  de_natur: [
-    "ALPEN","AUEN",
-    "BACH","BERG","BODEN",
-    "DELTA","DUENE",
-    "EBENE","EIS",
-    "FELS","FLUSS",
-    "GEBIRGE","GIPFEL","GLETSCHER",
-    "HUEGEL",
-    "INSEL",
-    "KANAL","KLIPPE","KUESTE",
-    "LANDSCHAFT","LAVA",
-    "MEER","MONSUN","MOOR",
-    "NEBEL",
-    "OASE",
-    "PLATEAU",
-    "REGEN","RIFF",
-    "SCHNEE","SEE","STEPPE","STURM",
-    "TAL","TAIGA","TORNADO",
-    "WALD","WASSER","WELLE","WUESTE"
-  ],
-
-  cities: [
-    "AMSTERDAM","ANKARA","ATHENS","ACCRA","ALGIERS","AUSTIN",
-    "BANGKOK","BARCELONA","BEIJING","BEIRUT","BELGRADE","BERLIN","BOGOTA","BRUSSELS","BUCHAREST","BUDAPEST",
-    "CAIRO","CARACAS","CHICAGO","COLOMBO",
-    "DELHI","DHAKA","DUBAI","DUBLIN",
-    "EDINBURGH",
-    "FRANKFURT",
-    "HAMBURG","HANOI","HAVANA","HELSINKI","HOUSTON",
-    "ISTANBUL",
-    "JAKARTA","JOHANNESBURG",
-    "KABUL","KARACHI","KHARTOUM","KINSHASA","KYIV",
-    "LAGOS","LAHORE","LIMA","LISBON","LONDON","LUANDA","LUSAKA",
-    "MADRID","MANILA","MELBOURNE","MONTREAL","MOSCOW","MUMBAI",
-    "NAIROBI",
-    "OSLO",
-    "PARIS","PRAGUE","PYONGYANG",
-    "ROME","ROTTERDAM",
-    "SEOUL","SHANGHAI","SINGAPORE","STOCKHOLM","SYDNEY",
-    "TAIPEI","TBILISI","TEHRAN","TOKYO","TORONTO",
-    "VIENNA","VILNIUS",
-    "WARSAW",
-    "YEREVAN",
-    "ZAGREB","ZURICH"
-  ],
-
-  de_staedte: [
-    "AACHEN","AUGSBURG",
-    "BERLIN","BIELEFELD","BOCHUM","BONN","BRAUNSCHWEIG","BREMEN",
-    "CHEMNITZ",
-    "DORTMUND","DRESDEN","DUISBURG","DUESSELDORF",
-    "ERFURT","ESSEN",
-    "FRANKFURT",
-    "GELSENKIRCHEN",
-    "HAMBURG","HANNOVER",
-    "INGOLSTADT",
-    "JENA",
-    "KARLSRUHE","KASSEL","KIEL","KOELN","KOBLENZ",
-    "LEIPZIG","LUDWIGSHAFEN",
-    "MAGDEBURG","MAINZ","MANNHEIM","MUENCHEN","MUENSTER",
-    "NUERNBERG",
-    "OBERHAUSEN",
-    "REGENSBURG","ROSTOCK",
-    "SAARBRUECKEN","STUTTGART",
-    "ULM",
-    "WIESBADEN","WUPPERTAL","WUERZBURG",
-    "WIEN","GRAZ","LINZ","SALZBURG","INNSBRUCK",
-    "ZUERICH","BASEL","BERN","LUZERN","LAUSANNE","GENF"
-  ]
-};
 
 // Label lookup used in feedback messages
-const CAT_LABELS = {
-  animals:    "Animals 🐾",
-  countries:  "Countries 🌍",
-  food:       "Food 🍕",
-  nature:     "Nature 🌿",
-  cities:     "Cities 🏙️",
-  de_tiere:   "Tiere 🐾",
-  de_laender: "Länder 🌍",
-  de_essen:   "Essen 🍕",
-  de_natur:   "Natur 🌿",
-  de_staedte: "Städte 🏙️",
-};
 
 // Letters considered "safe" to end a starting word on (have multiple followers)
 const SAFE_END = new Set('AEILNORSTGY');
@@ -731,11 +464,18 @@ let totalTime     = 25;
 let timerInterval = null;
 let gameActive    = false;
 
+const TITLES = {
+  en: { title: 'Word Chain', subtitle: 'Each word must start with the last letter of the previous!' },
+  de: { title: 'Wortkette', subtitle: 'Jedes Wort muss mit dem letzten Buchstaben des vorherigen beginnen!' },
+};
+
 // ─── Language toggle ──────────────────────────────────────────────────────────
 function setLang(lang) {
   language = lang;
   document.getElementById('lang-en').classList.toggle('active', lang === 'en');
   document.getElementById('lang-de').classList.toggle('active', lang === 'de');
+  document.getElementById('page-title').textContent    = TITLES[lang].title;
+  document.getElementById('page-subtitle').textContent = TITLES[lang].subtitle;
   buildCatButtons();
 }
 
@@ -830,7 +570,10 @@ function submitWord() {
     return;
   }
   if (!wordList.includes(raw)) {
-    showFeedback(`"${raw}" not in the ${CAT_LABELS[selectedCat]} list!`, 'err');
+    const notInList = language === 'de'
+      ? `„${raw}" ist nicht in der ${CAT_LABELS[selectedCat]}liste!`
+      : `"${raw}" not in the ${CAT_LABELS[selectedCat]} list!`;
+    showFeedback(notInList, 'err');
     shake(input);
     return;
   }
@@ -917,14 +660,17 @@ function endGame(reason) {
   clearInterval(timerInterval);
   gameActive = false;
 
-  const count = chainWords.length;
+  const count    = chainWords.length;
+  const speedLabels = { 25: 'Relaxed', 15: 'Normal', 8: 'Fast' };
+  const isRecord  = ArcadeScores.save('word-chain', count);
+  const bestEntry = ArcadeScores.get('word-chain');
   let icon, msg, detail;
 
-  if (count >= 20)      { icon = '🏆'; msg = 'Incredible chain!';   }
-  else if (count >= 12) { icon = '🔥'; msg = 'On fire!';            }
-  else if (count >= 7)  { icon = '⭐'; msg = 'Great chain!';        }
-  else if (count >= 3)  { icon = '👍'; msg = 'Nice start!';         }
-  else                  { icon = '🔗'; msg = 'Keep practising!';    }
+  if (count >= 20)      { icon = ''; msg = 'Incredible chain!';   }
+  else if (count >= 12) { icon = ''; msg = 'On fire!';            }
+  else if (count >= 7)  { icon = ''; msg = 'Great chain!';        }
+  else if (count >= 3)  { icon = ''; msg = 'Nice start!';         }
+  else                  { icon = ''; msg = 'Keep practising!';    }
 
   if (reason === 'timeout') detail = 'Time ran out!';
   else                      detail = 'No more valid words — nice run!';
@@ -944,6 +690,15 @@ function endGame(reason) {
     chip.textContent = w;
     wordsEl.appendChild(chip);
   });
+
+  const bestRow = document.getElementById('res-best-row');
+  const bestEl  = document.getElementById('res-best');
+  if (bestRow && bestEl && bestEntry) {
+    bestRow.style.display = 'block';
+    bestEl.textContent = isRecord
+      ? '🏆 New Record!'
+      : `🏆 Best: ${bestEntry.score} words`;
+  }
 }
 
 function retryGame() {

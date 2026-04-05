@@ -38,10 +38,12 @@
 
     .back-link {
       display: inline-block;
-      margin-bottom: 16px;
+      margin-top: 16px;
+      margin-bottom: 20px;
       color: #a5b4fc;
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: 1.1rem;
+      font-weight: 600;
       transition: color 0.2s;
     }
     .back-link:hover { color: #fff; }
@@ -322,7 +324,7 @@
 <body>
   <div class="container">
     <a href="../index.html" class="back-link">← Back to Arcade</a>
-    <h1>⚽ Guess the Player</h1>
+    <h1>Guess the Player</h1>
     <p class="subtitle">Can you identify these soccer legends and stars?</p>
 
     <!-- Menu -->
@@ -330,16 +332,16 @@
       <h2>Choose a country or play all</h2>
       <div class="country-grid">
         <button class="country-btn all" onclick="startQuiz('all')">All Players</button>
-        <button class="country-btn" onclick="startQuiz('Argentina')">🇦🇷 Argentina</button>
-        <button class="country-btn" onclick="startQuiz('Brazil')">🇧🇷 Brazil</button>
-        <button class="country-btn" onclick="startQuiz('France')">🇫🇷 France</button>
-        <button class="country-btn" onclick="startQuiz('Germany')">🇩🇪 Germany</button>
-        <button class="country-btn" onclick="startQuiz('Spain')">🇪🇸 Spain</button>
-        <button class="country-btn" onclick="startQuiz('England')">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</button>
-        <button class="country-btn" onclick="startQuiz('Portugal')">🇵🇹 Portugal</button>
-        <button class="country-btn" onclick="startQuiz('Italy')">🇮🇹 Italy</button>
-        <button class="country-btn" onclick="startQuiz('Netherlands')">🇳🇱 Netherlands</button>
-        <button class="country-btn" onclick="startQuiz('Other')">🌍 Other Countries</button>
+        <button class="country-btn" onclick="startQuiz('Argentina')"><svg viewBox="0 0 3 2" style="width:1.4em;height:.93em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="3" height="2" fill="#74ACDF"/><rect width="3" height=".67" y=".67" fill="#fff"/></svg> Argentina</button>
+        <button class="country-btn" onclick="startQuiz('Brazil')"><svg viewBox="0 0 3 2" style="width:1.4em;height:.93em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="3" height="2" fill="#009C3B"/><polygon points="1.5,0.15 2.85,1 1.5,1.85 0.15,1" fill="#FEDF00"/><circle cx="1.5" cy="1" r="0.38" fill="#002776"/></svg> Brazil</button>
+        <button class="country-btn" onclick="startQuiz('France')"><svg viewBox="0 0 3 2" style="width:1.4em;height:.93em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="2" fill="#002395"/><rect width="1" height="2" x="1" fill="#fff"/><rect width="1" height="2" x="2" fill="#ED2939"/></svg> France</button>
+        <button class="country-btn" onclick="startQuiz('Germany')"><svg viewBox="0 0 5 3" style="width:1.4em;height:.84em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="3" fill="#000"/><rect width="5" height="2" y="1" fill="#D00"/><rect width="5" height="1" y="2" fill="#FFCE00"/></svg> Germany</button>
+        <button class="country-btn" onclick="startQuiz('Spain')"><svg viewBox="0 0 3 2" style="width:1.4em;height:.93em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="3" height="2" fill="#AA151B"/><rect width="3" height="1" y=".5" fill="#F1BF00"/></svg> Spain</button>
+        <button class="country-btn" onclick="startQuiz('England')"><svg viewBox="0 0 60 30" style="width:1.4em;height:.7em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="60" height="30" fill="#fff"/><rect width="60" height="6" y="12" fill="#CE1124"/><rect width="6" height="30" x="27" fill="#CE1124"/></svg> England</button>
+        <button class="country-btn" onclick="startQuiz('Portugal')"><svg viewBox="0 0 3 2" style="width:1.4em;height:.93em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="3" height="2" fill="#FF0000"/><rect width="1.2" height="2" fill="#006600"/></svg> Portugal</button>
+        <button class="country-btn" onclick="startQuiz('Italy')"><svg viewBox="0 0 3 2" style="width:1.4em;height:.93em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="2" fill="#009246"/><rect width="1" height="2" x="1" fill="#fff"/><rect width="1" height="2" x="2" fill="#CE2B37"/></svg> Italy</button>
+        <button class="country-btn" onclick="startQuiz('Netherlands')"><svg viewBox="0 0 3 2" style="width:1.4em;height:.93em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="3" height="2" fill="#fff"/><rect width="3" height=".67" fill="#AE1C28"/><rect width="3" height=".67" y="1.33" fill="#21468B"/></svg> Netherlands</button>
+        <button class="country-btn" onclick="startQuiz('Other')">Other Countries</button>
       </div>
     </div>
 
@@ -371,11 +373,13 @@
         <div class="out-of" id="final-total">out of 10</div>
         <div class="percentage" id="final-pct">0%</div>
         <div class="best-streak" id="final-streak">Best streak: 0</div>
+        <div class="best-streak" id="res-best" style="margin-top:8px;color:#a5b4fc"></div>
       </div>
       <button class="play-again-btn" onclick="backToMenu()">Play Again</button>
     </div>
   </div>
 
+<script src="../scores.js"></script>
 <script>
 const PLAYERS = [
   // Argentina
@@ -514,6 +518,7 @@ let streak = 0;
 let bestStreak = 0;
 let totalQuestions = 10;
 let answered = false;
+let currentRegion = 'all';
 
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -524,6 +529,7 @@ function shuffle(arr) {
 }
 
 function startQuiz(region) {
+  currentRegion = region;
   if (region === 'all') {
     pool = [...PLAYERS];
   } else if (region === 'Other') {
@@ -661,6 +667,8 @@ function handleAnswer(btn, isCorrect, correctName) {
 }
 
 function showResult() {
+  const isRecord  = ArcadeScores.save('guess-the-player', score);
+  const bestEntry = ArcadeScores.get('guess-the-player');
   document.getElementById('quiz').style.display = 'none';
   document.getElementById('result').style.display = 'block';
 
@@ -670,6 +678,10 @@ function showResult() {
   document.getElementById('final-pct').textContent = `${pct}% correct`;
   document.getElementById('final-streak').textContent = `Best streak: ${bestStreak}`;
   document.getElementById('progress').style.width = '100%';
+  const bestEl = document.getElementById('res-best');
+  if (isRecord) bestEl.textContent = '🏆 New Record!';
+  else if (bestEntry) bestEl.textContent = `🏆 Best: ${bestEntry.score} correct`;
+  else bestEl.textContent = '';
 }
 
 function backToMenu() {

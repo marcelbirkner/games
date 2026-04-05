@@ -22,10 +22,12 @@
 
     .back-link {
       display: inline-block;
-      margin-bottom: 16px;
+      margin-top: 16px;
+      margin-bottom: 20px;
       color: #a5b4fc;
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: 1.1rem;
+      font-weight: 600;
       transition: color 0.2s;
     }
     .back-link:hover { color: #fff; }
@@ -74,7 +76,8 @@
       border-color: var(--c);
       box-shadow: 0 8px 24px rgba(0,0,0,0.3);
     }
-    .diff-card .dc-icon  { font-size: 2rem; margin-bottom: 8px; }
+    .diff-card .dc-icon  { width: 2rem; height: 2rem; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; color: var(--c); }
+    .diff-card .dc-icon svg { width: 100%; height: 100%; fill: currentColor; }
     .diff-card .dc-title { font-size: 1rem; font-weight: 700; color: var(--c); margin-bottom: 4px; }
     .diff-card .dc-info  { font-size: 0.75rem; color: #888; line-height: 1.5; }
 
@@ -218,37 +221,37 @@
 <body>
 <div class="container">
   <a href="../index.html" class="back-link">← Back to Arcade</a>
-  <h1>🔍 Word Hunt</h1>
-  <p class="subtitle">Find all hidden words before time runs out!</p>
+  <h1 id="page-title">Word Hunt</h1>
+  <p class="subtitle" id="page-subtitle">Find all hidden words before time runs out!</p>
 
   <!-- MENU -->
   <div id="menu">
     <h2 style="margin-bottom:14px;">Choose language</h2>
     <div style="display:flex;gap:12px;justify-content:center;margin-bottom:28px;">
-      <button id="lang-en" class="lang-btn active" onclick="setLang('en')">🇬🇧 English</button>
-      <button id="lang-de" class="lang-btn" onclick="setLang('de')">🇩🇪 Deutsch</button>
+      <button id="lang-en" class="lang-btn active" onclick="setLang('en')"><svg viewBox="0 0 60 30" style="width:1.4em;height:.7em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><clipPath id="a"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#a)"><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30m0-30L0 30" clip-path="url(#b)" stroke="#C8102E" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/></g></svg> English</button>
+      <button id="lang-de" class="lang-btn" onclick="setLang('de')"><svg viewBox="0 0 5 3" style="width:1.4em;height:.84em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="3" y="0" fill="#000"/><rect width="5" height="2" y="1" fill="#D00"/><rect width="5" height="1" y="2" fill="#FFCE00"/></svg> Deutsch</button>
     </div>
     <h2>Choose difficulty</h2>
     <div class="diff-grid">
       <div class="diff-card" style="--c:#34d399" onclick="startGame('easy')">
-        <div class="dc-icon">😊</div>
+        <div class="dc-icon"><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M4.285 9.567a.5.5 0 0 1 .683.183A3.5 3.5 0 0 0 8 11.5a3.5 3.5 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.5 4.5 0 0 1 8 12.5a4.5 4.5 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5"/></svg></div>
         <div class="dc-title">Easy</div>
         <div class="dc-info">8×8 grid<br>8 words<br>6 minutes</div>
       </div>
       <div class="diff-card" style="--c:#60a5fa" onclick="startGame('medium')">
-        <div class="dc-icon">🤔</div>
+        <div class="dc-icon"><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M4 10.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 0-1h-7a.5.5 0 0 0-.5.5m3-4C7 5.672 6.552 5 6 5s-1 .672-1 1.5S5.448 8 6 8s1-.672 1-1.5m4 0c0-.828-.448-1.5-1-1.5s-1 .672-1 1.5S9.448 8 10 8s1-.672 1-1.5"/></svg></div>
         <div class="dc-title">Medium</div>
-        <div class="dc-info">10×10 grid<br>10 words<br>4 minutes</div>
+        <div class="dc-info">10×10 grid<br>10 words<br>8 minutes</div>
       </div>
       <div class="diff-card" style="--c:#f87171" onclick="startGame('hard')">
-        <div class="dc-icon">💀</div>
+        <div class="dc-icon"><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767z"/><path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/></svg></div>
         <div class="dc-title">Hard</div>
-        <div class="dc-info">12×12 grid<br>12 words<br>3 minutes</div>
+        <div class="dc-info">12×12 grid<br>12 words<br>6 minutes</div>
       </div>
       <div class="diff-card" style="--c:#e879f9" onclick="startGame('expert')">
-        <div class="dc-icon">🔥</div>
+        <div class="dc-icon"><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 16c3.314 0 6-2 6-5.5 0-1.5-.5-4-2.5-6 .25 1.5-1.25 2-1.25 2C11 4 9 .5 6 0c.357 2 .5 4-2 6-1.25 1-2 2.729-2 4.5C2 14 4.686 16 8 16m0-1c-1.657 0-3-1-3-2.75 0-.75.25-2 1.25-3C6.125 10 7 10.5 7 10.5c-.375-1.25.5-3.25 2-3.5-.179 1-.25 2 1 3 .625.5 1 1.364 1 2.25C11 14 9.657 15 8 15"/></svg></div>
         <div class="dc-title">Expert</div>
-        <div class="dc-info">16×16 grid<br>14 words<br>2.5 minutes</div>
+        <div class="dc-info">16×16 grid<br>14 words<br>5 minutes</div>
       </div>
     </div>
   </div>
@@ -297,14 +300,18 @@
           <div class="rstat-label">Total Words</div>
         </div>
       </div>
+      <div id="res-best-row" style="display:none; text-align:center; margin:14px 0 4px; font-size:0.95rem; color:#a78bfa; font-weight:600; letter-spacing:0.3px">
+        <span id="res-best"></span>
+      </div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="retryGame()">🔄 Play Again</button>
+      <button class="btn btn-primary" onclick="retryGame()">Play Again</button>
       <button class="btn btn-ghost"   onclick="backToMenu()">⬅ Menu</button>
     </div>
   </div>
 </div>
 
+<script src="../scores.js"></script>
 <script>
 // ─── Word themes ─────────────────────────────────────────────────────────────
 // Each theme contains words of varied lengths so every puzzle has a mix of
@@ -312,35 +319,35 @@
 // what fits, then cfg.count are chosen at random.
 const THEMES = {
   easy: [
-    { lang:'en', name:"Animals 🐾",  words:["CAT","DOG","FOX","OWL","COW","PIG","EMU","BAT","WOLF","BEAR","FROG","DEER","CRAB","SWAN","MOLE","CROW","NEWT","DUCK","HERON","OTTER","GECKO","VIPER","MOOSE","RAVEN"] },
-    { lang:'en', name:"Nature 🌿",   words:["SUN","DEW","ICE","MUD","ASH","OAK","ELM","IVY","RAIN","SNOW","WIND","FIRE","TREE","LEAF","ROCK","LAKE","HILL","WAVE","CAVE","MIST","FERN","VINE","CLIFF","FLOOD","BROOK","FROST"] },
+    { lang:'en', name:"Animals",  words:["CAT","DOG","FOX","OWL","COW","PIG","EMU","BAT","WOLF","BEAR","FROG","DEER","CRAB","SWAN","MOLE","CROW","NEWT","DUCK","HERON","OTTER","GECKO","VIPER","MOOSE","RAVEN"] },
+    { lang:'en', name:"Nature",   words:["SUN","DEW","ICE","MUD","ASH","OAK","ELM","IVY","RAIN","SNOW","WIND","FIRE","TREE","LEAF","ROCK","LAKE","HILL","WAVE","CAVE","MIST","FERN","VINE","CLIFF","FLOOD","BROOK","FROST"] },
     { lang:'en', name:"Space ✨",    words:["SUN","ION","ORB","MOON","STAR","MARS","HALO","DUST","RING","COMET","ORBIT","VENUS","TITAN","NOVA","VOID","SATURN","METEOR","GALAXY","PULSAR","NEBULA"] },
-    { lang:'en', name:"Food 🍕",     words:["EGG","RYE","FIG","OAT","RICE","CORN","BEAN","PEAR","PLUM","LIME","KALE","TOFU","BEET","MINT","SAGE","DILL","LEEK","DATE","TOAST","SALAD","HONEY","GRAPE","ONION","LEMON"] },
-    { lang:'de', name:"Tiere 🐾",    words:["HUND","KATZE","VOGEL","FISCH","PFERD","TIGER","WOLF","FUCHS","ADLER","HASE","ENTE","IGEL","SCHAF","RATTE","BIENE","FALKE","TAUBE","LUCHS"] },
-    { lang:'de', name:"Alltag 🏠",   words:["HAUS","BUCH","BALL","BROT","BAUM","BLUME","STERN","SCHULE","FREUND","SOMMER","WINTER","ABEND","NACHT","GARTEN","BRUDER","MUTTER","STRASSE","FENSTER"] },
+    { lang:'en', name:"Food",     words:["EGG","RYE","FIG","OAT","RICE","CORN","BEAN","PEAR","PLUM","LIME","KALE","TOFU","BEET","MINT","SAGE","DILL","LEEK","DATE","TOAST","SALAD","HONEY","GRAPE","ONION","LEMON"] },
+    { lang:'de', name:"Tiere",    words:["HUND","KATZE","VOGEL","FISCH","PFERD","TIGER","WOLF","FUCHS","ADLER","HASE","ENTE","IGEL","SCHAF","RATTE","BIENE","FALKE","TAUBE","LUCHS"] },
+    { lang:'de', name:"Alltag",   words:["HAUS","BUCH","BALL","BROT","BAUM","BLUME","STERN","SCHULE","FREUND","SOMMER","WINTER","ABEND","NACHT","GARTEN","BRUDER","MUTTER","STRASSE","FENSTER"] },
   ],
   medium: [
-    { lang:'en', name:"Animals 🐾",  words:["OX","GNU","EMU","IBIS","TIGER","EAGLE","SHARK","WHALE","HORSE","ZEBRA","CAMEL","COBRA","PANDA","PARROT","FALCON","JAGUAR","BISON","KOALA","LLAMA","TAPIR","OTTER","MOOSE","TOUCAN","MEERKAT","PELICAN"] },
-    { lang:'en', name:"Countries 🌍",words:["CHAD","MALI","IRAN","PERU","CUBA","FRANCE","BRAZIL","MEXICO","RUSSIA","CANADA","SWEDEN","GREECE","NORWAY","TURKEY","POLAND","UKRAINE","ISRAEL","JORDAN","ANGOLA","KENYA","NIGERIA","VIETNAM","ECUADOR"] },
-    { lang:'en', name:"Science 🔬",  words:["ION","GAS","DNA","RNA","ATOM","CELL","GENE","ACID","PROTON","CARBON","OXYGEN","PLASMA","FISSION","GRAVITY","QUANTUM","NEBULA","ENZYME","FOSSIL","MAGNET","PHOTON","GENOME","FUNGAL","AMOEBA","SOLVENT"] },
+    { lang:'en', name:"Animals",  words:["OX","GNU","EMU","IBIS","TIGER","EAGLE","SHARK","WHALE","HORSE","ZEBRA","CAMEL","COBRA","PANDA","PARROT","FALCON","JAGUAR","BISON","KOALA","LLAMA","TAPIR","OTTER","MOOSE","TOUCAN","MEERKAT","PELICAN"] },
+    { lang:'en', name:"Countries",words:["CHAD","MALI","IRAN","PERU","CUBA","FRANCE","BRAZIL","MEXICO","RUSSIA","CANADA","SWEDEN","GREECE","NORWAY","TURKEY","POLAND","UKRAINE","ISRAEL","JORDAN","ANGOLA","KENYA","NIGERIA","VIETNAM","ECUADOR"] },
+    { lang:'en', name:"Science",  words:["ION","GAS","DNA","RNA","ATOM","CELL","GENE","ACID","PROTON","CARBON","OXYGEN","PLASMA","FISSION","GRAVITY","QUANTUM","NEBULA","ENZYME","FOSSIL","MAGNET","PHOTON","GENOME","FUNGAL","AMOEBA","SOLVENT"] },
     { lang:'en', name:"Sports ⚽",   words:["SKI","GYM","POLO","JUDO","LUGE","TENNIS","HOCKEY","BOXING","RUGBY","SOCCER","ROWING","CYCLING","FENCING","ARCHERY","DIVING","SKIING","KARATE","SQUASH","BOBSLED","NETBALL","CRICKET","CURLING"] },
-    { lang:'de', name:"Tiere 🐾",    words:["ELEFANT","GORILLA","PINGUIN","KROKODIL","SCHLANGE","NASHORN","PAPAGEI","LIBELLE","DELFIN","SPINNE","HORNISSE","GEPARD","JAGUAR","PANDA","ZEBRA","LEGUAN","AMEISE","FALKE","BIENE","SEEPFERD"] },
-    { lang:'de', name:"Essen 🍕",    words:["BROT","OBST","REIS","PIZZA","WURST","KUCHEN","SUPPE","SALAT","NUDELN","QUARK","APFEL","BRATEN","FLEISCH","ZWIEBEL","KARTOFFEL","SCHOKOLADE"] },
+    { lang:'de', name:"Tiere",    words:["ELEFANT","GORILLA","PINGUIN","KROKODIL","SCHLANGE","NASHORN","PAPAGEI","LIBELLE","DELFIN","SPINNE","HORNISSE","GEPARD","JAGUAR","PANDA","ZEBRA","LEGUAN","AMEISE","FALKE","BIENE","SEEPFERD"] },
+    { lang:'de', name:"Essen",    words:["BROT","OBST","REIS","PIZZA","WURST","KUCHEN","SUPPE","SALAT","NUDELN","QUARK","APFEL","BRATEN","FLEISCH","ZWIEBEL","KARTOFFEL","SCHOKOLADE"] },
   ],
   hard: [
-    { lang:'en', name:"Animals 🐾",  words:["OX","EMU","IBIS","MOOSE","ELEPHANT","DINOSAUR","BUTTERFLY","PORCUPINE","WOLVERINE","ALBATROSS","BARRACUDA","PLATYPUS","CHAMELEON","SALAMANDER","RHINOCEROS","ARMADILLO","NARWHAL","SCORPION","TARANTULA"] },
-    { lang:'en', name:"Countries 🌍",words:["CHAD","LAOS","FIJI","TONGA","AUSTRALIA","ARGENTINA","INDONESIA","VENEZUELA","BANGLADESH","PHILIPPINES","SWITZERLAND","MOZAMBIQUE","UZBEKISTAN","MADAGASCAR","AZERBAIJAN","CAMBODIA","LUXEMBOURG","KYRGYZSTAN"] },
-    { lang:'en', name:"Science 🔬",  words:["DNA","ATOM","CELL","GENE","ACID","LASER","ASTRONOMY","CHEMISTRY","TELESCOPE","SATELLITE","SUPERNOVA","METEORITE","ECOSYSTEM","CHROMOSOME","MAGNETISM","ATMOSPHERE","EARTHQUAKE","HURRICANE","EVOLUTION"] },
-    { lang:'en', name:"Geography 🗺️",words:["SEA","BAY","CAPE","GULF","REEF","DELTA","TUNDRA","HIMALAYAN","CARIBBEAN","AMAZONIAN","ANTARCTIC","PATAGONIA","CONTINENT","PENINSULA","ARCHIPELAGO","EQUATORIAL","RAINFOREST","SAVANNAH","PERMAFROST"] },
-    { lang:'de', name:"Deutschland 🇩🇪", words:["ANGST","FAHRRAD","RUCKSACK","AUTOBAHN","ZEITGEIST","BUNDESTAG","HAMBURGER","GYMNASIUM","BLITZKRIEG","WANDERLUST","HAUPTSTADT","BUNDESLIGA","LEBENSRAUM","POLTERGEIST","REALPOLITIK","KINDERGARTEN","HAUPTBAHNHOF"] },
-    { lang:'de', name:"Tiere 🐾",    words:["NASHORN","ELEFANT","KROKODIL","SCHLANGE","GORILLA","SEESTERN","ALLIGATOR","BARRAKUDA","FLEDERMAUS","SALAMANDER","RHINOZEROS","SCHIMPANSE","CHAMAELEON","TINTENFISCH","ERDMAENNCHEN"] },
+    { lang:'en', name:"Animals",  words:["OX","EMU","IBIS","MOOSE","ELEPHANT","DINOSAUR","BUTTERFLY","PORCUPINE","WOLVERINE","ALBATROSS","BARRACUDA","PLATYPUS","CHAMELEON","SALAMANDER","RHINOCEROS","ARMADILLO","NARWHAL","SCORPION","TARANTULA"] },
+    { lang:'en', name:"Countries",words:["CHAD","LAOS","FIJI","TONGA","AUSTRALIA","ARGENTINA","INDONESIA","VENEZUELA","BANGLADESH","PHILIPPINES","SWITZERLAND","MOZAMBIQUE","UZBEKISTAN","MADAGASCAR","AZERBAIJAN","CAMBODIA","LUXEMBOURG","KYRGYZSTAN"] },
+    { lang:'en', name:"Science",  words:["DNA","ATOM","CELL","GENE","ACID","LASER","ASTRONOMY","CHEMISTRY","TELESCOPE","SATELLITE","SUPERNOVA","METEORITE","ECOSYSTEM","CHROMOSOME","MAGNETISM","ATMOSPHERE","EARTHQUAKE","HURRICANE","EVOLUTION"] },
+    { lang:'en', name:"Geography",words:["SEA","BAY","CAPE","GULF","REEF","DELTA","TUNDRA","HIMALAYAN","CARIBBEAN","AMAZONIAN","ANTARCTIC","PATAGONIA","CONTINENT","PENINSULA","ARCHIPELAGO","EQUATORIAL","RAINFOREST","SAVANNAH","PERMAFROST"] },
+    { lang:'de', name:"Deutschland", words:["ANGST","FAHRRAD","RUCKSACK","AUTOBAHN","ZEITGEIST","BUNDESTAG","HAMBURGER","GYMNASIUM","BLITZKRIEG","WANDERLUST","HAUPTSTADT","BUNDESLIGA","LEBENSRAUM","POLTERGEIST","REALPOLITIK","KINDERGARTEN","HAUPTBAHNHOF"] },
+    { lang:'de', name:"Tiere",    words:["NASHORN","ELEFANT","KROKODIL","SCHLANGE","GORILLA","SEESTERN","ALLIGATOR","BARRAKUDA","FLEDERMAUS","SALAMANDER","RHINOZEROS","SCHIMPANSE","CHAMAELEON","TINTENFISCH","ERDMAENNCHEN"] },
   ],
   expert: [
-    { lang:'en', name:"Dinosaurs 🦕", words:["OX","GNU","IBIS","RAPTOR","IGUANODON","ALLOSAURUS","DIPLODOCUS","SPINOSAURUS","OVIRAPTOR","DIMETRODON","PTERODACTYL","STEGOSAURUS","TRICERATOPS","ANKYLOSAURUS","VELOCIRAPTOR","TYRANNOSAURUS","MEGALOSAURUS","BRACHIOSAURUS","ARCHAEOPTERYX","PROTOCERATOPS"] },
-    { lang:'en', name:"Geography 🗺️",words:["SEA","BAY","CAPE","GULF","REEF","BOSPHORUS","HIGHLANDS","WATERSHED","EVERGLADES","SCANDINAVIA","KILIMANJARO","MESOPOTAMIA","YELLOWSTONE","CONTINENTAL","SUBTROPICAL","ARCHIPELAGO","EQUATORIAL","RAINFOREST","PENINSULAR","MEDITERRANEAN"] },
-    { lang:'en', name:"Science 🔬",  words:["DNA","ION","GAS","GENE","CELL","ACID","LASER","RELATIVITY","ASTROPHYSICS","GEOPHYSICS","ATMOSPHERE","CHROMOSOME","CRYSTALLINE","NEUROSCIENCE","PALEONTOLOGY","SPECTROSCOPY","BIOCHEMISTRY","MICROORGANISM","RADIOACTIVITY","THERMODYNAMICS","ELECTROMAGNETIC","PHOTOSYNTHESIS","NANOTECHNOLOGY"] },
-    { lang:'en', name:"Big Words 📚", words:["ACE","ADD","AGO","IDEA","EPIC","ITEM","CATASTROPHIC","ORGANIZATION","ACCOMPLISHED","PROFESSIONAL","COLLABORATION","ENTERTAINMENT","SOPHISTICATED","APPRECIATION","INDEPENDENT","EXTRAORDINARY","PHILOSOPHICAL","COMMUNICATION","INTERNATIONAL","REVOLUTIONARY","DEMONSTRATION","CONSTITUTIONAL"] },
-    { lang:'de', name:"Deutsch Profi 🇩🇪", words:["ANGST","RUCKSACK","AUTOBAHN","ZEITGEIST","GYMNASIUM","WANDERLUST","LEBENSRAUM","POLTERGEIST","REALPOLITIK","DOPPELGANGER","HAUPTBAHNHOF","KINDERGARTEN","SCHADENFREUDE","BUNDESREPUBLIK","WELTANSCHAUUNG"] },
+    { lang:'en', name:"Dinosaurs", words:["OX","GNU","IBIS","RAPTOR","IGUANODON","ALLOSAURUS","DIPLODOCUS","SPINOSAURUS","OVIRAPTOR","DIMETRODON","PTERODACTYL","STEGOSAURUS","TRICERATOPS","ANKYLOSAURUS","VELOCIRAPTOR","TYRANNOSAURUS","MEGALOSAURUS","BRACHIOSAURUS","ARCHAEOPTERYX","PROTOCERATOPS"] },
+    { lang:'en', name:"Geography",words:["SEA","BAY","CAPE","GULF","REEF","BOSPHORUS","HIGHLANDS","WATERSHED","EVERGLADES","SCANDINAVIA","KILIMANJARO","MESOPOTAMIA","YELLOWSTONE","CONTINENTAL","SUBTROPICAL","ARCHIPELAGO","EQUATORIAL","RAINFOREST","PENINSULAR","MEDITERRANEAN"] },
+    { lang:'en', name:"Science",  words:["DNA","ION","GAS","GENE","CELL","ACID","LASER","RELATIVITY","ASTROPHYSICS","GEOPHYSICS","ATMOSPHERE","CHROMOSOME","CRYSTALLINE","NEUROSCIENCE","PALEONTOLOGY","SPECTROSCOPY","BIOCHEMISTRY","MICROORGANISM","RADIOACTIVITY","THERMODYNAMICS","ELECTROMAGNETIC","PHOTOSYNTHESIS","NANOTECHNOLOGY"] },
+    { lang:'en', name:"Big Words", words:["ACE","ADD","AGO","IDEA","EPIC","ITEM","CATASTROPHIC","ORGANIZATION","ACCOMPLISHED","PROFESSIONAL","COLLABORATION","ENTERTAINMENT","SOPHISTICATED","APPRECIATION","INDEPENDENT","EXTRAORDINARY","PHILOSOPHICAL","COMMUNICATION","INTERNATIONAL","REVOLUTIONARY","DEMONSTRATION","CONSTITUTIONAL"] },
+    { lang:'de', name:"Deutsch Profi", words:["ANGST","RUCKSACK","AUTOBAHN","ZEITGEIST","GYMNASIUM","WANDERLUST","LEBENSRAUM","POLTERGEIST","REALPOLITIK","DOPPELGANGER","HAUPTBAHNHOF","KINDERGARTEN","SCHADENFREUDE","BUNDESREPUBLIK","WELTANSCHAUUNG"] },
   ],
 };
 
@@ -352,9 +359,9 @@ const WORD_COLORS = [
 
 const CONFIG = {
   easy:   { n: 8,  count: 8,  time: 360 },
-  medium: { n: 10, count: 10, time: 240 },
-  hard:   { n: 12, count: 12, time: 180 },
-  expert: { n: 16, count: 14, time: 150 },
+  medium: { n: 10, count: 10, time: 480 },
+  hard:   { n: 12, count: 12, time: 360 },
+  expert: { n: 16, count: 14, time: 300 },
 };
 
 const DIRS = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
@@ -365,10 +372,17 @@ let selecting = false, startCell = null, currentSelection = [];
 let difficulty;
 let language = 'en';
 
+const TITLES = {
+  en: { title: 'Word Hunt', subtitle: 'Find all hidden words before time runs out!' },
+  de: { title: 'Wörter-Jagd', subtitle: 'Finde alle versteckten Wörter, bevor die Zeit abläuft!' },
+};
+
 function setLang(lang) {
   language = lang;
   document.getElementById('lang-en').classList.toggle('active', lang === 'en');
   document.getElementById('lang-de').classList.toggle('active', lang === 'de');
+  document.getElementById('page-title').textContent    = TITLES[lang].title;
+  document.getElementById('page-subtitle').textContent = TITLES[lang].subtitle;
 }
 
 function shuffle(arr) {
@@ -694,13 +708,28 @@ function showResult() {
   document.getElementById('result').style.display = 'block';
 
   const found    = wordData.filter(w => w.found).length;
+  const levelKey = `${language}_${difficulty}`;
+  const isRecord = ArcadeScores.save('word-hunt', found, levelKey, timeLeft);
+  const bestEntry = ArcadeScores.get('word-hunt', levelKey);
+  const bestRow = document.getElementById('res-best-row');
+  const bestEl  = document.getElementById('res-best');
+  if (bestRow && bestEl && bestEntry) {
+    bestRow.style.display = 'block';
+    if (isRecord) {
+      bestEl.textContent = '🏆 New Record!';
+    } else {
+      const bt = bestEntry.time;
+      const timeStr = bt != null ? ` · ${bt >= 60 ? Math.floor(bt/60)+'m '+bt%60+'s' : bt+'s'} left` : '';
+      bestEl.textContent = `🏆 Best (${difficulty}): ${bestEntry.score} found${timeStr}`;
+    }
+  }
   const total    = wordData.length;
   const timeUsed = totalTime - timeLeft;
   const won      = found === total;
 
-  document.getElementById('res-icon').textContent  = won ? '🎉' : '⌛';
+  document.getElementById('res-icon').textContent  = won ? '' : '⌛';
   document.getElementById('res-title').textContent = won
-    ? (timeUsed < totalTime * 0.5 ? 'Blazing fast! 🔥' : 'All words found!')
+    ? (timeUsed < totalTime * 0.5 ? 'Blazing fast!' : 'All words found!')
     : `You found ${found} of ${total} words`;
   document.getElementById('res-found').textContent = found;
   document.getElementById('res-time').textContent  = timeUsed < 60 ? `${timeUsed}s` : `${Math.floor(timeUsed/60)}m ${timeUsed%60}s`;
