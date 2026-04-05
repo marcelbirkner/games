@@ -76,10 +76,17 @@
       letter-spacing: 1px;
     }
     .joystick {
-      font-size: 3rem;
+      width: 3rem;
+      height: 3rem;
       display: block;
-      margin-bottom: 8px;
+      margin: 0 auto 8px;
+      color: #a78bfa;
       animation: bounce 2s ease-in-out infinite;
+    }
+    .joystick svg {
+      width: 100%;
+      height: 100%;
+      fill: currentColor;
     }
     @keyframes bounce {
       0%, 100% { transform: translateY(0); }
@@ -97,8 +104,18 @@
       margin-bottom: 20px;
     }
     .category-icon {
-      font-size: 1.6rem;
-      line-height: 1;
+      width: 1.6rem;
+      height: 1.6rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cat-color, #a5b4fc);
+      flex-shrink: 0;
+    }
+    .category-icon svg {
+      width: 100%;
+      height: 100%;
+      fill: currentColor;
     }
     .category-title {
       font-size: 1.25rem;
@@ -158,12 +175,21 @@
     }
 
     .game-card .icon {
-      font-size: 3.5rem;
-      line-height: 1;
+      width: 3.5rem;
+      height: 3.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
       filter: drop-shadow(0 0 12px var(--accent));
       transition: transform 0.2s ease;
       position: relative;
       z-index: 1;
+    }
+    .game-card .icon svg {
+      width: 100%;
+      height: 100%;
+      fill: currentColor;
     }
     .game-card:hover .icon {
       transform: scale(1.15) rotate(-5deg);
@@ -235,10 +261,96 @@
     }
     .game-card.coming-soon::before { display: none; }
 
+    /* Contribution section */
+    .contribute-section {
+      margin-top: 64px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 600px) {
+      .contribute-section { grid-template-columns: 1fr; }
+    }
+    .contribute-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 28px 24px;
+    }
+    .contribute-card-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #a78bfa;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .contribute-card-title svg { flex-shrink: 0; }
+    .contribute-text {
+      font-size: 0.88rem;
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .contribute-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: 99px;
+      border: 1.5px solid #a78bfa;
+      background: rgba(167,139,250,0.08);
+      color: #c4b5fd;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .contribute-link:hover {
+      background: rgba(167,139,250,0.2);
+      transform: translateY(-2px);
+    }
+    .team-list {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .team-chip {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px 6px 8px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      font-weight: 600;
+    }
+    .team-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--av1), var(--av2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
     /* Footer */
     footer {
       text-align: center;
-      margin-top: 64px;
+      margin-top: 40px;
       color: rgba(255,255,255,0.3);
       font-size: 0.85rem;
     }
@@ -247,6 +359,134 @@
       .arcade-sign { font-size: 2.2rem; letter-spacing: 2px; }
       .games-grid { grid-template-columns: 1fr; }
     }
+
+    /* High Scores button */
+    .scores-btn {
+      margin-top: 18px;
+      padding: 10px 28px;
+      border-radius: 99px;
+      border: 2px solid #f59e0b;
+      background: rgba(245,158,11,0.08);
+      color: #f59e0b;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .scores-btn:hover { background: rgba(245,158,11,0.2); transform: translateY(-2px); }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: linear-gradient(135deg, #1a1740 0%, #2a2660 100%);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 24px;
+      padding: 36px 28px 28px;
+      max-width: 440px;
+      width: 100%;
+      max-height: 82vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    }
+    .modal-close {
+      position: absolute;
+      top: 14px; right: 18px;
+      background: none; border: none;
+      color: rgba(255,255,255,0.4);
+      font-size: 1.6rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .modal-close:hover { color: #fff; }
+    .modal-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      text-align: center;
+      color: #f59e0b;
+      margin-bottom: 24px;
+      letter-spacing: 1px;
+    }
+    .scores-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .scores-table th {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #a5b4fc;
+      padding-bottom: 10px;
+      text-align: left;
+    }
+    .scores-table th:last-child { text-align: right; }
+    .scores-table td {
+      padding: 9px 0;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      font-size: 0.92rem;
+      color: #e2e8f0;
+    }
+    .scores-table td:last-child {
+      text-align: right;
+      font-weight: 700;
+      color: #10b981;
+    }
+    .score-none { color: rgba(255,255,255,0.25) !important; font-weight: 400 !important; }
+    .game-header-row td {
+      padding: 10px 0 2px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #a5b4fc;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .level-row td {
+      padding: 5px 0;
+      font-size: 0.85rem;
+      border-top: none;
+    }
+    .level-row td:first-child {
+      padding-left: 12px;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+    .scores-cat-header {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 16px 0 6px;
+      border-bottom: 1px solid var(--cat-color, #a5b4fc);
+      color: var(--cat-color, #a5b4fc);
+    }
+    .scores-cat-header:first-child { padding-top: 4px; }
+    .modal-reset {
+      display: block;
+      margin: 20px auto 0;
+      padding: 7px 20px;
+      border-radius: 99px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: none;
+      color: rgba(255,255,255,0.35);
+      font-family: inherit;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .modal-reset:hover { color: #ef4444; border-color: #ef4444; }
   </style>
 </head>
 <body>
@@ -255,15 +495,28 @@
 
   <div class="content">
     <header>
-      <span class="joystick">🕹️</span>
+      <span class="joystick"><svg viewBox="0 0 16 16"><path d="M11.5 6.027a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m-1.5 1.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1m2.5-.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m-1.5 1.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1m-6.5-3h1v1h1v1h-1v1h-1v-1h-1v-1h1z"/><path d="M3.051 3.26a.5.5 0 0 1 .354-.613l1.932-.518a.5.5 0 0 1 .62.39c.655-.079 1.35-.117 2.043-.117.72 0 1.443.041 2.12.126a.5.5 0 0 1 .622-.399l1.932.518a.5.5 0 0 1 .306.729q.211.136.373.297c.408.408.78 1.05 1.095 1.772.32.733.599 1.591.805 2.466s.34 1.78.364 2.606c.024.816-.059 1.602-.328 2.21a1.42 1.42 0 0 1-1.445.83c-.636-.067-1.115-.394-1.513-.773-.245-.232-.496-.526-.739-.808-.126-.148-.25-.292-.368-.423-.728-.804-1.597-1.527-3.224-1.527s-2.496.723-3.224 1.527c-.119.131-.242.275-.368.423-.243.282-.494.575-.739.808-.398.38-.877.706-1.513.773a1.42 1.42 0 0 1-1.445-.83c-.27-.608-.352-1.395-.329-2.21.024-.826.16-1.73.365-2.606.206-.875.486-1.733.805-2.466.315-.722.687-1.364 1.094-1.772a2.3 2.3 0 0 1 .433-.335l-.028-.079zm2.036.412c-.877.185-1.469.443-1.733.708-.276.276-.587.783-.885 1.465a14 14 0 0 0-.748 2.295 12.4 12.4 0 0 0-.339 2.406c-.022.755.062 1.368.243 1.776a.42.42 0 0 0 .426.24c.327-.034.61-.199.929-.502.212-.202.4-.423.615-.674.133-.156.276-.323.44-.504C4.861 9.969 5.978 9.027 8 9.027s3.139.942 3.965 1.855c.164.181.307.348.44.504.214.251.403.472.615.674.318.303.601.468.929.503a.42.42 0 0 0 .426-.241c.18-.408.265-1.02.243-1.776a12.4 12.4 0 0 0-.339-2.406 14 14 0 0 0-.748-2.295c-.298-.682-.61-1.19-.885-1.465-.264-.265-.856-.523-1.733-.708-.85-.179-1.877-.27-2.913-.27s-2.063.091-2.913.27"/></svg></span>
       <div class="arcade-sign">Game Arcade</div>
       <p class="tagline">Pick a game and start playing!</p>
+      <button class="scores-btn" onclick="openScores()"><svg viewBox="0 0 16 16" style="width:1em;height:1em;display:inline-block;vertical-align:-.125em;fill:currentColor"><path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5q0 .807-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33 33 0 0 1 2.5.5m.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935m10.083 3.935a2 2 0 0 0 .72-3.935c-.133 1.59-.388 2.885-.72 3.935M3.504 1q.01.775.056 1.469c.13 2.028.457 3.546.87 4.667C5.294 9.48 6.484 10 7 10a.5.5 0 0 1 .5.5v2.61a1 1 0 0 1-.757.97l-1.426.356a.5.5 0 0 0-.179.085L4.5 15h7l-.638-.479a.5.5 0 0 0-.18-.085l-1.425-.356a1 1 0 0 1-.757-.97V10.5A.5.5 0 0 1 9 10c.516 0 1.706-.52 2.57-2.864.413-1.12.74-2.64.87-4.667q.045-.694.056-1.469z"/></svg> High Scores</button>
     </header>
+
+    <!-- High Scores Modal -->
+    <div class="modal-backdrop" id="scores-modal" onclick="closeScoresOnBackdrop(event)">
+      <div class="modal">
+        <button class="modal-close" onclick="closeScores()" aria-label="Close">&#215;</button>
+        <div class="modal-title"><svg viewBox="0 0 16 16" style="width:1em;height:1em;display:inline-block;vertical-align:-.125em;fill:currentColor"><path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5q0 .807-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33 33 0 0 1 2.5.5m.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935m10.083 3.935a2 2 0 0 0 .72-3.935c-.133 1.59-.388 2.885-.72 3.935M3.504 1q.01.775.056 1.469c.13 2.028.457 3.546.87 4.667C5.294 9.48 6.484 10 7 10a.5.5 0 0 1 .5.5v2.61a1 1 0 0 1-.757.97l-1.426.356a.5.5 0 0 0-.179.085L4.5 15h7l-.638-.479a.5.5 0 0 0-.18-.085l-1.425-.356a1 1 0 0 1-.757-.97V10.5A.5.5 0 0 1 9 10c.516 0 1.706-.52 2.57-2.864.413-1.12.74-2.64.87-4.667q.045-.694.056-1.469z"/></svg> High Scores</div>
+        <table class="scores-table">
+          <tbody id="scores-tbody"></tbody>
+        </table>
+        <button class="modal-reset" onclick="resetScores()">Reset all scores</button>
+      </div>
+    </div>
 
     <!-- ⚽ Football -->
     <div class="category">
       <div class="category-header" style="--cat-color:#10b981">
-        <span class="category-icon">⚽</span>
+        <span class="category-icon" style="--cat-color:#10b981"><svg viewBox="0 0 16 16"><path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5q0 .807-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33 33 0 0 1 2.5.5m.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935m10.083 3.935a2 2 0 0 0 .72-3.935c-.133 1.59-.388 2.885-.72 3.935M3.504 1q.01.775.056 1.469c.13 2.028.457 3.546.87 4.667C5.294 9.48 6.484 10 7 10a.5.5 0 0 1 .5.5v2.61a1 1 0 0 1-.757.97l-1.426.356a.5.5 0 0 0-.179.085L4.5 15h7l-.638-.479a.5.5 0 0 0-.18-.085l-1.425-.356a1 1 0 0 1-.757-.97V10.5A.5.5 0 0 1 9 10c.516 0 1.706-.52 2.57-2.864.413-1.12.74-2.64.87-4.667q.045-.694.056-1.469z"/></svg></span>
         <span class="category-title" style="color:#10b981">Football</span>
         <div class="category-line" style="background:linear-gradient(90deg,#10b981,transparent);"></div>
       </div>
@@ -271,7 +524,7 @@
 
         <a href="./guess-the-player/index.html" class="game-card"
            style="--accent:#10b981; --glow:linear-gradient(135deg,rgba(16,185,129,0.08),transparent); --shadow-color:rgba(16,185,129,0.3);">
-          <span class="icon">⚽</span>
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/></svg></span>
           <div class="game-title">Guess the Player</div>
           <div class="game-desc">Can you identify famous soccer players from their photos? Test your football knowledge!</div>
           <span class="badge" style="background:#10b981;">Football</span>
@@ -280,7 +533,7 @@
 
         <a href="./guess-the-footballer/index.html" class="game-card"
            style="--accent:#f97316; --glow:linear-gradient(135deg,rgba(249,115,22,0.08),transparent); --shadow-color:rgba(249,115,22,0.3);">
-          <span class="icon">🏟️</span>
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M6.5 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1zM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/><path d="M4.5 0A2.5 2.5 0 0 0 2 2.5V14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2.5A2.5 2.5 0 0 0 11.5 0zM3 2.5A1.5 1.5 0 0 1 4.5 1h7A1.5 1.5 0 0 1 13 2.5v10.795a4.2 4.2 0 0 0-.776-.492C11.392 12.387 10.063 12 8 12s-3.392.387-4.224.803a4.2 4.2 0 0 0-.776.492z"/></svg></span>
           <div class="game-title">Guess the Footballer</div>
           <div class="game-desc">Birthplace, country & club — can you name the footballer from these clues? 4 options to choose from!</div>
           <span class="badge" style="background:#f97316;">Football</span>
@@ -289,7 +542,7 @@
 
         <a href="./guess-the-birth-country/index.html" class="game-card"
            style="--accent:#fb923c; --glow:linear-gradient(135deg,rgba(251,146,60,0.08),transparent); --shadow-color:rgba(251,146,60,0.3);">
-          <span class="icon">🗺️</span>
+          <span class="icon"><svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"/></svg></span>
           <div class="game-title">Guess the Birth Country</div>
           <div class="game-desc">You know their name — but where in the world were they born? Test your football geography!</div>
           <span class="badge" style="background:#fb923c;">Football</span>
@@ -302,7 +555,7 @@
     <!-- 🌍 Geography -->
     <div class="category">
       <div class="category-header" style="--cat-color:#6366f1">
-        <span class="category-icon">🌍</span>
+        <span class="category-icon" style="--cat-color:#6366f1"><svg viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0M2.04 4.326c.325 1.329 2.532 2.54 3.717 3.19.48.263.793.434.743.484q-.121.12-.242.234c-.416.396-.787.749-.758 1.266.035.634.618.824 1.214 1.017.577.188 1.168.38 1.286.983.082.417-.075.988-.22 1.52-.215.782-.406 1.48.22 1.48 1.5-.5 3.798-3.186 4-5 .138-1.243-2-2-3.5-2.5-.478-.16-.755.081-.99.284-.172.15-.322.279-.51.216-.445-.148-2.5-2-1.5-2.5.78-.39.952-.171 1.227.182.078.099.163.208.273.318.609.304.662-.132.723-.633.039-.322.081-.671.277-.867.434-.434 1.265-.791 2.028-1.12.712-.306 1.365-.587 1.579-.88A7 7 0 1 1 2.04 4.327Z"/></svg></span>
         <span class="category-title" style="color:#6366f1">Geography</span>
         <div class="category-line" style="background:linear-gradient(90deg,#6366f1,transparent);"></div>
       </div>
@@ -310,7 +563,7 @@
 
         <a href="./fun-with-flags/index.html" class="game-card"
            style="--accent:#6366f1; --glow:linear-gradient(135deg,rgba(99,102,241,0.08),transparent); --shadow-color:rgba(99,102,241,0.3);">
-          <span class="icon">🌍</span>
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M14.778.085A.5.5 0 0 1 15 .5V8a.5.5 0 0 1-.314.464L14.5 8l.186.464-.003.001-.006.003-.023.009a12 12 0 0 1-.397.15c-.264.095-.631.223-1.047.35-.816.252-1.879.523-2.71.523-.847 0-1.548-.28-2.158-.525l-.028-.01C7.68 8.71 7.14 8.5 6.5 8.5c-.7 0-1.638.23-2.437.477A20 20 0 0 0 3 9.342V15.5a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 1 0v.282c.226-.079.496-.17.79-.26C4.606.272 5.67 0 6.5 0c.84 0 1.524.277 2.121.519l.043.018C9.286.788 9.828 1 10.5 1c.7 0 1.638-.23 2.437-.477a20 20 0 0 0 1.349-.476l.019-.007.004-.002h.001"/></svg></span>
           <div class="game-title">Fun with Flags</div>
           <div class="game-desc">Can you name all 249 countries from their flags? Test your geography skills!</div>
           <span class="badge" style="background:#6366f1;">Geography</span>
@@ -319,7 +572,7 @@
 
         <a href="./guess-the-capital/index.html" class="game-card"
            style="--accent:#14b8a6; --glow:linear-gradient(135deg,rgba(20,184,166,0.08),transparent); --shadow-color:rgba(20,184,166,0.3);">
-          <span class="icon">🌐</span>
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7.5-6.923c-.67.204-1.335.82-1.887 1.855q-.215.403-.395.872c.705.157 1.472.257 2.282.287zM4.249 3.539q.214-.577.481-1.078a7 7 0 0 1 .597-.933A7 7 0 0 0 3.051 3.05q.544.277 1.198.49zM3.509 7.5c.036-1.07.188-2.087.436-3.008a9 9 0 0 1-1.565-.667A6.96 6.96 0 0 0 1.018 7.5zm1.4-2.741a12.3 12.3 0 0 0-.4 2.741H7.5V5.091c-.91-.03-1.783-.145-2.591-.332M8.5 5.09V7.5h2.99a12.3 12.3 0 0 0-.399-2.741c-.808.187-1.681.301-2.591.332zM4.51 8.5c.035.987.176 1.914.399 2.741A13.6 13.6 0 0 1 7.5 10.91V8.5zm3.99 0v2.409c.91.03 1.783.145 2.591.332.223-.827.364-1.754.4-2.741zm-3.282 3.696q.18.469.395.872c.552 1.035 1.218 1.65 1.887 1.855V11.91c-.81.03-1.577.13-2.282.287zm.11 2.276a7 7 0 0 1-.598-.933 9 9 0 0 1-.481-1.079 8.4 8.4 0 0 0-1.198.49 7 7 0 0 0 2.276 1.522zm-1.383-2.964A13.4 13.4 0 0 1 3.508 8.5h-2.49a6.96 6.96 0 0 0 1.362 3.675c.47-.258.995-.482 1.565-.667m6.728 2.964a7 7 0 0 0 2.275-1.521 8.4 8.4 0 0 0-1.197-.49 9 9 0 0 1-.481 1.078 7 7 0 0 1-.597.933M8.5 11.909v3.014c.67-.204 1.335-.82 1.887-1.855q.216-.403.395-.872A12.6 12.6 0 0 0 8.5 11.91zm3.555-.401c.57.185 1.095.409 1.565.667A6.96 6.96 0 0 0 14.982 8.5h-2.49a13.4 13.4 0 0 1-.437 3.008M14.982 7.5a6.96 6.96 0 0 0-1.362-3.675c-.47.258-.995.482-1.565.667.248.92.4 1.938.437 3.008zM11.27 2.461q.266.502.482 1.078a8.4 8.4 0 0 0 1.196-.49 7 7 0 0 0-2.275-1.52c.218.283.418.597.597.932m-.488 1.343a8 8 0 0 0-.395-.872C9.835 1.897 9.17 1.282 8.5 1.077V4.09c.81-.03 1.577-.13 2.282-.287z"/></svg></span>
           <div class="game-title">Guess the Capital</div>
           <div class="game-desc">Can you name the capital city of every country? Pick a continent and find out!</div>
           <span class="badge" style="background:#14b8a6;">Geography</span>
@@ -328,7 +581,7 @@
 
         <a href="./guess-the-river/index.html" class="game-card"
            style="--accent:#38bdf8; --glow:linear-gradient(135deg,rgba(56,189,248,0.08),transparent); --shadow-color:rgba(56,189,248,0.3);">
-          <span class="icon">🌊</span>
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M.036 3.314a.5.5 0 0 1 .65-.278l1.757.703a1.5 1.5 0 0 0 1.114 0l1.014-.406a2.5 2.5 0 0 1 1.857 0l1.015.406a1.5 1.5 0 0 0 1.114 0l1.014-.406a2.5 2.5 0 0 1 1.857 0l1.015.406a1.5 1.5 0 0 0 1.114 0l1.757-.703a.5.5 0 1 1 .372.928l-1.758.703a2.5 2.5 0 0 1-1.857 0l-1.014-.406a1.5 1.5 0 0 0-1.114 0l-1.015.406a2.5 2.5 0 0 1-1.857 0l-1.014-.406a1.5 1.5 0 0 0-1.114 0l-1.015.406a2.5 2.5 0 0 1-1.857 0L.314 3.964a.5.5 0 0 1-.278-.65m0 3a.5.5 0 0 1 .65-.278l1.757.703a1.5 1.5 0 0 0 1.114 0l1.014-.406a2.5 2.5 0 0 1 1.857 0l1.015.406a1.5 1.5 0 0 0 1.114 0l1.014-.406a2.5 2.5 0 0 1 1.857 0l1.015.406a1.5 1.5 0 0 0 1.114 0l1.757-.703a.5.5 0 1 1 .372.928l-1.758.703a2.5 2.5 0 0 1-1.857 0l-1.014-.406a1.5 1.5 0 0 0-1.114 0l-1.015.406a2.5 2.5 0 0 1-1.857 0l-1.014-.406a1.5 1.5 0 0 0-1.114 0l-1.015.406a2.5 2.5 0 0 1-1.857 0L.314 6.964a.5.5 0 0 1-.278-.65m0 3a.5.5 0 0 1 .65-.278l1.757.703a1.5 1.5 0 0 0 1.114 0l1.014-.406a2.5 2.5 0 0 1 1.857 0l1.015.406a1.5 1.5 0 0 0 1.114 0l1.014-.406a2.5 2.5 0 0 1 1.857 0l1.015.406a1.5 1.5 0 0 0 1.114 0l1.757-.703a.5.5 0 1 1 .372.928l-1.758.703a2.5 2.5 0 0 1-1.857 0l-1.014-.406a1.5 1.5 0 0 0-1.114 0l-1.015.406a2.5 2.5 0 0 1-1.857 0l-1.014-.406a1.5 1.5 0 0 0-1.114 0l-1.015.406a2.5 2.5 0 0 1-1.857 0L.314 9.964a.5.5 0 0 1-.278-.65m0 3a.5.5 0 0 1 .65-.278l1.757.703a1.5 1.5 0 0 0 1.114 0l1.014-.406a2.5 2.5 0 0 1 1.857 0l1.015.406a1.5 1.5 0 0 0 1.114 0l1.014-.406a2.5 2.5 0 0 1 1.857 0l1.015.406a1.5 1.5 0 0 0 1.114 0l1.757-.703a.5.5 0 1 1 .372.928l-1.758.703a2.5 2.5 0 0 1-1.857 0l-1.014-.406a1.5 1.5 0 0 0-1.114 0l-1.015.406a2.5 2.5 0 0 1-1.857 0l-1.014-.406a1.5 1.5 0 0 0-1.114 0l-1.015.406a2.5 2.5 0 0 1-1.857 0l-1.757-.703a.5.5 0 0 1-.278-.65"/></svg></span>
           <div class="game-title">Guess the River</div>
           <div class="game-desc">Which country do the world's 50 largest rivers flow through? Pick a region and find out!</div>
           <span class="badge" style="background:#38bdf8; color:#0c4a6e;">Geography</span>
@@ -341,7 +594,7 @@
     <!-- 🔤 Words -->
     <div class="category">
       <div class="category-header" style="--cat-color:#a78bfa">
-        <span class="category-icon">🔤</span>
+        <span class="category-icon" style="--cat-color:#a78bfa"><svg viewBox="0 0 16 16"><path d="M2.873 11.297V4.142H1.699L0 5.379v1.137l1.64-1.18h.06v5.961zm3.213-5.09v-.063c0-.618.44-1.169 1.196-1.169.676 0 1.174.44 1.174 1.106 0 .624-.42 1.101-.807 1.526L4.99 10.553v.744h4.78v-.99H6.643v-.069L8.41 8.252c.65-.724 1.237-1.332 1.237-2.27C9.646 4.849 8.723 4 7.308 4c-1.573 0-2.36 1.064-2.36 2.15v.057zm6.559 1.883h.786c.823 0 1.374.481 1.379 1.179.01.707-.55 1.216-1.421 1.21-.77-.005-1.326-.419-1.379-.953h-1.095c.042 1.053.938 1.918 2.464 1.918 1.478 0 2.642-.839 2.62-2.144-.02-1.143-.922-1.651-1.551-1.714v-.063c.535-.09 1.347-.66 1.326-1.678-.026-1.053-.933-1.855-2.359-1.845-1.5.005-2.317.88-2.348 1.898h1.116c.032-.498.498-.944 1.206-.944.703 0 1.206.435 1.206 1.07.005.64-.504 1.106-1.2 1.106h-.75z"/></svg></span>
         <span class="category-title" style="color:#a78bfa">Words</span>
         <div class="category-line" style="background:linear-gradient(90deg,#a78bfa,transparent);"></div>
       </div>
@@ -349,7 +602,7 @@
 
         <a href="./word-hunt/index.html" class="game-card"
            style="--accent:#a78bfa; --glow:linear-gradient(135deg,rgba(167,139,250,0.08),transparent); --shadow-color:rgba(167,139,250,0.3);">
-          <span class="icon">🔍</span>
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/></svg></span>
           <div class="game-title">Word Hunt</div>
           <div class="game-desc">Find all hidden words in the letter grid before time runs out!</div>
           <span class="badge" style="background:#a78bfa;">Words</span>
@@ -358,7 +611,7 @@
 
         <a href="./scattergories/index.html" class="game-card"
            style="--accent:#f59e0b; --glow:linear-gradient(135deg,rgba(245,158,11,0.08),transparent); --shadow-color:rgba(245,158,11,0.3);">
-          <span class="icon">🎲</span>
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M13 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zM3 0a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V3a3 3 0 0 0-3-3z"/><path d="M5.5 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m8 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m-4-4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/></svg></span>
           <div class="game-title">Scattergories</div>
           <div class="game-desc">A random letter drops — fill in all 9 categories with words starting with that letter before time runs out!</div>
           <span class="badge" style="background:#f59e0b;">Words</span>
@@ -367,7 +620,7 @@
 
         <a href="./word-chain/index.html" class="game-card"
            style="--accent:#06b6d4; --glow:linear-gradient(135deg,rgba(6,182,212,0.08),transparent); --shadow-color:rgba(6,182,212,0.3);">
-          <span class="icon">🔗</span>
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></span>
           <div class="game-title">Word Chain</div>
           <div class="game-desc">Each word must start with the last letter of the previous. How long can you keep the chain going?</div>
           <span class="badge" style="background:#06b6d4; color:#083344;">Words</span>
@@ -376,7 +629,7 @@
 
         <a href="./hangman/index.html" class="game-card"
            style="--accent:#8b5cf6; --glow:linear-gradient(135deg,rgba(139,92,246,0.08),transparent); --shadow-color:rgba(139,92,246,0.3);">
-          <span class="icon">🪢</span>
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13a.5.5 0 0 1 0 1 .5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1 0-1 .5.5 0 0 1 0-1 .5.5 0 0 1-.46-.302l-.761-1.77a2 2 0 0 0-.453-.618A5.98 5.98 0 0 1 2 6m6-5a5 5 0 0 0-3.479 8.592c.263.254.514.564.676.941L5.83 12h4.342l.632-1.467c.162-.377.413-.687.676-.941A5 5 0 0 0 8 1"/></svg></span>
           <div class="game-title">Hangman</div>
           <div class="game-desc">Classic word-guessing game. Reveal the hidden word one letter at a time before it's too late!</div>
           <span class="badge" style="background:#8b5cf6;">Words</span>
@@ -385,7 +638,7 @@
 
         <a href="./anagram-blast/index.html" class="game-card"
            style="--accent:#f43f5e; --glow:linear-gradient(135deg,rgba(244,63,94,0.08),transparent); --shadow-color:rgba(244,63,94,0.3);">
-          <span class="icon">🔀</span>
+          <span class="icon"><svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.6 9.6 0 0 0 7.556 8a9.6 9.6 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.6 10.6 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.6 9.6 0 0 0 6.444 8a9.6 9.6 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5"/><path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192m0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192"/></svg></span>
           <div class="game-title">Anagram Blast</div>
           <div class="game-desc">Unscramble the jumbled letters to form the hidden word before time runs out!</div>
           <span class="badge" style="background:#f43f5e;">Words</span>
@@ -394,7 +647,7 @@
 
         <a href="./missing-vowels/index.html" class="game-card"
            style="--accent:#22d3ee; --glow:linear-gradient(135deg,rgba(34,211,238,0.08),transparent); --shadow-color:rgba(34,211,238,0.3);">
-          <span class="icon">🔡</span>
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M2.204 11.078c.767 0 1.201-.356 1.406-.737h.059V11h1.216V7.519c0-1.314-.947-1.783-2.11-1.783C1.355 5.736.75 6.42.69 7.27h1.216c.064-.323.313-.552.84-.552s.864.249.864.771v.464H2.346C1.145 7.953.5 8.568.5 9.496c0 .977.693 1.582 1.704 1.582m.42-.947c-.44 0-.845-.235-.845-.718 0-.395.269-.684.84-.684h.991v.538c0 .503-.444.864-.986.864m5.593.937c1.216 0 1.948-.869 1.948-2.31v-.702c0-1.44-.727-2.305-1.929-2.305-.742 0-1.328.347-1.499.889h-.063V3.983h-1.29V11h1.27v-.791h.064c.21.532.776.86 1.499.86Zm-.43-1.025c-.66 0-1.113-.518-1.113-1.28V8.12c0-.825.42-1.343 1.098-1.343.684 0 1.075.518 1.075 1.416v.45c0 .888-.386 1.401-1.06 1.401Zm2.834-1.328c0 1.47.87 2.378 2.305 2.378 1.416 0 2.139-.777 2.158-1.763h-1.186c-.06.425-.313.732-.933.732-.66 0-1.05-.512-1.05-1.352v-.625c0-.81.371-1.328 1.045-1.328.635 0 .879.425.918.776h1.187c-.02-.986-.787-1.806-2.14-1.806-1.41 0-2.304.918-2.304 2.338z"/></svg></span>
           <div class="game-title">Missing Vowels</div>
           <div class="game-desc">All the vowels have been removed — can you figure out the hidden word from the consonants alone?</div>
           <span class="badge" style="background:#22d3ee; color:#083344;">Words</span>
@@ -403,7 +656,7 @@
 
         <a href="./speed-typing/index.html" class="game-card"
            style="--accent:#10b981; --glow:linear-gradient(135deg,rgba(16,185,129,0.08),transparent); --shadow-color:rgba(16,185,129,0.3);">
-          <span class="icon">⌨️</span>
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M14 5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM2 4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><path d="M13 10.25a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25zm0-2a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25zm-5 0A.25.25 0 0 1 8.25 8h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 8 8.75zm2 0a.25.25 0 0 1 .25-.25h1.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-1.5a.25.25 0 0 1-.25-.25zm1 2a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25zm-5-2A.25.25 0 0 1 6.25 8h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 6 8.75zm-2 0A.25.25 0 0 1 4.25 8h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 4 8.75zm-2 0A.25.25 0 0 1 2.25 8h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 2 8.75zm11-2a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25zm-2 0a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25zm-2 0A.25.25 0 0 1 9.25 6h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 9 6.75zm-2 0A.25.25 0 0 1 7.25 6h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 7 6.75zm-2 0A.25.25 0 0 1 5.25 6h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 5 6.75zm-3 0A.25.25 0 0 1 2.25 6h1.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-1.5A.25.25 0 0 1 2 6.75zm0 4a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25zm2 0a.25.25 0 0 1 .25-.25h5.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-5.5a.25.25 0 0 1-.25-.25z"/></svg></span>
           <div class="game-title">Speed Typing</div>
           <div class="game-desc">Type as many words as you can in 60 seconds. Beat your personal best WPM record!</div>
           <span class="badge" style="background:#10b981;">Words</span>
@@ -416,7 +669,7 @@
     <!-- 🧠 Brain & Math -->
     <div class="category">
       <div class="category-header" style="--cat-color:#f59e0b">
-        <span class="category-icon">🧠</span>
+        <span class="category-icon" style="--cat-color:#f59e0b"><svg viewBox="0 0 16 16"><path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13a.5.5 0 0 1 0 1 .5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1 0-1 .5.5 0 0 1 0-1 .5.5 0 0 1-.46-.302l-.761-1.77a2 2 0 0 0-.453-.618A5.98 5.98 0 0 1 2 6m6-5a5 5 0 0 0-3.479 8.592c.263.254.514.564.676.941L5.83 12h4.342l.632-1.467c.162-.377.413-.687.676-.941A5 5 0 0 0 8 1"/></svg></span>
         <span class="category-title" style="color:#f59e0b">Brain &amp; Math</span>
         <div class="category-line" style="background:linear-gradient(90deg,#f59e0b,transparent);"></div>
       </div>
@@ -424,7 +677,7 @@
 
         <a href="./math-blitz/index.html" class="game-card"
            style="--accent:#f59e0b; --glow:linear-gradient(135deg,rgba(245,158,11,0.08),transparent); --shadow-color:rgba(245,158,11,0.3);">
-          <span class="icon">🔢</span>
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M2.873 11.297V4.142H1.699L0 5.379v1.137l1.64-1.18h.06v5.961zm3.213-5.09v-.063c0-.618.44-1.169 1.196-1.169.676 0 1.174.44 1.174 1.106 0 .624-.42 1.101-.807 1.526L4.99 10.553v.744h4.78v-.99H6.643v-.069L8.41 8.252c.65-.724 1.237-1.332 1.237-2.27C9.646 4.849 8.723 4 7.308 4c-1.573 0-2.36 1.064-2.36 2.15v.057zm6.559 1.883h.786c.823 0 1.374.481 1.379 1.179.01.707-.55 1.216-1.421 1.21-.77-.005-1.326-.419-1.379-.953h-1.095c.042 1.053.938 1.918 2.464 1.918 1.478 0 2.642-.839 2.62-2.144-.02-1.143-.922-1.651-1.551-1.714v-.063c.535-.09 1.347-.66 1.326-1.678-.026-1.053-.933-1.855-2.359-1.845-1.5.005-2.317.88-2.348 1.898h1.116c.032-.498.498-.944 1.206-.944.703 0 1.206.435 1.206 1.07.005.64-.504 1.106-1.2 1.106h-.75z"/></svg></span>
           <div class="game-title">Math Blitz</div>
           <div class="game-desc">Race against the clock to solve math puzzles before time runs out!</div>
           <span class="badge" style="background:#f59e0b;">Math</span>
@@ -433,7 +686,7 @@
 
         <a href="./tic-tac-toe/index.html" class="game-card"
            style="--accent:#ec4899; --glow:linear-gradient(135deg,rgba(236,72,153,0.08),transparent); --shadow-color:rgba(236,72,153,0.3);">
-          <span class="icon">⭕</span>
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0zm6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0z"/></svg></span>
           <div class="game-title">Tic Tac Toe</div>
           <div class="game-desc">Play with a friend or challenge the computer. Three in a row wins!</div>
           <span class="badge" style="background:#ec4899;">2 Players</span>
@@ -442,29 +695,125 @@
 
         <a href="./puzzle-rush/index.html" class="game-card"
            style="--accent:#ef4444; --glow:linear-gradient(135deg,rgba(239,68,68,0.08),transparent); --shadow-color:rgba(239,68,68,0.3);">
-          <span class="icon">🧩</span>
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M3.112 3.645A1.5 1.5 0 0 1 4.605 2H7a.5.5 0 0 1 .5.5v.382c0 .696-.497 1.182-.872 1.469a.5.5 0 0 0-.115.118l-.012.025L6.5 4.5v.003l.003.01q.005.015.036.053a.9.9 0 0 0 .27.194C7.09 4.9 7.51 5 8 5c.492 0 .912-.1 1.19-.24a.9.9 0 0 0 .271-.194.2.2 0 0 0 .036-.054l.003-.01v-.008l-.012-.025a.5.5 0 0 0-.115-.118c-.375-.287-.872-.773-.872-1.469V2.5A.5.5 0 0 1 9 2h2.395a1.5 1.5 0 0 1 1.493 1.645L12.645 6.5h.237c.195 0 .42-.147.675-.48.21-.274.528-.52.943-.52.568 0 .947.447 1.154.862C15.877 6.807 16 7.387 16 8s-.123 1.193-.346 1.638c-.207.415-.586.862-1.154.862-.415 0-.733-.246-.943-.52-.255-.333-.48-.48-.675-.48h-.237l.243 2.855A1.5 1.5 0 0 1 11.395 14H9a.5.5 0 0 1-.5-.5v-.382c0-.696.497-1.182.872-1.469a.5.5 0 0 0 .115-.118l.012-.025.001-.006v-.003l-.003-.01a.2.2 0 0 0-.036-.053.9.9 0 0 0-.27-.194C8.91 11.1 8.49 11 8 11s-.912.1-1.19.24a.9.9 0 0 0-.271.194.2.2 0 0 0-.036.054l-.003.01v.002l.001.006.012.025c.016.027.05.068.115.118.375.287.872.773.872 1.469v.382a.5.5 0 0 1-.5.5H4.605a1.5 1.5 0 0 1-1.493-1.645L3.356 9.5h-.238c-.195 0-.42.147-.675.48-.21.274-.528.52-.943.52-.568 0-.947-.447-1.154-.862C.123 9.193 0 8.613 0 8s.123-1.193.346-1.638C.553 5.947.932 5.5 1.5 5.5c.415 0 .733.246.943.52.255.333.48.48.675.48h.238z"/></svg></span>
           <div class="game-title">Puzzle Rush</div>
           <div class="game-desc">Slide tiles into order before time runs out. How fast can you go?</div>
           <span class="badge" style="background:#ef4444;">Puzzle</span>
           <span class="play-btn" style="border-color:#ef4444; color:#ef4444;">Play</span>
         </a>
 
+        <a href="./four-wins/index.html" class="game-card"
+           style="--accent:#60a5fa; --glow:linear-gradient(135deg,rgba(96,165,250,0.08),transparent); --shadow-color:rgba(96,165,250,0.3);">
+          <span class="icon"><svg viewBox="0 0 16 16"><circle cx="4" cy="4" r="1.5"/><circle cx="8" cy="4" r="1.5"/><circle cx="12" cy="4" r="1.5"/><circle cx="4" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="12" cy="8" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/></svg></span>
+          <div class="game-title">Four Wins</div>
+          <div class="game-desc">Drop pieces and connect four in a row before your opponent does. Play a friend or beat the AI!</div>
+          <span class="badge" style="background:#60a5fa; color:#1e3a5f;">2 Players</span>
+          <span class="play-btn" style="border-color:#60a5fa; color:#60a5fa;">Play</span>
+        </a>
+
       </div>
     </div>
 
+    <!-- Contribute & Team -->
+    <div class="contribute-section">
+
+      <!-- Contribute card -->
+      <div class="contribute-card">
+        <div class="contribute-card-title">
+          <svg viewBox="0 0 16 16" style="width:1em;height:1em;fill:currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+          </svg>
+          Share your ideas
+        </div>
+        <p class="contribute-text">Got an idea for a new game or an improvement? We'd love to hear it! Open an issue on GitHub and let us know.</p>
+        <a class="contribute-link" href="https://github.com/marcelbirkner/games/issues" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" style="width:.9em;height:.9em;fill:currentColor"><path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0M1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0"/></svg>
+          Open an Issue
+        </a>
+      </div>
+
+      <!-- Team card -->
+      <div class="contribute-card">
+        <div class="contribute-card-title">
+          <svg viewBox="0 0 16 16" style="width:1em;height:1em;fill:currentColor">
+            <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/>
+          </svg>
+          The Team
+        </div>
+        <ul class="team-list">
+          <li><span class="team-chip"><span class="team-avatar" style="--av1:#10b981;--av2:#6ee7b7">T</span>Theo</span></li>
+          <li><span class="team-chip"><span class="team-avatar" style="--av1:#ec4899;--av2:#f9a8d4">E</span>Emma</span></li>
+          <li><span class="team-chip"><span class="team-avatar" style="--av1:#f59e0b;--av2:#fcd34d">A</span>Anna</span></li>
+          <li><span class="team-chip"><span class="team-avatar" style="--av1:#6366f1;--av2:#a78bfa">M</span>Marcel</span></li>
+        </ul>
+      </div>
+
+    </div>
+
     <footer>
-      Built with ❤️ &nbsp;·&nbsp; More games coming soon
-      &nbsp;·&nbsp;
-      <a href="https://github.com/marcelbirkner/games" target="_blank" rel="noopener"
-         style="color:rgba(255,255,255,0.4); text-decoration:none; transition:color 0.2s;"
-         onmouseover="this.style.color='rgba(255,255,255,0.8)'"
-         onmouseout="this.style.color='rgba(255,255,255,0.4)'">
-        GitHub ↗
-      </a>
+      Built with <svg viewBox="0 0 16 16" style="width:1em;height:1em;fill:#f43f5e;display:inline-block;vertical-align:-.125em"><path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/></svg> for Emma and Theo
     </footer>
   </div>
 
+  <script src="./scores.js"></script>
   <script>
+    function openScores() {
+      var tbody = document.getElementById('scores-tbody');
+      var all = ArcadeScores.getAll();
+      tbody.innerHTML = ArcadeScores.CATEGORIES.map(function(cat) {
+        var rows = cat.games.map(function(g) {
+          var gameData = all[g.id] || {};
+          if (!g.levels || g.levels.length === 0) {
+            // Single-level game — show best across all stored entries
+            var best = null;
+            Object.values(gameData).forEach(function(entry) {
+              if (entry && entry.score !== undefined && (best === null || entry.score > best)) best = entry.score;
+            });
+            var hasScore = best !== null;
+            var display = hasScore ? (best + ' ' + g.unit) : '—';
+            return '<tr><td>' + g.name + '</td><td class="' + (hasScore ? '' : 'score-none') + '">' + display + '</td></tr>';
+          }
+          // Multi-level game — game name header + one row per level
+          var levelRows = g.levels.map(function(level) {
+            var best = null;
+            if (g.prefix) {
+              // word-chain: key includes speed suffix, match by prefix
+              Object.keys(gameData).forEach(function(k) {
+                if (k === level.key || k.indexOf(level.key + '_') === 0) {
+                  var entry = gameData[k];
+                  if (entry && (best === null || entry.score > best)) best = entry.score;
+                }
+              });
+            } else {
+              var entry = gameData[level.key];
+              if (entry) best = entry.score;
+            }
+            var hasScore = best !== null;
+            var display = hasScore ? (best + ' ' + g.unit) : '—';
+            return '<tr class="level-row"><td>' + level.label + '</td><td class="' + (hasScore ? '' : 'score-none') + '">' + display + '</td></tr>';
+          }).join('');
+          return '<tr class="game-header-row"><td colspan="2">' + g.name + '</td></tr>' + levelRows;
+        }).join('');
+        return '<tr><td colspan="2" class="scores-cat-header" style="--cat-color:' + cat.color + '">' + cat.name + '</td></tr>' + rows;
+      }).join('');
+      document.getElementById('scores-modal').classList.add('open');
+    }
+
+    function closeScores() {
+      document.getElementById('scores-modal').classList.remove('open');
+    }
+
+    function closeScoresOnBackdrop(e) {
+      if (e.target === document.getElementById('scores-modal')) closeScores();
+    }
+
+    function resetScores() {
+      if (confirm('Reset all high scores?')) {
+        ArcadeScores.clear();
+        openScores();
+      }
+    }
+
     // Generate twinkling stars
     const container = document.getElementById('stars');
     for (let i = 0; i < 120; i++) {

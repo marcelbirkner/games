@@ -33,24 +33,31 @@
 
     /* Back link */
     .back-link {
-      display: inline-flex; align-items: center; gap: 6px;
-      color: rgba(255,255,255,0.6); text-decoration: none;
-      font-size: 0.875rem; margin-bottom: 28px;
+      display: inline-block;
+      margin-top: 16px;
+      margin-bottom: 20px;
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 600;
       transition: color 0.2s;
     }
     .back-link:hover { color: #fff; }
 
     /* Language toggle */
     .lang-bar {
-      display: flex; justify-content: flex-end; margin-bottom: 20px; gap: 8px;
+      display: flex; justify-content: center; margin-bottom: 32px; gap: 10px;
     }
     .lang-btn {
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-      color: #fff; padding: 6px 16px; border-radius: 20px; cursor: pointer;
-      font-size: 0.85rem; transition: all 0.2s;
+      background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.15);
+      color: #ccc; padding: 8px 22px; border-radius: 99px; cursor: pointer;
+      font-size: 0.95rem; font-weight: 700; transition: all 0.2s;
     }
-    .lang-btn.active { background: #6366f1; border-color: #6366f1; font-weight: 600; }
-    .lang-btn:hover:not(.active) { background: rgba(255,255,255,0.15); }
+    .lang-btn.active {
+      border-color: #6366f1; background: rgba(99,102,241,0.2);
+      color: #a5b4fc; box-shadow: 0 0 12px rgba(99,102,241,0.35);
+    }
+    .lang-btn:hover:not(.active) { border-color: rgba(255,255,255,0.4); color: #fff; }
 
     /* ============ MENU SCREEN ============ */
     #screen-menu { text-align: center; }
@@ -201,17 +208,112 @@
     .results-table tr:last-child td { border-bottom: none; }
     .results-table tr:hover td { background: rgba(255,255,255,0.03); }
 
-    .td-cat { font-weight: 600; color: rgba(255,255,255,0.85); }
-    .td-answer { color: #fff; }
-    .td-status { font-size: 1.2rem; text-align: center; }
-    .td-example { color: rgba(255,255,255,0.55); font-style: italic; }
-    .example-letter {
-      color: #a78bfa; font-style: normal; font-weight: 700;
+    .judge-hint {
+      text-align: center;
+      color: #a5b4fc;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
     }
-    .row-correct td { background: rgba(16,185,129,0.06); }
-    .row-wrong   td { background: rgba(239,68,68,0.04); }
+
+    .td-cat { font-weight: 600; color: rgba(255,255,255,0.85); width: 38%; }
+    .td-answer { color: #fff; width: 48%; }
+    .td-judge { text-align: right; width: 14%; }
+
+    .judge-btn {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      border: 2px solid;
+      background: none;
+      font-size: 1rem; line-height: 1;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .judge-btn.counted {
+      border-color: #10b981;
+      color: #10b981;
+      background: rgba(16,185,129,0.12);
+    }
+    .judge-btn.counted:hover { background: rgba(16,185,129,0.25); }
+    .judge-btn.skipped {
+      border-color: rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.04);
+    }
+    .judge-btn.skipped:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.6); }
+    .judge-btn.invalid {
+      border-color: rgba(239,68,68,0.35);
+      color: rgba(239,68,68,0.45);
+      background: rgba(239,68,68,0.06);
+      cursor: not-allowed;
+    }
+    .judge-btn.invalid:hover { border-color: rgba(239,68,68,0.35); color: rgba(239,68,68,0.45); }
+
+    .row-counted td { opacity: 1; }
+    .row-skipped .td-cat,
+    .row-skipped .td-answer { opacity: 0.35; text-decoration: line-through; }
+    .row-invalid .td-cat { opacity: 0.45; }
+    .row-invalid .td-answer { opacity: 0.45; color: #f87171; text-decoration: line-through; }
 
     .play-again-wrap { text-align: center; }
+
+    /* Mode buttons */
+    .mode-btns {
+      display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(167,139,250,0.5);
+      color: #a78bfa; font-size: 1.1rem; font-weight: 700;
+      padding: 14px 44px; border-radius: 50px; cursor: pointer;
+      transition: transform 0.15s, background 0.2s, border-color 0.2s;
+    }
+    .btn-secondary:hover {
+      background: rgba(167,139,250,0.15); border-color: #a78bfa;
+      transform: translateY(-2px);
+    }
+
+    /* ============ LETTER PICKER SCREEN ============ */
+    #screen-letter-pick { display: none; text-align: center; }
+    .picker-title {
+      font-size: 1.9rem; font-weight: 800; margin-bottom: 8px;
+    }
+    .picker-subtitle {
+      font-size: 1rem; color: rgba(255,255,255,0.6);
+      margin-bottom: 32px; line-height: 1.5;
+    }
+    .letter-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      max-width: 400px;
+      margin: 0 auto 32px;
+    }
+    .letter-btn {
+      aspect-ratio: 1;
+      border: 2px solid rgba(167,139,250,0.35);
+      border-radius: 16px;
+      background: rgba(167,139,250,0.08);
+      color: #fff;
+      font-size: 1.8rem;
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .letter-btn:hover {
+      background: rgba(167,139,250,0.25);
+      border-color: #a78bfa;
+      transform: scale(1.08);
+      box-shadow: 0 4px 20px rgba(167,139,250,0.4);
+    }
+    .letter-btn:active { transform: scale(0.97); }
+    .picker-back {
+      background: none; border: none; color: rgba(255,255,255,0.5);
+      font-size: 0.95rem; cursor: pointer; text-decoration: underline;
+      transition: color 0.2s;
+    }
+    .picker-back:hover { color: #fff; }
 
     /* Utility */
     .hidden { display: none !important; }
@@ -226,17 +328,29 @@
   <!-- Back link -->
   <a href="../index.html" class="back-link">← Back to Arcade</a>
 
-  <!-- Language toggle -->
-  <div class="lang-bar">
-    <button class="lang-btn active" id="btn-en" onclick="setLang('en')">🇬🇧 English</button>
-    <button class="lang-btn"        id="btn-de" onclick="setLang('de')">🇩🇪 Deutsch</button>
-  </div>
-
   <!-- SCREEN: MENU -->
   <div id="screen-menu">
-    <h1 class="game-title">🎲 Scattergories</h1>
+    <h1 class="game-title">Scattergories</h1>
     <p class="game-subtitle" id="ui-subtitle"></p>
-    <button class="btn-primary" onclick="startGame()">Start Game</button>
+
+    <!-- Language toggle -->
+    <div class="lang-bar">
+      <button class="lang-btn active" id="btn-en" onclick="setLang('en')"><svg viewBox="0 0 60 30" style="width:1.4em;height:.7em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><clipPath id="a"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#a)"><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30m0-30L0 30" clip-path="url(#b)" stroke="#C8102E" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/></g></svg> English</button>
+      <button class="lang-btn"        id="btn-de" onclick="setLang('de')"><svg viewBox="0 0 5 3" style="width:1.4em;height:.84em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="3" y="0" fill="#000"/><rect width="5" height="2" y="1" fill="#D00"/><rect width="5" height="1" y="2" fill="#FFCE00"/></svg> Deutsch</button>
+    </div>
+
+    <div class="mode-btns">
+      <button class="btn-primary" onclick="startSolo()" id="btn-solo">Solo</button>
+      <button class="btn-secondary" onclick="showLetterPicker()" id="btn-multi">Multiplayer</button>
+    </div>
+  </div>
+
+  <!-- SCREEN: LETTER PICKER (multiplayer) -->
+  <div id="screen-letter-pick">
+    <h2 class="picker-title" id="picker-title">Pick a Letter</h2>
+    <p class="picker-subtitle" id="picker-subtitle">Choose the letter for this round — everyone uses the same one</p>
+    <div class="letter-grid" id="letter-grid"></div>
+    <button class="picker-back" onclick="showScreen('screen-menu')" id="picker-back">← Back to menu</button>
   </div>
 
   <!-- SCREEN: PLAYING -->
@@ -272,95 +386,79 @@
       </div>
       <div class="grade-msg" id="res-grade"></div>
     </div>
+    <p class="judge-hint" id="judge-hint"></p>
     <table class="results-table" id="results-table">
       <thead>
         <tr>
           <th id="th-cat">Category</th>
           <th id="th-answer">Your Answer</th>
           <th></th>
-          <th id="th-example">Example</th>
         </tr>
       </thead>
       <tbody id="results-tbody"></tbody>
     </table>
     <div class="play-again-wrap">
-      <button class="btn-primary" id="btn-play-again" onclick="startGame()"></button>
+      <button class="btn-primary" id="btn-play-again" onclick="playAgain()"></button>
     </div>
   </div>
 
 </div><!-- .content -->
 
+<script src="../scores.js"></script>
 <script>
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
-const LETTERS = 'ABCDEFGHIJKLMNOPRSTW'.split('');
-const CATS    = ['city','country','color','instrument','drink','school','clothing','sport','vip'];
-const TOTAL_SECONDS = 120;
+const LETTERS     = 'ABCDEFGHIJKLMNOPRSTW'.split('');
+const FIXED_CATS  = ['city', 'country', 'animal', 'sport'];
+const RANDOM_POOL = ['vip','instrument','clothing','school','food','movie','brand','job','body','fruit','boyname','girlname','capital','tvshow','band','kitchen','outside','hobby','vehicle','color'];
+const TOTAL_SECONDS = 180;
 
 // ─── STRINGS ─────────────────────────────────────────────────────────────────
 const STRINGS = {
   en: {
-    subtitle:   "Think of a word for each category — starting with the same letter!",
-    letterLabel:"Letter",
-    timeUp:     "Time's up!",
-    submitBtn:  "Submit Answers",
-    playAgain:  "Play Again",
-    yourAnswer: "Your Answer",
-    example:    "Example",
-    scoreLabel: "Score",
-    catLabels:  { city:"City", country:"Country", color:"Color", instrument:"Music Instrument",
-                  drink:"Drink", school:"In School", clothing:"Clothing", sport:"Sport", vip:"Famous Person" }
+    subtitle:    "Think of a word for each category — starting with the same letter!",
+    letterLabel: "Letter",
+    timeUp:      "Time's up!",
+    submitBtn:   "Submit Answers",
+    playAgain:   "Play Again",
+    yourAnswer:  "Your Answer",
+    judgeHint:   "Tap ✓ to count an answer or ✗ to skip it. Answers with the wrong first letter can't be counted.",
+    scoreLabel:  "Score",
+    soloBtn:     "Solo",
+    multiBtn:    "Multiplayer",
+    pickerTitle: "Pick a Letter",
+    pickerSub:   "Choose the letter for this round — everyone uses the same one",
+    pickerBack:  "← Back to menu",
+    catLabels:   { city:"City", country:"Country", animal:"Animal", sport:"Sport",
+                   vip:"Famous Person", instrument:"Music Instrument", clothing:"Clothing",
+                   school:"In School", food:"Food & Drink", movie:"Movie", brand:"Brand / Company",
+                   job:"Job / Profession", body:"Body Part", fruit:"Fruit or Vegetable",
+                   boyname:"Boy's Name", girlname:"Girl's Name", capital:"Capital City",
+                   tvshow:"TV Show", band:"Musical Artist / Band", kitchen:"Thing in a Kitchen",
+                   outside:"Thing you Find Outside", hobby:"Hobby / Activity",
+                   vehicle:"Vehicle", color:"Color" }
   },
   de: {
-    subtitle:   "Denk dir für jede Kategorie ein Wort aus — das mit dem gleichen Buchstaben beginnt!",
-    letterLabel:"Buchstabe",
-    timeUp:     "Zeit abgelaufen!",
-    submitBtn:  "Antworten abgeben",
-    playAgain:  "Nochmal spielen",
-    yourAnswer: "Deine Antwort",
-    example:    "Beispiel",
-    scoreLabel: "Punkte",
-    catLabels:  { city:"Stadt", country:"Land", color:"Farbe", instrument:"Musikinstrument",
-                  drink:"Getränk", school:"In der Schule", clothing:"Kleidung", sport:"Sport", vip:"Prominente Person" }
-  }
-};
-
-// ─── WORD LISTS ───────────────────────────────────────────────────────────────
-const WORDS = {
-  city: {
-    en: ["amsterdam","athens","austin","abu dhabi","ankara","accra","adelaide","antwerp","algiers","almaty","berlin","barcelona","budapest","brussels","bogota","buenos aires","bangkok","bangalore","beirut","bucharest","cairo","chicago","cape town","casablanca","copenhagen","caracas","chennai","colombo","dubai","delhi","dhaka","dublin","denver","dakar","edinburgh","florence","frankfurt","fukuoka","geneva","glasgow","guangzhou","hamburg","hanoi","havana","helsinki","houston","hong kong","istanbul","islamabad","jakarta","jerusalem","johannesburg","karachi","kyiv","kuala lumpur","kabul","london","lima","lisbon","lagos","los angeles","moscow","madrid","mumbai","manila","melbourne","milan","montreal","nairobi","naples","oslo","ottawa","paris","prague","perth","phoenix","rome","riyadh","rio de janeiro","sydney","seoul","singapore","stockholm","santiago","tokyo","toronto","taipei","tehran","ulaanbaatar","vienna","vancouver","venice","warsaw","washington","yokohama","zurich","zagreb"],
-    de: ["amsterdam","athen","austin","abu dhabi","ankara","accra","adelaide","antwerpen","algier","almaty","berlin","barcelona","budapest","brüssel","bogotá","buenos aires","bangkok","bangalore","beirut","bukarest","kairo","chicago","kapstadt","casablanca","kopenhagen","caracas","chennai","colombo","dubai","delhi","dhaka","dublin","denver","dakar","edinburgh","florenz","frankfurt","fukuoka","genf","glasgow","guangzhou","hamburg","hanoi","havanna","helsinki","houston","hongkong","istanbul","islamabad","jakarta","jerusalem","johannesburg","karachi","kiew","kuala lumpur","kabul","london","lima","lissabon","lagos","los angeles","moskau","madrid","mumbai","manila","melbourne","mailand","montreal","nairobi","neapel","oslo","ottawa","paris","prag","perth","phoenix","rom","riad","rio de janeiro","sydney","seoul","singapur","stockholm","santiago","tokio","toronto","taipeh","teheran","ulaanbaatar","wien","vancouver","venedig","warschau","washington","yokohama","zürich","zagreb","münchen","düsseldorf","köln","stuttgart","bremen","hannover","leipzig","nürnberg","bonn","augsburg","wiesbaden","freiburg","heidelberg","erfurt","potsdam","rostock","kiel"]
-  },
-  country: {
-    en: ["afghanistan","albania","algeria","andorra","angola","argentina","armenia","australia","austria","azerbaijan","bahamas","bahrain","bangladesh","belarus","belgium","belize","benin","bhutan","bolivia","botswana","brazil","brunei","bulgaria","burkina faso","burundi","cambodia","cameroon","canada","chad","chile","china","colombia","comoros","congo","croatia","cuba","cyprus","czech republic","denmark","djibouti","dominican republic","ecuador","egypt","eritrea","estonia","ethiopia","fiji","finland","france","gabon","gambia","georgia","germany","ghana","greece","guatemala","guinea","guyana","haiti","honduras","hungary","iceland","india","indonesia","iran","iraq","ireland","israel","italy","jamaica","japan","jordan","kazakhstan","kenya","kuwait","kyrgyzstan","laos","latvia","lebanon","lesotho","liberia","libya","liechtenstein","lithuania","luxembourg","madagascar","malawi","malaysia","maldives","mali","malta","mauritania","mauritius","mexico","moldova","monaco","mongolia","montenegro","morocco","mozambique","myanmar","namibia","nepal","netherlands","new zealand","nicaragua","niger","nigeria","norway","oman","pakistan","panama","paraguay","peru","philippines","poland","portugal","qatar","romania","russia","rwanda","saudi arabia","senegal","serbia","singapore","slovakia","slovenia","somalia","south africa","spain","sri lanka","sudan","sweden","switzerland","syria","taiwan","tajikistan","tanzania","thailand","togo","trinidad","tunisia","turkey","turkmenistan","uganda","ukraine","united kingdom","united states","uruguay","uzbekistan","venezuela","vietnam","yemen","zambia","zimbabwe"],
-    de: ["afghanistan","albanien","algerien","andorra","angola","argentinien","armenien","australien","österreich","aserbaidschan","bahamas","bahrain","bangladesch","weißrussland","belgien","belize","benin","bhutan","bolivien","botswana","brasilien","brunei","bulgarien","burkina faso","burundi","kambodscha","kamerun","kanada","tschad","chile","china","kolumbien","komoren","kongo","kroatien","kuba","zypern","tschechien","dänemark","dschibuti","dominikanische republik","ecuador","ägypten","eritrea","estland","äthiopien","fidschi","finnland","frankreich","gabun","gambia","georgien","deutschland","ghana","griechenland","guatemala","guinea","guyana","haiti","honduras","ungarn","island","indien","indonesien","iran","irak","irland","israel","italien","jamaika","japan","jordanien","kasachstan","kenia","kuwait","kirgisistan","laos","lettland","libanon","lesotho","liberia","libyen","liechtenstein","litauen","luxemburg","madagaskar","malawi","malaysia","malediven","mali","malta","mauretanien","mauritius","mexiko","moldau","monaco","mongolei","montenegro","marokko","mosambik","myanmar","namibia","nepal","niederlande","neuseeland","nicaragua","niger","nigeria","norwegen","oman","pakistan","panama","paraguay","peru","philippinen","polen","portugal","katar","rumänien","russland","ruanda","saudi-arabien","senegal","serbien","singapur","slowakei","slowenien","somalia","südafrika","spanien","sri lanka","sudan","schweden","schweiz","syrien","taiwan","tadschikistan","tansania","thailand","togo","trinidad","tunesien","türkei","turkmenistan","uganda","ukraine","vereinigtes königreich","vereinigte staaten","uruguay","usbekistan","venezuela","vietnam","jemen","sambia","simbabwe"]
-  },
-  color: {
-    en: ["red","orange","yellow","green","blue","purple","violet","pink","brown","black","white","gray","grey","gold","silver","teal","turquoise","beige","indigo","magenta","maroon","olive","navy","crimson","coral","salmon","lavender","cyan","lime","amber","azure","ivory","khaki","mauve","ochre","peach","rose","ruby","scarlet","tan","taupe","vermilion"],
-    de: ["rot","orange","gelb","grün","blau","lila","violett","rosa","braun","schwarz","weiß","grau","gold","silber","türkis","beige","indigo","magenta","dunkelrot","olivgrün","dunkelblau","karmesin","koralle","lachs","lavendel","cyan","limette","bernstein","azurblau","elfenbein","khaki","malve","ocker","pfirsich","rubinrot","scharlachrot","taupe","purpur"]
-  },
-  instrument: {
-    en: ["piano","guitar","violin","drums","flute","trumpet","cello","bass","harp","saxophone","clarinet","oboe","trombone","tuba","accordion","banjo","mandolin","ukulele","bassoon","viola","sitar","bagpipes","xylophone","harmonica","bongo","tambourine","kazoo","lute","organ","synthesizer","marimba","dulcimer","harpsichord","didgeridoo","recorder","zither","french horn"],
-    de: ["klavier","gitarre","violine","geige","schlagzeug","flöte","trompete","cello","bass","harfe","saxophon","klarinette","oboe","posaune","tuba","akkordeon","banjo","mandoline","ukulele","fagott","bratsche","sitar","dudelsack","xylophon","mundharmonika","bongo","tamburin","kazoo","laute","orgel","synthesizer","marimba","cembalo","didgeridoo","blockflöte","zither","waldhorn"]
-  },
-  drink: {
-    en: ["water","wine","beer","juice","coffee","tea","milk","soda","lemonade","whiskey","vodka","rum","gin","tequila","champagne","brandy","cider","smoothie","cocktail","espresso","cappuccino","latte","cola","sprite","fanta","orange juice","apple juice","green tea","black tea","hot chocolate","milkshake","punch","mojito","martini","sangria","prosecco","mead","sake","kombucha"],
-    de: ["wasser","wein","bier","saft","kaffee","tee","milch","limonade","lemonade","whiskey","wodka","rum","gin","tequila","sekt","champagner","cognac","apfelwein","smoothie","cocktail","espresso","cappuccino","latte","cola","sprite","fanta","orangensaft","apfelsaft","grüntee","schwarztee","kakao","milchshake","punsch","mojito","martini","sangria","prosecco","met","sake","kombucha","mineralwasser","sprudel","radler","malzbier"]
-  },
-  school: {
-    en: ["pencil","pen","paper","book","ruler","eraser","notebook","backpack","desk","chair","board","chalk","teacher","student","class","homework","test","exam","calculator","scissors","glue","compass","map","globe","library","dictionary","art","math","science","english","history","geography","biology","chemistry","physics","lunch","locker","gymnasium","cafeteria"],
-    de: ["stift","bleistift","papier","buch","lineal","radiergummi","heft","rucksack","schreibtisch","stuhl","tafel","kreide","lehrer","schüler","klasse","hausaufgaben","test","prüfung","taschenrechner","schere","kleber","zirkel","karte","globus","bibliothek","wörterbuch","kunst","mathe","mathematik","naturwissenschaft","englisch","geschichte","geografie","biologie","chemie","physik","mittagessen","spind","turnhalle","kantine","kugelschreiber","füller","mäppchen"]
-  },
-  clothing: {
-    en: ["shirt","pants","jeans","jacket","coat","dress","skirt","socks","shoes","boots","hat","scarf","gloves","sweater","hoodie","blouse","tie","belt","underwear","bra","shorts","swimsuit","bikini","pajamas","robe","vest","cardigan","blazer","trench coat","raincoat","sneakers","sandals","heels","cap","beanie","mittens","leggings","tights","uniform","suit"],
-    de: ["hemd","hose","jeans","jacke","mantel","kleid","rock","socken","schuhe","stiefel","hut","schal","handschuhe","pullover","hoodie","bluse","krawatte","gürtel","unterwäsche","shorts","badeanzug","bikini","schlafanzug","bademantel","weste","strickjacke","blazer","trenchcoat","regenmantel","turnschuhe","sandalen","absatzschuhe","mütze","fäustlinge","leggings","strumpfhose","uniform","anzug","kappe"]
-  },
-  sport: {
-    en: ["soccer","football","basketball","tennis","baseball","golf","swimming","running","cycling","volleyball","boxing","wrestling","judo","karate","gymnastics","athletics","skiing","snowboarding","surfing","rowing","sailing","archery","badminton","table tennis","hockey","rugby","cricket","polo","fencing","triathlon","marathon","weightlifting","rock climbing","skateboarding","bowling","darts","billiards","curling"],
-    de: ["fußball","basketball","tennis","baseball","golf","schwimmen","laufen","radfahren","volleyball","boxen","ringen","judo","karate","turnen","leichtathletik","skifahren","snowboarden","surfen","rudern","segeln","bogenschießen","badminton","tischtennis","hockey","rugby","cricket","polo","fechten","triathlon","marathon","gewichtheben","klettern","skateboarden","bowling","darts","billard","curling","handball","reiten"]
-  },
-  vip: {
-    en: ["albert einstein","abraham lincoln","angela merkel","andy warhol","adele","arnold schwarzenegger","beyonce","bill gates","bob dylan","bruce lee","charles darwin","charlie chaplin","dalai lama","david beckham","einstein","elton john","elvis presley","elon musk","emma watson","fred astaire","freddie mercury","gandhi","george washington","jack nicholson","jackie chan","james dean","jennifer lopez","john lennon","julia roberts","julius caesar","kanye west","kim kardashian","lady gaga","lebron james","leonardo da vinci","madonna","marilyn monroe","mark zuckerberg","michael jackson","michael jordan","napoleon","nelson mandela","oprah winfrey","pablo picasso","princess diana","queen elizabeth","robin williams","rihanna","roger federer","ronaldo","serena williams","shakespeare","steve jobs","taylor swift","tiger woods","tom hanks","winston churchill"],
-    de: ["albert einstein","angela merkel","arnold schwarzenegger","beethoven","bertha von suttner","bismarck","conchita wurst","david hasselhoff","einstein","falco","franz beckenbauer","friedrich schiller","goethe","gottlieb daimler","helmut kohl","herbert grönemeyer","immanuel kant","ina müller","jakob grimm","johannes brahms","karl marx","katharina die große","konrad adenauer","lena meyer-landrut","ludwig van beethoven","maria theresia","marlene dietrich","martin luther","michael schumacher","mozart","napoleon","nena","nikolaus kopernikus","otto von bismarck","rammstein","robert koch","rosa luxemburg","schiller","sigmund freud","stefan zweig","till lindemann","udo jürgens","voltaire","werner heisenberg","willy brandt","yoko ono"]
+    subtitle:    "Denk dir für jede Kategorie ein Wort aus — das mit dem gleichen Buchstaben beginnt!",
+    letterLabel: "Buchstabe",
+    timeUp:      "Zeit abgelaufen!",
+    submitBtn:   "Antworten abgeben",
+    playAgain:   "Nochmal spielen",
+    yourAnswer:  "Deine Antwort",
+    judgeHint:   "Tippe ✓ um eine Antwort zu zählen oder ✗ um sie zu überspringen. Antworten mit falschem Anfangsbuchstaben können nicht gezählt werden.",
+    scoreLabel:  "Punkte",
+    soloBtn:     "Solo",
+    multiBtn:    "Mehrspieler",
+    pickerTitle: "Buchstabe wählen",
+    pickerSub:   "Wähle den Buchstaben für diese Runde — alle spielen mit demselben",
+    pickerBack:  "← Zurück zum Menü",
+    catLabels:   { city:"Stadt", country:"Land", animal:"Tier", sport:"Sport",
+                   vip:"Prominente Person", instrument:"Musikinstrument", clothing:"Kleidung",
+                   school:"In der Schule", food:"Essen & Trinken", movie:"Film", brand:"Marke / Firma",
+                   job:"Beruf", body:"Körperteil", fruit:"Obst oder Gemüse",
+                   boyname:"Männlicher Name", girlname:"Weiblicher Name", capital:"Hauptstadt",
+                   tvshow:"Fernsehserie", band:"Musiker / Band", kitchen:"Dinge in der Küche",
+                   outside:"Dinge draußen", hobby:"Hobby / Aktivität",
+                   vehicle:"Fahrzeug", color:"Farbe" }
   }
 };
 
@@ -369,6 +467,8 @@ let lang          = 'en';
 let currentLetter = 'B';
 let timerInterval = null;
 let secondsLeft   = TOTAL_SECONDS;
+let activeCats      = [...FIXED_CATS];
+let multiplayerMode = false;
 
 // ─── STARS ────────────────────────────────────────────────────────────────────
 (function createStars() {
@@ -392,17 +492,22 @@ function setLang(l) {
 
 function renderUI() {
   const s = STRINGS[lang];
-  document.getElementById('ui-subtitle').textContent    = s.subtitle;
-  document.getElementById('ui-letter-label').textContent = s.letterLabel;
+  document.getElementById('ui-subtitle').textContent      = s.subtitle;
+  document.getElementById('ui-letter-label').textContent  = s.letterLabel;
   document.getElementById('res-letter-label').textContent = s.letterLabel;
-  document.getElementById('btn-submit').textContent      = s.submitBtn;
-  document.getElementById('btn-play-again').textContent  = s.playAgain;
-  document.getElementById('th-cat').textContent          = CATS.length ? s.catLabels['city'] ? 'Category' : 'Kategorie' : 'Category';
-  document.getElementById('th-answer').textContent       = s.yourAnswer;
-  document.getElementById('th-example').textContent      = s.example;
-  document.getElementById('res-score-label').textContent = s.scoreLabel;
+  document.getElementById('btn-submit').textContent       = s.submitBtn;
+  document.getElementById('btn-play-again').textContent   = s.playAgain;
+  document.getElementById('btn-solo').textContent         = s.soloBtn;
+  document.getElementById('btn-multi').textContent        = s.multiBtn;
+  document.getElementById('picker-title').textContent     = s.pickerTitle;
+  document.getElementById('picker-subtitle').textContent  = s.pickerSub;
+  document.getElementById('picker-back').textContent      = s.pickerBack;
+  document.getElementById('th-cat').textContent           = lang === 'de' ? 'Kategorie' : 'Category';
+  document.getElementById('th-answer').textContent        = s.yourAnswer;
+  document.getElementById('judge-hint').textContent       = s.judgeHint;
+  document.getElementById('res-score-label').textContent  = s.scoreLabel;
   // Re-render category labels if play screen is visible
-  CATS.forEach(cat => {
+  activeCats.forEach(cat => {
     const lbl = document.getElementById('label-' + cat);
     if (lbl) lbl.textContent = s.catLabels[cat];
   });
@@ -410,17 +515,39 @@ function renderUI() {
 
 // ─── SCREEN HELPERS ───────────────────────────────────────────────────────────
 function showScreen(id) {
-  ['screen-menu','screen-play','screen-result'].forEach(s => {
+  ['screen-menu','screen-letter-pick','screen-play','screen-result'].forEach(s => {
     document.getElementById(s).style.display = (s === id) ? 'block' : 'none';
   });
 }
 
 // ─── GAME FLOW ────────────────────────────────────────────────────────────────
-function startGame() {
+function startSolo() {
+  multiplayerMode = false;
+  startGame(LETTERS[Math.floor(Math.random() * LETTERS.length)]);
+}
+
+function showLetterPicker() {
+  multiplayerMode = true;
+  const grid = document.getElementById('letter-grid');
+  grid.innerHTML = '';
+  LETTERS.forEach(letter => {
+    const btn = document.createElement('button');
+    btn.className = 'letter-btn';
+    btn.textContent = letter;
+    btn.addEventListener('click', () => startGame(letter));
+    grid.appendChild(btn);
+  });
+  showScreen('screen-letter-pick');
+}
+
+function startGame(letter) {
   stopTimer();
-  currentLetter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+  currentLetter = letter;
   document.getElementById('current-letter').textContent = currentLetter;
   document.getElementById('res-letter').textContent     = currentLetter;
+  // Pick 5 random categories from pool (shuffle + slice)
+  const shuffled = [...RANDOM_POOL].sort(() => Math.random() - 0.5);
+  activeCats = [...FIXED_CATS, ...shuffled.slice(0, 5)];
   buildGrid();
   renderUI();
   secondsLeft = TOTAL_SECONDS;
@@ -436,7 +563,7 @@ function buildGrid() {
   const grid = document.getElementById('categories-grid');
   grid.innerHTML = '';
   const s = STRINGS[lang];
-  CATS.forEach(cat => {
+  activeCats.forEach(cat => {
     const row = document.createElement('div');
     row.className = 'cat-row';
     row.innerHTML = `
@@ -483,103 +610,125 @@ function updateTimerDisplay() {
 function submitAnswers(timedOut = false) {
   stopTimer();
   if (timedOut) {
-    // brief flash message
     const disp = document.getElementById('timer-display');
     disp.textContent = STRINGS[lang].timeUp;
     disp.className = 'timer-display danger';
   }
 
-  const letter = currentLetter.toLowerCase();
-  let score = 0;
-  const results = [];
+  const results = activeCats.map(cat => ({
+    cat,
+    answer: document.getElementById('input-' + cat).value.trim(),
+  }));
 
-  CATS.forEach(cat => {
-    const raw     = document.getElementById('input-' + cat).value;
-    const trimmed = raw.trim().toLowerCase();
-    const valid   = checkAnswer(cat, trimmed, letter);
-    if (valid) score++;
-    const example = getExample(cat, letter);
-    results.push({ cat, answer: raw.trim(), valid, example });
-  });
-
-  renderResults(results, score);
+  renderResults(results);
   showScreen('screen-result');
 }
 
-function checkAnswer(cat, word, letter) {
-  if (!word) return false;
-  if (!word.startsWith(letter)) return false;
-  const list = WORDS[cat][lang];
-  return list.includes(word);
-}
-
-function getExample(cat, letter) {
-  const list = WORDS[cat][lang];
-  const matches = list.filter(w => w.startsWith(letter));
-  if (matches.length === 0) {
-    // fall back to other lang
-    const other = lang === 'en' ? 'de' : 'en';
-    const fb = WORDS[cat][other].filter(w => w.startsWith(letter));
-    return fb.length > 0 ? fb[0] : '—';
-  }
-  return matches[Math.floor(Math.random() * Math.min(matches.length, 5))];
-}
-
-function renderResults(results, score) {
+function renderResults(results) {
   const s = STRINGS[lang];
 
-  // Score
-  document.getElementById('res-score-number').textContent = `${score} / 9`;
   document.getElementById('res-letter').textContent        = currentLetter;
   document.getElementById('res-letter-label').textContent  = s.letterLabel;
   document.getElementById('res-score-label').textContent   = s.scoreLabel;
   document.getElementById('th-answer').textContent         = s.yourAnswer;
-  document.getElementById('th-example').textContent        = s.example;
+  document.getElementById('judge-hint').textContent        = s.judgeHint;
+  document.getElementById('btn-play-again').textContent    = s.playAgain;
 
-  // Grade
-  let grade = '';
-  if (lang === 'en') {
-    if (score === 9)      grade = '🏆 Perfect!';
-    else if (score >= 7)  grade = '🌟 Excellent!';
-    else if (score >= 5)  grade = '😊 Good job!';
-    else if (score >= 3)  grade = '💪 Keep practicing!';
-    else                  grade = '🎯 Better luck next time!';
-  } else {
-    if (score === 9)      grade = '🏆 Perfekt!';
-    else if (score >= 7)  grade = '🌟 Ausgezeichnet!';
-    else if (score >= 5)  grade = '😊 Gut gemacht!';
-    else if (score >= 3)  grade = '💪 Weiter üben!';
-    else                  grade = '🎯 Nächstes Mal klappt\'s!';
-  }
-  document.getElementById('res-grade').textContent = grade;
-
-  // Table
   const tbody = document.getElementById('results-tbody');
   tbody.innerHTML = '';
-  results.forEach(r => {
-    const tr = document.createElement('tr');
-    tr.className = r.valid ? 'row-correct' : 'row-wrong';
 
-    // Highlight first letter in example
-    const exLow = r.example.toLowerCase();
-    const letter = currentLetter.toLowerCase();
-    let exHtml = r.example;
-    if (exLow.startsWith(letter)) {
-      const prefix = r.example.slice(0, letter.length);
-      const rest   = r.example.slice(letter.length);
-      exHtml = `<span class="example-letter">${escHtml(prefix)}</span>${escHtml(rest)}`;
+  results.forEach(r => {
+    const hasAnswer   = r.answer.length > 0;
+    const firstLetter = r.answer.trim()[0] || '';
+    const validLetter = firstLetter.toUpperCase() === currentLetter;
+    const blocked     = !hasAnswer || !validLetter; // empty or wrong letter → can't count
+    const counted     = !blocked;                   // non-empty and correct letter
+
+    const tr = document.createElement('tr');
+    tr.className       = blocked ? 'row-invalid' : 'row-counted';
+    tr.dataset.counted = counted ? 'true' : 'false';
+
+    const btn = document.createElement('button');
+    if (blocked) {
+      btn.className   = 'judge-btn invalid';
+      btn.textContent = '✗';
+      btn.setAttribute('aria-label', 'Cannot count');
+      btn.disabled = true;
+    } else {
+      btn.className = 'judge-btn counted';
+      btn.textContent = '✓';
+      btn.setAttribute('aria-label', 'Count');
+      btn.addEventListener('click', () => {
+        const isCounted = tr.dataset.counted === 'true';
+        const nowCounted = !isCounted;
+        tr.dataset.counted  = nowCounted ? 'true' : 'false';
+        tr.className        = nowCounted ? 'row-counted' : 'row-skipped';
+        btn.className       = 'judge-btn ' + (nowCounted ? 'counted' : 'skipped');
+        btn.textContent     = nowCounted ? '✓' : '✗';
+        btn.setAttribute('aria-label', nowCounted ? 'Count' : 'Skip');
+        updateJudgeScore();
+      });
     }
 
-    tr.innerHTML = `
-      <td class="td-cat">${escHtml(s.catLabels[r.cat])}</td>
-      <td class="td-answer">${escHtml(r.answer || '—')}</td>
-      <td class="td-status">${r.valid ? '✅' : '❌'}</td>
-      <td class="td-example">${exHtml}</td>
-    `;
+    const tdCat    = document.createElement('td');
+    tdCat.className = 'td-cat';
+    tdCat.textContent = s.catLabels[r.cat];
+
+    const tdAns    = document.createElement('td');
+    tdAns.className = 'td-answer';
+    tdAns.textContent = r.answer || '—';
+
+    const tdJudge  = document.createElement('td');
+    tdJudge.className = 'td-judge';
+    tdJudge.appendChild(btn);
+
+    tr.appendChild(tdCat);
+    tr.appendChild(tdAns);
+    tr.appendChild(tdJudge);
     tbody.appendChild(tr);
   });
 
-  document.getElementById('btn-play-again').textContent = s.playAgain;
+  updateJudgeScore();
+}
+
+function updateJudgeScore() {
+  const rows  = document.querySelectorAll('#results-tbody tr');
+  const score = [...rows].filter(r => r.dataset.counted === 'true').length;
+  const total = rows.length;
+
+  document.getElementById('res-score-number').textContent = `${score} / ${total}`;
+
+  const grade = getGrade(score, total);
+  document.getElementById('res-grade').textContent = grade;
+}
+
+function getGrade(score, total) {
+  const pct = score / total;
+  if (lang === 'en') {
+    if (pct === 1)    return 'Perfect!';
+    if (pct >= 0.77)  return 'Excellent!';
+    if (pct >= 0.55)  return 'Good job!';
+    if (pct >= 0.33)  return 'Keep practicing!';
+    return 'Better luck next time!';
+  } else {
+    if (pct === 1)    return 'Perfekt!';
+    if (pct >= 0.77)  return 'Ausgezeichnet!';
+    if (pct >= 0.55)  return 'Gut gemacht!';
+    if (pct >= 0.33)  return 'Weiter üben!';
+    return 'Nächstes Mal klappt\'s!';
+  }
+}
+
+function playAgain() {
+  // Save whatever score the player approved before starting over
+  const rows  = document.querySelectorAll('#results-tbody tr');
+  const score = [...rows].filter(r => r.dataset.counted === 'true').length;
+  ArcadeScores.save('scattergories', score, lang);
+  if (multiplayerMode) {
+    showLetterPicker();
+  } else {
+    startSolo();
+  }
 }
 
 function escHtml(str) {

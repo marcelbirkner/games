@@ -25,10 +25,12 @@
 
     .back-link {
       display: inline-block;
-      margin-bottom: 16px;
+      margin-top: 16px;
+      margin-bottom: 20px;
       color: #a5b4fc;
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: 1.1rem;
+      font-weight: 600;
       transition: color 0.2s;
     }
     .back-link:hover { color: #fff; }
@@ -75,7 +77,8 @@
       border-color: var(--color);
       box-shadow: 0 8px 24px rgba(0,0,0,0.3);
     }
-    .age-card .card-icon { font-size: 2.4rem; margin-bottom: 10px; }
+    .age-card .card-icon { font-size: 2.4rem; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; color: var(--color); }
+    .age-card .card-icon svg { width: 2.4rem; height: 2.4rem; fill: currentColor; }
     .age-card .card-title {
       font-size: 1.1rem;
       font-weight: 700;
@@ -312,41 +315,41 @@
 <body>
 <div class="container">
   <a href="../index.html" class="back-link">← Back to Arcade</a>
-  <h1>🔢 Math Blitz</h1>
+  <h1>Math Blitz</h1>
   <p class="subtitle">60 seconds. How many can you solve?</p>
 
   <!-- MENU -->
   <div id="menu">
     <div class="lang-section">
-      <button id="lang-en" class="lang-btn active" onclick="setLang('en')">🇬🇧 English</button>
-      <button id="lang-de" class="lang-btn"        onclick="setLang('de')">🇩🇪 Deutsch</button>
+      <button id="lang-en" class="lang-btn active" onclick="setLang('en')"><svg viewBox="0 0 60 30" style="width:1.4em;height:.7em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><clipPath id="a"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#a)"><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30m0-30L0 30" clip-path="url(#b)" stroke="#C8102E" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/></g></svg> English</button>
+      <button id="lang-de" class="lang-btn"        onclick="setLang('de')"><svg viewBox="0 0 5 3" style="width:1.4em;height:.84em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="3" y="0" fill="#000"/><rect width="5" height="2" y="1" fill="#D00"/><rect width="5" height="1" y="2" fill="#FFCE00"/></svg> Deutsch</button>
     </div>
     <h2 id="menu-heading">Choose your age group</h2>
     <div class="age-grid">
 
       <div class="age-card" style="--color:#34d399" onclick="startGame('little')">
-        <div class="card-icon">🌟</div>
+        <div class="card-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.950l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.950l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/></svg></div>
         <div class="card-title">Little Stars</div>
         <div class="card-ages">Ages 5 – 7</div>
         <div class="card-desc">Counting, adding &amp; taking away small numbers</div>
       </div>
 
       <div class="age-card" style="--color:#60a5fa" onclick="startGame('junior')">
-        <div class="card-icon">🚀</div>
+        <div class="card-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.752 6.193c.599.6 1.73.437 2.528-.362s.96-1.932.362-2.530c-.599-.6-1.73-.437-2.528.362s-.96 1.932-.362 2.530z"/><path d="M15.811 3.312c-.363 1.534-1.334 3.626-3.64 6.218l-.24 2.408a2.56 2.56 0 0 1-.732 1.535l-1.45 1.45a.5.5 0 0 1-.707 0l-.69-.69a.5.5 0 0 1-.087-.614l1.5-2.573-.717-.717-2.573 1.5a.5.5 0 0 1-.614-.087l-.69-.69a.5.5 0 0 1 0-.707l1.45-1.45a2.56 2.56 0 0 1 1.535-.732l2.408-.24c2.592-2.306 4.684-3.278 6.218-3.64.422-.1.818.332.72.75zm-2.504 8.564a2.18 2.18 0 0 0-.157-.532c-.2-.518-.666-1.319-1.352-2.06l-.454.454.672 2.15a.5.5 0 0 0 .861.112l.43-.124zM5.522 8.975a2.18 2.18 0 0 0-.532-.157l-.962.963a.5.5 0 0 0 .112.861l2.15.672.454-.454c-.74-.686-1.541-1.152-2.06-1.352z"/></svg></div>
         <div class="card-title">Juniors</div>
         <div class="card-ages">Ages 8 – 10</div>
         <div class="card-desc">Bigger sums, times tables &amp; simple division</div>
       </div>
 
       <div class="age-card" style="--color:#f59e0b" onclick="startGame('champion')">
-        <div class="card-icon">⚡</div>
+        <div class="card-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"/></svg></div>
         <div class="card-title">Champions</div>
         <div class="card-ages">Ages 11 – 13</div>
         <div class="card-desc">Full times tables, negatives &amp; two-step problems</div>
       </div>
 
       <div class="age-card" style="--color:#f87171" onclick="startGame('master')">
-        <div class="card-icon">🔥</div>
+        <div class="card-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 16c3.314 0 6-2 6-5.5 0-1.5-.5-4-2.5-6 .25 1.5-1.25 2-1.25 2C11 4 9 .5 6 0c.357 2 .5 4-2 6-1.25 1-2 2.729-2 4.5C2 14 4.686 16 8 16m0-1c-1.657 0-3-1-3-2.75 0-.75.25-2 1.25-3C6.125 10 7 10.5 7 10.5c-.375-1.25.5-3.25 2-3.5-.179 1-.25 2 1 3 .625.5 1 1.364 1 2.25C11 14 9.657 15 8 15"/></svg></div>
         <div class="card-title">Masters</div>
         <div class="card-ages">Ages 14+</div>
         <div class="card-desc">Percentages, powers, fractions &amp; order of operations</div>
@@ -399,12 +402,16 @@
           <div class="stat-label" id="stat-streak">Best Streak</div>
         </div>
       </div>
+      <div id="res-best-row" style="display:none; text-align:center; margin:10px 0 4px; font-size:0.9rem; color:#f59e0b; font-weight:600">
+        <span id="res-best"></span>
+      </div>
     </div>
     <button class="play-again-btn" id="play-again-btn" onclick="backToMenu()">Play Again</button>
   </div>
 
 </div>
 
+<script src="../scores.js"></script>
 <script>
 // ─── Language support ─────────────────────────────────────────────────────
 const STRINGS = {
@@ -413,7 +420,7 @@ const STRINGS = {
     menuHeading: "Choose your age group",
     getReady:    "Get ready!",
     scoreLabel:  "Score:",
-    streak:      n => `🔥 ${n} in a row!`,
+    streak:      n => `${n} in a row!`,
     correct:    "Correct",
     wrong:      "Wrong",
     bestStreak: "Best Streak",
@@ -425,11 +432,11 @@ const STRINGS = {
       { title:"Masters",      ages:"Ages 14+",     desc:"Percentages, powers, fractions & order of operations" },
     ],
     grades: [
-      { min:90, emoji:'🏆', title:"Perfect! You're a Math genius!" },
-      { min:70, emoji:'🌟', title:"Brilliant! Superstar performance!" },
-      { min:50, emoji:'😊', title:"Great work! Keep it up!" },
-      { min:30, emoji:'💪', title:"Good effort! Practice makes perfect!" },
-      { min:0,  emoji:'🎯', title:"Keep going — you're learning!" },
+      { min:90, emoji:'', title:"Perfect! You're a Math genius!" },
+      { min:70, emoji:'', title:"Brilliant! Superstar performance!" },
+      { min:50, emoji:'', title:"Great work! Keep it up!" },
+      { min:30, emoji:'', title:"Good effort! Practice makes perfect!" },
+      { min:0,  emoji:'', title:"Keep going — you're learning!" },
     ],
   },
   de: {
@@ -437,7 +444,7 @@ const STRINGS = {
     menuHeading: "Altersgruppe wählen",
     getReady:    "Fertig machen!",
     scoreLabel:  "Punkte:",
-    streak:      n => `🔥 ${n} hintereinander!`,
+    streak:      n => `${n} hintereinander!`,
     correct:    "Richtig",
     wrong:      "Falsch",
     bestStreak: "Beststreak",
@@ -449,11 +456,11 @@ const STRINGS = {
       { title:"Profis",        ages:"Alter 14+",     desc:"Prozent, Potenzen, Brüche & Klammerrechnung" },
     ],
     grades: [
-      { min:90, emoji:'🏆', title:"Perfekt! Du bist ein Mathe-Genie!" },
-      { min:70, emoji:'🌟', title:"Brilliant! Superstar!" },
-      { min:50, emoji:'😊', title:"Toll gemacht! Weiter so!" },
-      { min:30, emoji:'💪', title:"Guter Einsatz! Übung macht den Meister!" },
-      { min:0,  emoji:'🎯', title:"Weiter so — du lernst!" },
+      { min:90, emoji:'', title:"Perfekt! Du bist ein Mathe-Genie!" },
+      { min:70, emoji:'', title:"Brilliant! Superstar!" },
+      { min:50, emoji:'', title:"Toll gemacht! Weiter so!" },
+      { min:30, emoji:'', title:"Guter Einsatz! Übung macht den Meister!" },
+      { min:0,  emoji:'', title:"Weiter so — du lernst!" },
     ],
   },
 };
@@ -783,6 +790,8 @@ function handleAnswer(btn, value) {
 }
 
 function endGame() {
+  const isRecord  = ArcadeScores.save('math-blitz', score, level);
+  const bestEntry = ArcadeScores.get('math-blitz', level);
   document.getElementById('quiz').style.display = 'none';
   document.getElementById('result').style.display = 'block';
 
@@ -797,6 +806,16 @@ function endGame() {
   document.getElementById('res-score').textContent = score;
   document.getElementById('res-wrong').textContent = wrongCount;
   document.getElementById('res-streak').textContent = bestStreak;
+
+  const levelLabels = { little: 'Little Stars', junior: 'Juniors', champion: 'Champions', master: 'Masters' };
+  const bestRow = document.getElementById('res-best-row');
+  const bestEl  = document.getElementById('res-best');
+  if (bestRow && bestEl && bestEntry) {
+    bestRow.style.display = 'block';
+    bestEl.textContent = isRecord
+      ? '🏆 New Record!'
+      : `🏆 Best (${levelLabels[level] || level}): ${bestEntry.score} correct`;
+  }
 }
 
 function backToMenu() {

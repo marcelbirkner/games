@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Four Wins</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container { max-width: 500px; width: 100%; padding: 20px; }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 16px;
+      margin-bottom: 20px;
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    h1 { text-align: center; font-size: 2rem; margin-bottom: 8px; }
+    .subtitle { text-align: center; color: #aaa; margin-bottom: 32px; font-size: 0.95rem; }
+
+    /* ── MENU ── */
+    #menu { text-align: center; }
+    #menu h2 { font-size: 1.1rem; color: #ccc; margin-bottom: 20px; }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .mode-card {
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 28px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .mode-card:hover {
+      background: rgba(255,255,255,0.11);
+      transform: translateY(-4px);
+      border-color: var(--color);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .mode-card .card-icon {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color);
+    }
+    .mode-card .card-icon svg { width: 2.4rem; height: 2.4rem; fill: currentColor; }
+    .mode-card .card-title { font-size: 1.1rem; font-weight: 700; color: var(--color); margin-bottom: 6px; }
+    .mode-card .card-desc { font-size: 0.82rem; color: #aaa; line-height: 1.4; }
+
+    /* ── DIFFICULTY ── */
+    #difficulty-picker { display: none; text-align: center; }
+    #difficulty-picker h2 { font-size: 1.1rem; color: #ccc; margin-bottom: 20px; }
+
+    .diff-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+
+    .diff-btn {
+      padding: 18px 10px;
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .diff-btn:hover {
+      border-color: var(--color);
+      background: rgba(255,255,255,0.1);
+      transform: translateY(-3px);
+    }
+    .diff-btn .diff-icon {
+      width: 1.8rem; height: 1.8rem;
+      margin: 0 auto 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--color);
+    }
+    .diff-btn .diff-icon svg { width: 100%; height: 100%; fill: currentColor; }
+    .diff-btn .diff-label { color: var(--color); font-weight: 700; }
+
+    .back-btn {
+      background: none; border: none;
+      color: #a5b4fc; font-size: 0.95rem;
+      cursor: pointer; padding: 8px;
+    }
+
+    /* ── GAME ── */
+    #game { display: none; }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .scores { display: flex; gap: 10px; }
+
+    .score-box {
+      background: rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 8px 12px;
+      text-align: center;
+      min-width: 52px;
+    }
+    .score-box .score-label { font-size: 0.65rem; color: #888; letter-spacing: 0.5px; text-transform: uppercase; }
+    .score-box .score-val { font-size: 1.4rem; font-weight: 800; }
+    .score-box.p1-box .score-val { color: #60a5fa; }
+    .score-box.draw-box .score-val { color: #888; }
+    .score-box.p2-box .score-val { color: #f87171; }
+
+    .turn-indicator {
+      font-size: 0.85rem; color: #aaa;
+      flex: 1;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .turn-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%; flex-shrink: 0;
+    }
+    .turn-dot.p1 { background: #60a5fa; box-shadow: 0 0 6px rgba(96,165,250,0.7); }
+    .turn-dot.p2 { background: #f87171; box-shadow: 0 0 6px rgba(248,113,113,0.7); }
+
+    /* Result banner */
+    .result-banner {
+      display: none; text-align: center;
+      padding: 16px; border-radius: 14px;
+      margin-bottom: 14px;
+      background: rgba(255,255,255,0.07);
+    }
+    .result-banner.show { display: block; }
+    .result-banner .result-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 2px; }
+    .result-banner .result-sub { color: #aaa; font-size: 0.85rem; }
+
+    /* Board */
+    .board-wrap {
+      background: rgba(20,18,60,0.9);
+      border: 2px solid rgba(99,102,241,0.4);
+      border-radius: 16px;
+      padding: 10px;
+      margin-bottom: 16px;
+    }
+
+    .board { display: flex; gap: 6px; }
+
+    .col {
+      flex: 1;
+      display: flex; flex-direction: column; gap: 6px;
+      cursor: pointer;
+      border-radius: 8px; padding: 4px;
+      transition: background 0.15s;
+    }
+    .col:hover:not(.disabled) { background: rgba(255,255,255,0.04); }
+    .col.hover-p1 { background: rgba(96,165,250,0.12) !important; }
+    .col.hover-p2 { background: rgba(248,113,113,0.12) !important; }
+    .col.disabled { cursor: default; pointer-events: none; }
+
+    .cell {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.07);
+    }
+    .cell.p1 {
+      background: radial-gradient(circle at 35% 35%, #93c5fd, #3b82f6);
+      border-color: #2563eb;
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,0.25), 0 2px 8px rgba(96,165,250,0.4);
+    }
+    .cell.p2 {
+      background: radial-gradient(circle at 35% 35%, #fca5a5, #ef4444);
+      border-color: #dc2626;
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,0.25), 0 2px 8px rgba(248,113,113,0.4);
+    }
+    .cell.preview-p1 { background: rgba(96,165,250,0.2); border-color: rgba(96,165,250,0.3); }
+    .cell.preview-p2 { background: rgba(248,113,113,0.2); border-color: rgba(248,113,113,0.3); }
+
+    .cell.winner { animation: winPulse 0.5s ease-in-out infinite alternate; }
+    @keyframes winPulse {
+      from { transform: scale(1); }
+      to   { transform: scale(1.12); }
+    }
+    .cell.pop { animation: cellPop 0.25s ease; }
+    @keyframes cellPop {
+      0%   { transform: scale(0.4); opacity: 0.4; }
+      70%  { transform: scale(1.12); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Buttons */
+    .btn-row { display: flex; gap: 12px; }
+    .btn {
+      flex: 1; padding: 14px; border: none;
+      border-radius: 12px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: transform 0.2s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; }
+    .btn-secondary { background: rgba(255,255,255,0.1); color: #ccc; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="../index.html" class="back-link">← Back to Arcade</a>
+  <h1>Four Wins</h1>
+  <p class="subtitle">Connect four in a row to win!</p>
+
+  <!-- MENU -->
+  <div id="menu">
+    <h2>Choose mode</h2>
+    <div class="mode-grid">
+      <div class="mode-card" style="--color:#a5b4fc" onclick="selectMode('pvp')">
+        <div class="card-icon">
+          <svg viewBox="0 0 16 16"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/></svg>
+        </div>
+        <div class="card-title">Two Players</div>
+        <div class="card-desc">Play against a friend on the same device</div>
+      </div>
+      <div class="mode-card" style="--color:#f87171" onclick="selectMode('cpu')">
+        <div class="card-icon">
+          <svg viewBox="0 0 16 16"><path d="M6 12.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5M3 8.062C3 6.76 4.235 5.765 5.53 5.886a26.6 26.6 0 0 0 4.94 0C11.765 5.765 13 6.76 13 8.062v1.157a.93.93 0 0 1-.765.935c-.845.147-2.34.346-4.235.346s-3.39-.2-4.235-.346A.93.93 0 0 1 3 9.219zm4.542-.827a.25.25 0 0 0-.217.068l-.92.9a25 25 0 0 1-1.871-.183.25.25 0 0 0-.068.495c.55.076 1.232.149 2.02.193a.25.25 0 0 0 .189-.071l.754-.736.847 1.71a.25.25 0 0 0 .404.062l.932-.97a25 25 0 0 0 1.922-.188.25.25 0 0 0-.068-.495c-.538.074-1.207.145-1.98.189a.25.25 0 0 0-.166.076l-.754.785-.842-1.7a.25.25 0 0 0-.182-.134M8 3.5a.5.5 0 0 0-.5.5v1H7a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-.5V4a.5.5 0 0 0-.5-.5M6.5 6h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1 0-1m0 2.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1 0-1"/></svg>
+        </div>
+        <div class="card-title">vs Computer</div>
+        <div class="card-desc">Challenge the AI opponent</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIFFICULTY -->
+  <div id="difficulty-picker">
+    <h2>Choose difficulty</h2>
+    <div class="diff-grid">
+      <div class="diff-btn" style="--color:#34d399" onclick="startGame('easy')">
+        <div class="diff-icon"><svg viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M4.285 9.567a.5.5 0 0 1 .683.183A3.5 3.5 0 0 0 8 11.5a3.5 3.5 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.5 4.5 0 0 1 8 12.5a4.5 4.5 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5"/></svg></div>
+        <div class="diff-label">Easy</div>
+      </div>
+      <div class="diff-btn" style="--color:#60a5fa" onclick="startGame('medium')">
+        <div class="diff-icon"><svg viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M4 10.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 0-1h-7a.5.5 0 0 0-.5.5m3-4C7 5.672 6.552 5 6 5s-1 .672-1 1.5S5.448 8 6 8s1-.672 1-1.5m4 0c0-.828-.448-1.5-1-1.5s-1 .672-1 1.5S9.448 8 10 8s1-.672 1-1.5"/></svg></div>
+        <div class="diff-label">Medium</div>
+      </div>
+      <div class="diff-btn" style="--color:#f87171" onclick="startGame('hard')">
+        <div class="diff-icon"><svg viewBox="0 0 16 16"><path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767z"/><path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/></svg></div>
+        <div class="diff-label">Hard</div>
+      </div>
+    </div>
+    <button class="back-btn" onclick="showMenu()">← Back</button>
+  </div>
+
+  <!-- GAME -->
+  <div id="game">
+    <div class="status-bar">
+      <div class="scores">
+        <div class="score-box p1-box">
+          <div class="score-label">P1</div>
+          <div class="score-val" id="score-p1">0</div>
+        </div>
+        <div class="score-box draw-box">
+          <div class="score-label">DRAW</div>
+          <div class="score-val" id="score-draw">0</div>
+        </div>
+        <div class="score-box p2-box">
+          <div class="score-label" id="p2-label">P2</div>
+          <div class="score-val" id="score-p2">0</div>
+        </div>
+      </div>
+      <div class="turn-indicator">
+        <span class="turn-dot" id="turn-dot"></span>
+        <span id="turn-text"></span>
+      </div>
+    </div>
+
+    <div class="result-banner" id="result-banner">
+      <div class="result-title" id="result-title"></div>
+    </div>
+
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="newRound()">New Round</button>
+      <button class="btn btn-secondary" onclick="changeMode()">Change Mode</button>
+    </div>
+  </div>
+</div>
+
+<script src="../scores.js"></script>
+<script>
+const ROWS = 6, COLS = 7;
+let board, currentPlayer, gameOver, mode, difficulty;
+let scores = { p1: 0, draw: 0, p2: 0 };
+let cpuThinking = false;
+
+// ─── Board UI ────────────────────────────────────────────────────────────────
+
+function buildBoardUI() {
+  const boardEl = document.getElementById('board');
+  boardEl.innerHTML = '';
+  for (let c = 0; c < COLS; c++) {
+    const col = document.createElement('div');
+    col.className = 'col';
+    col.id = `col-${c}`;
+    col.addEventListener('click', () => handleColClick(c));
+    col.addEventListener('mouseenter', () => hoverCol(c));
+    col.addEventListener('mouseleave', clearHover);
+    for (let r = 0; r < ROWS; r++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.id = `cell-${r}-${c}`;
+      col.appendChild(cell);
+    }
+    boardEl.appendChild(col);
+  }
+}
+
+function createBoard() {
+  return Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+}
+
+// ─── Game flow ───────────────────────────────────────────────────────────────
+
+function selectMode(m) {
+  mode = m;
+  if (m === 'cpu') {
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('difficulty-picker').style.display = 'block';
+  } else {
+    startGame('pvp');
+  }
+}
+
+function showMenu() {
+  document.getElementById('difficulty-picker').style.display = 'none';
+  document.getElementById('game').style.display = 'none';
+  document.getElementById('menu').style.display = 'block';
+}
+
+function startGame(diff) {
+  difficulty = diff;
+  scores = { p1: 0, draw: 0, p2: 0 };
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('difficulty-picker').style.display = 'none';
+  document.getElementById('game').style.display = 'block';
+  document.getElementById('p2-label').textContent = mode === 'cpu' ? 'CPU' : 'P2';
+  buildBoardUI();
+  newRound();
+}
+
+function newRound() {
+  board = createBoard();
+  currentPlayer = 1;
+  gameOver = false;
+  cpuThinking = false;
+  document.getElementById('result-banner').classList.remove('show');
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++)
+      document.getElementById(`cell-${r}-${c}`).className = 'cell';
+  enableCols();
+  updateScores();
+  updateTurnIndicator();
+}
+
+function changeMode() {
+  scores = { p1: 0, draw: 0, p2: 0 };
+  document.getElementById('game').style.display = 'none';
+  showMenu();
+}
+
+// ─── Gameplay ────────────────────────────────────────────────────────────────
+
+function handleColClick(col) {
+  if (gameOver || cpuThinking) return;
+  if (mode === 'cpu' && currentPlayer === 2) return;
+  const row = getLowestRow(board, col);
+  if (row === -1) return;
+  placePiece(row, col, currentPlayer);
+  afterMove();
+}
+
+function getLowestRow(b, col) {
+  for (let r = ROWS - 1; r >= 0; r--)
+    if (b[r][col] === 0) return r;
+  return -1;
+}
+
+function placePiece(row, col, player) {
+  board[row][col] = player;
+  const cell = document.getElementById(`cell-${row}-${col}`);
+  cell.classList.add(player === 1 ? 'p1' : 'p2', 'pop');
+  cell.addEventListener('animationend', () => cell.classList.remove('pop'), { once: true });
+}
+
+function afterMove() {
+  const win = checkWin(board, currentPlayer);
+  if (win) {
+    gameOver = true;
+    win.forEach(([r, c]) => document.getElementById(`cell-${r}-${c}`).classList.add('winner'));
+    currentPlayer === 1 ? scores.p1++ : scores.p2++;
+    if (currentPlayer === 1) ArcadeScores.save('four-wins', scores.p1);
+    const name = currentPlayer === 1 ? 'Player 1' : (mode === 'cpu' ? 'Computer' : 'Player 2');
+    const color = currentPlayer === 1 ? '#60a5fa' : '#f87171';
+    showResult(`<span style="color:${color}">${name} wins!</span>`);
+    disableCols();
+    updateScores();
+    updateTurnIndicator();
+    return;
+  }
+  if (isFull(board)) {
+    gameOver = true;
+    scores.draw++;
+    showResult("It's a draw!");
+    updateScores();
+    updateTurnIndicator();
+    return;
+  }
+  currentPlayer = currentPlayer === 1 ? 2 : 1;
+  updateTurnIndicator();
+  if (mode === 'cpu' && currentPlayer === 2) {
+    cpuThinking = true;
+    disableCols();
+    setTimeout(cpuMove, 450);
+  }
+}
+
+function cpuMove() {
+  const col = getBestMove();
+  const row = getLowestRow(board, col);
+  placePiece(row, col, 2);
+  cpuThinking = false;
+  enableCols();
+  afterMove();
+}
+
+function disableCols() {
+  for (let c = 0; c < COLS; c++)
+    document.getElementById(`col-${c}`).classList.add('disabled');
+}
+
+function enableCols() {
+  for (let c = 0; c < COLS; c++)
+    document.getElementById(`col-${c}`).classList.remove('disabled');
+}
+
+function isFull(b) { return b[0].every(c => c !== 0); }
+
+// ─── Win detection ───────────────────────────────────────────────────────────
+
+function checkWin(b, p) {
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c <= COLS-4; c++)
+      if (b[r][c]===p && b[r][c+1]===p && b[r][c+2]===p && b[r][c+3]===p)
+        return [[r,c],[r,c+1],[r,c+2],[r,c+3]];
+  for (let r = 0; r <= ROWS-4; r++)
+    for (let c = 0; c < COLS; c++)
+      if (b[r][c]===p && b[r+1][c]===p && b[r+2][c]===p && b[r+3][c]===p)
+        return [[r,c],[r+1,c],[r+2,c],[r+3,c]];
+  for (let r = 0; r <= ROWS-4; r++)
+    for (let c = 0; c <= COLS-4; c++)
+      if (b[r][c]===p && b[r+1][c+1]===p && b[r+2][c+2]===p && b[r+3][c+3]===p)
+        return [[r,c],[r+1,c+1],[r+2,c+2],[r+3,c+3]];
+  for (let r = 0; r <= ROWS-4; r++)
+    for (let c = 3; c < COLS; c++)
+      if (b[r][c]===p && b[r+1][c-1]===p && b[r+2][c-2]===p && b[r+3][c-3]===p)
+        return [[r,c],[r+1,c-1],[r+2,c-2],[r+3,c-3]];
+  return null;
+}
+
+// ─── AI ─────────────────────────────────────────────────────────────────────
+
+function getBestMove() {
+  const valid = getValidCols(board);
+  if (difficulty === 'easy') {
+    if (Math.random() < 0.35) {
+      for (const c of valid) if (checkWin(dropOnBoard(board,c,2), 2)) return c;
+      for (const c of valid) if (checkWin(dropOnBoard(board,c,1), 1)) return c;
+    }
+    return valid[Math.floor(Math.random() * valid.length)];
+  }
+  const depth = difficulty === 'medium' ? 4 : 7;
+  return minimax(board, depth, -Infinity, Infinity, true).col ?? valid[0];
+}
+
+function getValidCols(b) {
+  return Array.from({length: COLS}, (_, i) => i).filter(c => b[0][c] === 0);
+}
+
+function dropOnBoard(b, col, player) {
+  const nb = b.map(r => [...r]);
+  const row = getLowestRow(nb, col);
+  if (row !== -1) nb[row][col] = player;
+  return nb;
+}
+
+function scoreWindow(w, player) {
+  const opp = player === 1 ? 2 : 1;
+  const pc = w.filter(x => x===player).length;
+  const ec = w.filter(x => x===0).length;
+  const oc = w.filter(x => x===opp).length;
+  if (pc===4) return 1000;
+  if (pc===3 && ec===1) return 8;
+  if (pc===2 && ec===2) return 2;
+  if (oc===3 && ec===1) return -6;
+  return 0;
+}
+
+function scoreBoard(b, player) {
+  let score = 0;
+  const mid = Math.floor(COLS/2);
+  for (let r = 0; r < ROWS; r++) {
+    if (b[r][mid]===player) score += 4;
+    if (mid>0 && (b[r][mid-1]===player || b[r][mid+1]===player)) score += 2;
+  }
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c <= COLS-4; c++)
+      score += scoreWindow([b[r][c],b[r][c+1],b[r][c+2],b[r][c+3]], player);
+  for (let c = 0; c < COLS; c++)
+    for (let r = 0; r <= ROWS-4; r++)
+      score += scoreWindow([b[r][c],b[r+1][c],b[r+2][c],b[r+3][c]], player);
+  for (let r = 0; r <= ROWS-4; r++)
+    for (let c = 0; c <= COLS-4; c++)
+      score += scoreWindow([b[r][c],b[r+1][c+1],b[r+2][c+2],b[r+3][c+3]], player);
+  for (let r = 0; r <= ROWS-4; r++)
+    for (let c = 3; c < COLS; c++)
+      score += scoreWindow([b[r][c],b[r+1][c-1],b[r+2][c-2],b[r+3][c-3]], player);
+  return score;
+}
+
+function minimax(b, depth, alpha, beta, maximizing) {
+  const valid = getValidCols(b).sort((a,_b) => Math.abs(a-3)-Math.abs(_b-3));
+  if (checkWin(b, 2)) return { score: 100000+depth };
+  if (checkWin(b, 1)) return { score: -100000-depth };
+  if (!valid.length || depth===0) return { score: scoreBoard(b,2)-scoreBoard(b,1) };
+
+  if (maximizing) {
+    let best = { score: -Infinity, col: valid[0] };
+    for (const col of valid) {
+      const res = minimax(dropOnBoard(b,col,2), depth-1, alpha, beta, false);
+      if (res.score > best.score) best = { score: res.score, col };
+      alpha = Math.max(alpha, best.score);
+      if (alpha >= beta) break;
+    }
+    return best;
+  } else {
+    let best = { score: Infinity, col: valid[0] };
+    for (const col of valid) {
+      const res = minimax(dropOnBoard(b,col,1), depth-1, alpha, beta, true);
+      if (res.score < best.score) best = { score: res.score, col };
+      beta = Math.min(beta, best.score);
+      if (alpha >= beta) break;
+    }
+    return best;
+  }
+}
+
+// ─── UI helpers ─────────────────────────────────────────────────────────────
+
+function hoverCol(col) {
+  if (gameOver || cpuThinking || (mode==='cpu' && currentPlayer===2)) return;
+  clearHover();
+  document.getElementById(`col-${col}`).classList.add(currentPlayer===1 ? 'hover-p1' : 'hover-p2');
+  const row = getLowestRow(board, col);
+  if (row !== -1)
+    document.getElementById(`cell-${row}-${col}`).classList.add(currentPlayer===1 ? 'preview-p1' : 'preview-p2');
+}
+
+function clearHover() {
+  for (let c = 0; c < COLS; c++) {
+    document.getElementById(`col-${c}`)?.classList.remove('hover-p1','hover-p2');
+    for (let r = 0; r < ROWS; r++)
+      document.getElementById(`cell-${r}-${c}`)?.classList.remove('preview-p1','preview-p2');
+  }
+}
+
+function updateTurnIndicator() {
+  const dot  = document.getElementById('turn-dot');
+  const text = document.getElementById('turn-text');
+  if (gameOver) { dot.className='turn-dot'; text.textContent=''; return; }
+  dot.className = `turn-dot ${currentPlayer===1?'p1':'p2'}`;
+  text.textContent = mode==='cpu'
+    ? (cpuThinking ? 'Computer thinking…' : 'Your turn')
+    : `Player ${currentPlayer}'s turn`;
+}
+
+function updateScores() {
+  document.getElementById('score-p1').textContent   = scores.p1;
+  document.getElementById('score-draw').textContent = scores.draw;
+  document.getElementById('score-p2').textContent   = scores.p2;
+}
+
+function showResult(html) {
+  document.getElementById('result-title').innerHTML = html;
+  document.getElementById('result-banner').classList.add('show');
+  document.getElementById('turn-dot').className = 'turn-dot';
+  document.getElementById('turn-text').textContent = '';
+}
+</script>
+</body>
+</html>

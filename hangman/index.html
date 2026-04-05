@@ -19,14 +19,15 @@
 
     .back-link {
       display: inline-block;
-      margin-bottom: 16px;
+      margin-top: 16px;
+      margin-bottom: 20px;
       color: #a5b4fc;
       text-decoration: none;
-      font-size: 0.9rem;
-      opacity: 0.8;
-      transition: opacity 0.2s;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: color 0.2s;
     }
-    .back-link:hover { opacity: 1; }
+    .back-link:hover { color: #fff; }
 
     h1 {
       font-size: 2.2rem;
@@ -365,7 +366,7 @@
 <div class="container">
   <a class="back-link" href="../index.html">← Back to Arcade</a>
 
-  <h1>🪓 Hangman</h1>
+  <h1>Hangman</h1>
   <p class="subtitle" id="subtitle">Guess the word before the man is hanged!</p>
 
   <!-- ── MENU ── -->
@@ -373,8 +374,8 @@
     <div class="menu-section">
       <h2 id="lbl-language">Language</h2>
       <div class="btn-group">
-        <button class="lang-btn active" data-lang="en" onclick="setLang('en')">🇬🇧 English</button>
-        <button class="lang-btn"        data-lang="de" onclick="setLang('de')">🇩🇪 Deutsch</button>
+        <button class="lang-btn active" data-lang="en" onclick="setLang('en')"><svg viewBox="0 0 60 30" style="width:1.4em;height:.7em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><clipPath id="a"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#a)"><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30m0-30L0 30" clip-path="url(#b)" stroke="#C8102E" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/></g></svg> English</button>
+        <button class="lang-btn"        data-lang="de" onclick="setLang('de')"><svg viewBox="0 0 5 3" style="width:1.4em;height:.84em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="3" y="0" fill="#000"/><rect width="5" height="2" y="1" fill="#D00"/><rect width="5" height="1" y="2" fill="#FFCE00"/></svg> Deutsch</button>
       </div>
     </div>
 
@@ -438,6 +439,9 @@
           <div class="score-label" id="lbl-lost">Lost</div>
         </div>
       </div>
+      <div id="res-best-row" style="display:none; text-align:center; margin:10px 0 4px; font-size:0.9rem; color:#f59e0b; font-weight:600">
+        <span id="res-best"></span>
+      </div>
       <div class="result-btns">
         <button class="next-btn" onclick="nextWord()" id="btn-next">Next Word</button>
         <button class="menu-btn" onclick="goMenu()"  id="btn-menu">Menu</button>
@@ -446,38 +450,12 @@
   </div>
 </div>
 
+<script src="../scores.js"></script>
+<script src="../data/word-lists.js"></script>
 <script>
   /* ─── DATA ─────────────────────────────────────────────────────────────── */
-  const CATEGORIES = {
-    en: [
-      { key:'animals',   label:'🐾 Animals'  },
-      { key:'countries', label:'🌍 Countries' },
-      { key:'food',      label:'🍕 Food'      },
-      { key:'nature',    label:'🌿 Nature'    },
-      { key:'cities',    label:'🏙️ Cities'    },
-    ],
-    de: [
-      { key:'de_tiere',   label:'🐾 Tiere'   },
-      { key:'de_laender', label:'🌍 Länder'  },
-      { key:'de_essen',   label:'🍕 Essen'   },
-      { key:'de_natur',   label:'🌿 Natur'   },
-      { key:'de_staedte', label:'🏙️ Städte'  },
-    ],
-  };
-
-  const WORD_LISTS = {
-    animals: ["AARDVARK","ALBATROSS","ALLIGATOR","ANACONDA","ANTELOPE","ARMADILLO","AXOLOTL","BABOON","BADGER","BEAR","BEAVER","BISON","BOAR","BUFFALO","BUTTERFLY","BUZZARD","CAMEL","CARDINAL","CHEETAH","CHIPMUNK","COBRA","COYOTE","CRANE","CROCODILE","CROW","DEER","DINGO","DOLPHIN","DONKEY","DRAGONFLY","EAGLE","EEL","ELEPHANT","EMU","ERMINE","FALCON","FERRET","FINCH","FLAMINGO","FOX","FROG","GECKO","GIRAFFE","GORILLA","GROUSE","HAMSTER","HAWK","HEDGEHOG","HERON","HIPPO","HYENA","IGUANA","IMPALA","JAGUAR","JELLYFISH","KANGAROO","KITE","KOALA","KOOKABURRA","LEMUR","LION","LIZARD","LLAMA","LOBSTER","LYNX","MEERKAT","MOLE","MONKEY","MOOSE","MOUSE","NARWHAL","NEWT","NIGHTINGALE","OCELOT","OCTOPUS","ORANGUTAN","OSTRICH","OTTER","OWL","PANDA","PARROT","PELICAN","PENGUIN","PIRANHA","PLATYPUS","PORCUPINE","PUMA","QUOKKA","RABBIT","RACCOON","RAVEN","RHINOCEROS","ROBIN","SALAMANDER","SHARK","SNAKE","SPARROW","SQUIRREL","STORK","SWAN","TARANTULA","TIGER","TORTOISE","TOUCAN","TURKEY","VULTURE","VIPER","WALRUS","WHALE","WOLF","WOLVERINE","WOMBAT","WREN","YAK","ZEBRA"],
-    countries: ["AFGHANISTAN","ALBANIA","ALGERIA","ANGOLA","ARGENTINA","ARMENIA","AUSTRALIA","AUSTRIA","AZERBAIJAN","BAHRAIN","BANGLADESH","BELARUS","BELGIUM","BELIZE","BOLIVIA","BRAZIL","BULGARIA","CAMBODIA","CAMEROON","CANADA","CHILE","CHINA","COLOMBIA","CROATIA","CUBA","CYPRUS","DENMARK","ECUADOR","EGYPT","ENGLAND","ETHIOPIA","FINLAND","FRANCE","GEORGIA","GERMANY","GHANA","GREECE","GUATEMALA","GUINEA","HAITI","HUNGARY","ICELAND","INDIA","INDONESIA","IRAN","IRAQ","IRELAND","ISRAEL","ITALY","JAMAICA","JAPAN","JORDAN","KAZAKHSTAN","KENYA","KUWAIT","LAOS","LATVIA","LEBANON","LIBYA","LITHUANIA","LUXEMBOURG","MADAGASCAR","MALAYSIA","MALI","MEXICO","MOLDOVA","MONGOLIA","MOROCCO","MOZAMBIQUE","MYANMAR","NAMIBIA","NEPAL","NETHERLANDS","NICARAGUA","NIGER","NIGERIA","NORWAY","OMAN","PAKISTAN","PANAMA","PARAGUAY","PERU","PHILIPPINES","POLAND","PORTUGAL","QATAR","ROMANIA","RUSSIA","RWANDA","SENEGAL","SERBIA","SOMALIA","SPAIN","SUDAN","SWEDEN","SWITZERLAND","SYRIA","TAIWAN","TAJIKISTAN","TANZANIA","THAILAND","TUNISIA","TURKEY","UGANDA","UKRAINE","URUGUAY","VENEZUELA","VIETNAM","WALES","YEMEN","ZAMBIA","ZIMBABWE"],
-    food: ["ALMOND","APPLE","APRICOT","ASPARAGUS","AVOCADO","BANANA","BASIL","BEAN","BEET","BREAD","BROCCOLI","BROWNIE","BUTTER","CABBAGE","CARAMEL","CARROT","CHEESE","CHERRY","CHICKEN","CHILI","CHOCOLATE","CINNAMON","COCONUT","COFFEE","COOKIE","CORN","CREAM","CROISSANT","DATE","DILL","DUMPLING","EGG","EGGPLANT","FIG","FISH","FLOUR","FUDGE","GARLIC","GINGER","GRAPE","GUAVA","HAZELNUT","HONEY","HUMMUS","JAM","JELLY","KALE","KIWI","LEMON","LETTUCE","LIME","LYCHEE","LASAGNE","MANGO","MELON","MINT","MUSHROOM","MUSTARD","MACARON","NOODLE","NUTMEG","OATS","OLIVE","ONION","ORANGE","OREGANO","PAPAYA","PAPRIKA","PARSLEY","PEACH","PEAR","PEPPER","PINEAPPLE","PLUM","POTATO","PRETZEL","PANCAKE","QUINOA","RADISH","RAISIN","RASPBERRY","RICE","ROSEMARY","RHUBARB","SAGE","SALMON","SALT","SHRIMP","SPINACH","STRAWBERRY","SUGAR","TAMARIND","THYME","TOFU","TOMATO","TRUFFLE","TUNA","TURNIP","VANILLA","WALNUT","WATERMELON","WHEAT","WAFFLE","YAM","YOGURT","ZUCCHINI"],
-    nature: ["ARCTIC","AURORA","AVALANCHE","ATOLL","BAY","BEACH","BLIZZARD","BOULDER","BOG","CANYON","CAVE","CLIFF","CLOUD","COAST","CORAL","CREEK","CRATER","CURRENT","DELTA","DESERT","DUNE","DROUGHT","EARTHQUAKE","ESTUARY","EROSION","FJORD","FLOOD","FOREST","FOUNTAIN","FOG","GEYSER","GLACIER","GORGE","GROVE","GULF","HURRICANE","HILL","HAIL","ICEBERG","ISLAND","INLET","JUNGLE","LAGOON","LAKE","LAVA","LIGHTNING","MEADOW","MOUNTAIN","MARSH","MONSOON","MESA","OASIS","OCEAN","PENINSULA","PLATEAU","PRAIRIE","RAINFOREST","RAVINE","REEF","RIVER","ROCK","RAPIDS","SAVANNA","SEA","SPRING","STORM","STREAM","SWAMP","STRAIT","TIDE","TORNADO","TUNDRA","TAIGA","VALLEY","VOLCANO","WATERFALL","WETLAND","WIND","WAVE"],
-    cities: ["AMSTERDAM","ANKARA","ATHENS","ACCRA","ALGIERS","AUSTIN","BANGKOK","BARCELONA","BEIJING","BEIRUT","BELGRADE","BERLIN","BOGOTA","BRUSSELS","BUCHAREST","BUDAPEST","CAIRO","CARACAS","CHICAGO","COLOMBO","DELHI","DHAKA","DUBAI","DUBLIN","EDINBURGH","FRANKFURT","HAMBURG","HANOI","HAVANA","HELSINKI","HOUSTON","ISTANBUL","JAKARTA","JOHANNESBURG","KABUL","KARACHI","KHARTOUM","KINSHASA","KYIV","LAGOS","LAHORE","LIMA","LISBON","LONDON","LUANDA","LUSAKA","MADRID","MANILA","MELBOURNE","MONTREAL","MOSCOW","MUMBAI","NAIROBI","OSLO","PARIS","PRAGUE","PYONGYANG","ROME","ROTTERDAM","SEOUL","SHANGHAI","SINGAPORE","STOCKHOLM","SYDNEY","TAIPEI","TBILISI","TEHRAN","TOKYO","TORONTO","VIENNA","VILNIUS","WARSAW","YEREVAN","ZAGREB","ZURICH"],
-    de_tiere: ["ADLER","AMEISE","AXOLOTL","BIBER","BIENE","DACHS","DELFIN","EICHHORNCHEN","ELEFANT","ENTE","FALKE","FISCH","FROSCH","FUCHS","GECKO","GEPARD","GIRAFFE","GORILLA","HASE","HUND","HYAENE","IGEL","JAGUAR","KATZE","KOALA","KROKODIL","LIBELLE","LOEWE","LUCHS","MARDER","MAUS","NASHORN","NILPFERD","OTTER","PAPAGEI","PFERD","PINGUIN","RABE","RATTE","SCHAF","SCHLANGE","SCHMETTERLING","SEEHUND","SPINNE","STORCH","TIGER","TINTENFISCH","UHU","VOGEL","WASCHBAER","WOLF","ZEBRA","ZIEGE"],
-    de_laender: ["AEGYPTEN","AETHIOPIEN","ALBANIEN","ALGERIEN","ANGOLA","ARGENTINIEN","AUSTRALIEN","BELGIEN","BOLIVIEN","BRASILIEN","BULGARIEN","CHILE","CHINA","DAENEMARK","DEUTSCHLAND","ECUADOR","ENGLAND","FINNLAND","FRANKREICH","GEORGIEN","GHANA","GRIECHENLAND","GUATEMALA","INDIEN","INDONESIEN","IRAK","IRAN","IRLAND","ISLAND","ISRAEL","ITALIEN","JAMAIKA","JAPAN","JORDANIEN","KAMERUN","KANADA","KENIA","KOLUMBIEN","KROATIEN","KUBA","LAOS","LETTLAND","LIBYEN","LITAUEN","LUXEMBURG","MALI","MEXIKO","MOLDAWIEN","MONGOLEI","MAROKKO","NAMIBIA","NEPAL","NIEDERLANDE","NIGERIA","NORWEGEN","OMAN","PAKISTAN","PANAMA","PERU","PHILIPPINEN","POLEN","PORTUGAL","RUMAENIEN","RUSSLAND","RUANDA","SAMBIA","SCHWEDEN","SERBIEN","SIMBABWE","SOMALIA","SPANIEN","SUDAN","SYRIEN","TAIWAN","TANSANIA","THAILAND","TUNESIEN","TUERKEI","UGANDA","UKRAINE","UNGARN","URUGUAY","USBEKISTAN","VENEZUELA","VIETNAM","WALES","JEMEN"],
-    de_essen: ["APFEL","ARTISCHOCKE","AVOCADO","BANANE","BIRNE","BOHNE","BROCCOLI","BROT","BUTTER","DATTEL","EI","ERBSE","FEIGE","FISCH","FLEISCH","GEMUESE","GURKE","HONIG","INGWER","JOGHURT","KAROTTE","KARTOFFEL","KAESE","KIRSCHE","KNOBLAUCH","KOHL","KUCHEN","LACHS","LAUCH","LINSE","MAIS","MANGO","MELONE","MILCH","NUDELN","NUSS","OBST","OLIVE","ORANGE","PFIRSICH","PFLAUME","PILZ","PIZZA","QUARK","RADIESCHEN","REIS","ROSENKOHL","ROSINE","SALAT","SALZ","SCHINKEN","SCHOKOLADE","SENF","SPINAT","SUPPE","THYMIAN","TOMATE","VANILLE","WASSERMELONE","WEIZEN","WURST","ZITRONE","ZUCCHINI","ZWIEBEL"],
-    de_natur: ["ALPEN","AUEN","BACH","BERG","BODEN","DELTA","DUENE","EBENE","EIS","FELS","FLUSS","GEBIRGE","GIPFEL","GLETSCHER","HUEGEL","INSEL","KANAL","KLIPPE","KUESTE","LANDSCHAFT","LAVA","MEER","MONSUN","MOOR","NEBEL","OASE","PLATEAU","REGEN","RIFF","SCHNEE","SEE","STEPPE","STURM","TAL","TAIGA","TORNADO","WALD","WASSER","WELLE","WUESTE"],
-    de_staedte: ["AACHEN","AUGSBURG","BERLIN","BIELEFELD","BOCHUM","BONN","BRAUNSCHWEIG","BREMEN","CHEMNITZ","DORTMUND","DRESDEN","DUISBURG","DUESSELDORF","ERFURT","ESSEN","FRANKFURT","GELSENKIRCHEN","HAMBURG","HANNOVER","INGOLSTADT","JENA","KARLSRUHE","KASSEL","KIEL","KOELN","KOBLENZ","LEIPZIG","LUDWIGSHAFEN","MAGDEBURG","MAINZ","MANNHEIM","MUENCHEN","MUENSTER","NUERNBERG","OBERHAUSEN","REGENSBURG","ROSTOCK","SAARBRUECKEN","STUTTGART","ULM","WIESBADEN","WUPPERTAL","WUERZBURG","WIEN","GRAZ","LINZ","SALZBURG","INNSBRUCK","ZUERICH","BASEL","BERN","LUZERN","LAUSANNE","GENF"],
-  };
-
+  
+  
   const STRINGS = {
     en: {
       subtitle:   'Guess the word before the man is hanged!',
@@ -485,8 +463,8 @@
       category:   'Category',
       start:      'Start Game',
       wrong:      'Wrong guesses',
-      winTitle:   'You got it! 🎉',
-      loseTitle:  'Hard luck! 💀',
+      winTitle:   'You got it!',
+      loseTitle:  'Hard luck!',
       wordWas:    'The word was:',
       next:       'Next Word',
       menu:       'Menu',
@@ -499,8 +477,8 @@
       category:   'Kategorie',
       start:      'Spiel starten',
       wrong:      'Falsche Buchstaben',
-      winTitle:   'Richtig! 🎉',
-      loseTitle:  'Schade! 💀',
+      winTitle:   'Richtig!',
+      loseTitle:  'Schade!',
       wordWas:    'Das Wort war:',
       next:       'Nächstes Wort',
       menu:       'Menü',
@@ -514,7 +492,10 @@
     'part-leg-left', 'part-leg-right'
   ];
   const MAX_WRONG = 6;
-  const KB_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
+  const KB_ROWS = {
+    en: ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'],
+    de: ['QWERTZUIOPÜ', 'ASDFGHJKLÖ', 'YXCVBNMÄ', 'ß'],
+  };
 
   /* ─── STATE ────────────────────────────────────────────────────────────── */
   let lang        = 'en';
@@ -646,7 +627,7 @@
   function renderKeyboard() {
     const kb = document.getElementById('keyboard');
     kb.innerHTML = '';
-    KB_ROWS.forEach(row => {
+    (KB_ROWS[lang] || KB_ROWS.en).forEach(row => {
       const rowDiv = document.createElement('div');
       rowDiv.className = 'keyboard-row';
       for (const ch of row) {
@@ -728,6 +709,8 @@
   }
 
   function showResult(won) {
+    const isRecord  = ArcadeScores.save('hangman', score.won);
+    const bestEntry = ArcadeScores.get('hangman');
     const s = STRINGS[lang];
     document.getElementById('result-title').textContent = won ? s.winTitle : s.loseTitle;
     document.getElementById('result-title').className   = 'result-title ' + (won ? 'win' : 'lose');
@@ -739,6 +722,15 @@
     document.getElementById('lbl-word-was').textContent = s.wordWas;
     document.getElementById('btn-next').textContent     = s.next;
     document.getElementById('btn-menu').textContent     = s.menu;
+
+    const bestRow = document.getElementById('res-best-row');
+    const bestEl  = document.getElementById('res-best');
+    if (bestRow && bestEl && bestEntry) {
+      bestRow.style.display = 'block';
+      bestEl.textContent = isRecord
+        ? '🏆 New Record!'
+        : `🏆 Best: ${bestEntry.score} wins`;
+    }
     show('result');
   }
 

@@ -9,10 +9,12 @@
 
     .back-link {
       display: inline-block;
-      margin-bottom: 16px;
+      margin-top: 16px;
+      margin-bottom: 20px;
       color: #a5b4fc;
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: 1.1rem;
+      font-weight: 600;
       transition: color 0.2s;
     }
     .back-link:hover { color: #fff; }
@@ -249,14 +251,14 @@
 <body>
   <div class="container">
     <a href="../index.html" class="back-link">← Back to Arcade</a>
-    <h1>Fun with Flags</h1>
-    <p class="subtitle">How well do you know your country flags?</p>
+    <h1 id="page-title">Fun with Flags</h1>
+    <p class="subtitle" id="page-subtitle">How well do you know your country flags?</p>
 
     <!-- Menu -->
     <div id="menu">
       <div class="lang-section">
-        <button id="lang-en" class="lang-btn active" onclick="setLang('en')">🇬🇧 English</button>
-        <button id="lang-de" class="lang-btn"        onclick="setLang('de')">🇩🇪 Deutsch</button>
+        <button id="lang-en" class="lang-btn active" onclick="setLang('en')"><svg viewBox="0 0 60 30" style="width:1.4em;height:.7em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><clipPath id="a"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#a)"><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30m0-30L0 30" clip-path="url(#b)" stroke="#C8102E" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/></g></svg> English</button>
+        <button id="lang-de" class="lang-btn"        onclick="setLang('de')"><svg viewBox="0 0 5 3" style="width:1.4em;height:.84em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="3" y="0" fill="#000"/><rect width="5" height="2" y="1" fill="#D00"/><rect width="5" height="1" y="2" fill="#FFCE00"/></svg> Deutsch</button>
       </div>
       <h2 id="menu-heading">Choose a region</h2>
       <div class="continent-grid" id="region-btns">
@@ -291,18 +293,21 @@
         <div class="out-of" id="final-total">out of 10</div>
         <div class="percentage" id="final-pct">0%</div>
         <div class="best-streak" id="final-streak">Best streak: 0</div>
+        <div class="best-streak" id="res-best" style="margin-top:8px;color:#a5b4fc"></div>
       </div>
       <button class="play-again-btn" id="play-again-btn" onclick="backToMenu()">Play Again</button>
     </div>
   </div>
 
+<script src="../scores.js"></script>
+<script src="../data/countries.js"></script>
 <script>
 // ─── Language support ─────────────────────────────────────────────────────
 let language = 'en';
 
 const UI = {
-  en: { menu:"Choose a region", score:"Score: ", question:"Question: ", streak:"Streak: ", playAgain:"Play Again", outOf: n => `out of ${n}`, bestStreak: n => `Best streak: ${n}`, pct: p => `${p}% correct` },
-  de: { menu:"Region wählen",   score:"Punkte: ", question:"Frage: ",   streak:"Serie: ",  playAgain:"Nochmal",    outOf: n => `von ${n}`,    bestStreak: n => `Beste Serie: ${n}`, pct: p => `${p}% richtig` },
+  en: { title:"Fun with Flags", subtitle:"How well do you know your country flags?", menu:"Choose a region", score:"Score: ", question:"Question: ", streak:"Streak: ", playAgain:"Play Again", outOf: n => `out of ${n}`, bestStreak: n => `Best streak: ${n}`, pct: p => `${p}% correct` },
+  de: { title:"Flaggen-Quiz",   subtitle:"Wie gut kennst du die Flaggen der Welt?",  menu:"Region wählen",   score:"Punkte: ", question:"Frage: ", streak:"Serie: ", playAgain:"Nochmal", outOf: n => `von ${n}`, bestStreak: n => `Beste Serie: ${n}`, pct: p => `${p}% richtig` },
 };
 
 const DE_NAMES = {
@@ -323,30 +328,18 @@ function setLang(lang) {
   document.getElementById('lang-en').classList.toggle('active', lang === 'en');
   document.getElementById('lang-de').classList.toggle('active', lang === 'de');
   const U = UI[lang];
-  document.getElementById('menu-heading').textContent = U.menu;
-  document.getElementById('lbl-score').textContent    = U.score;
-  document.getElementById('lbl-question').textContent = U.question;
-  document.getElementById('lbl-streak').textContent   = U.streak;
+  document.getElementById('page-title').textContent    = U.title;
+  document.getElementById('page-subtitle').textContent = U.subtitle;
+  document.getElementById('menu-heading').textContent  = U.menu;
+  document.getElementById('lbl-score').textContent     = U.score;
+  document.getElementById('lbl-question').textContent  = U.question;
+  document.getElementById('lbl-streak').textContent    = U.streak;
   document.getElementById('play-again-btn').textContent = U.playAgain;
   document.querySelectorAll('#region-btns button').forEach(btn => {
     btn.textContent = btn.dataset[lang];
   });
 }
 
-const COUNTRIES = [
-  // Africa
-  {name:"Algeria",code:"dz",continent:"Africa"},{name:"Angola",code:"ao",continent:"Africa"},{name:"Benin",code:"bj",continent:"Africa"},{name:"Botswana",code:"bw",continent:"Africa"},{name:"Burkina Faso",code:"bf",continent:"Africa"},{name:"Burundi",code:"bi",continent:"Africa"},{name:"Cameroon",code:"cm",continent:"Africa"},{name:"Cape Verde",code:"cv",continent:"Africa"},{name:"Central African Republic",code:"cf",continent:"Africa"},{name:"Chad",code:"td",continent:"Africa"},{name:"Comoros",code:"km",continent:"Africa"},{name:"Congo",code:"cg",continent:"Africa"},{name:"DR Congo",code:"cd",continent:"Africa"},{name:"Djibouti",code:"dj",continent:"Africa"},{name:"Egypt",code:"eg",continent:"Africa"},{name:"Equatorial Guinea",code:"gq",continent:"Africa"},{name:"Eritrea",code:"er",continent:"Africa"},{name:"Eswatini",code:"sz",continent:"Africa"},{name:"Ethiopia",code:"et",continent:"Africa"},{name:"Gabon",code:"ga",continent:"Africa"},{name:"Gambia",code:"gm",continent:"Africa"},{name:"Ghana",code:"gh",continent:"Africa"},{name:"Guinea",code:"gn",continent:"Africa"},{name:"Guinea-Bissau",code:"gw",continent:"Africa"},{name:"Ivory Coast",code:"ci",continent:"Africa"},{name:"Kenya",code:"ke",continent:"Africa"},{name:"Lesotho",code:"ls",continent:"Africa"},{name:"Liberia",code:"lr",continent:"Africa"},{name:"Libya",code:"ly",continent:"Africa"},{name:"Madagascar",code:"mg",continent:"Africa"},{name:"Malawi",code:"mw",continent:"Africa"},{name:"Mali",code:"ml",continent:"Africa"},{name:"Mauritania",code:"mr",continent:"Africa"},{name:"Mauritius",code:"mu",continent:"Africa"},{name:"Morocco",code:"ma",continent:"Africa"},{name:"Mozambique",code:"mz",continent:"Africa"},{name:"Namibia",code:"na",continent:"Africa"},{name:"Niger",code:"ne",continent:"Africa"},{name:"Nigeria",code:"ng",continent:"Africa"},{name:"Rwanda",code:"rw",continent:"Africa"},{name:"Senegal",code:"sn",continent:"Africa"},{name:"Seychelles",code:"sc",continent:"Africa"},{name:"Sierra Leone",code:"sl",continent:"Africa"},{name:"Somalia",code:"so",continent:"Africa"},{name:"South Africa",code:"za",continent:"Africa"},{name:"South Sudan",code:"ss",continent:"Africa"},{name:"Sudan",code:"sd",continent:"Africa"},{name:"Tanzania",code:"tz",continent:"Africa"},{name:"Togo",code:"tg",continent:"Africa"},{name:"Tunisia",code:"tn",continent:"Africa"},{name:"Uganda",code:"ug",continent:"Africa"},{name:"Zambia",code:"zm",continent:"Africa"},{name:"Zimbabwe",code:"zw",continent:"Africa"},
-  // Asia
-  {name:"Afghanistan",code:"af",continent:"Asia"},{name:"Armenia",code:"am",continent:"Asia"},{name:"Azerbaijan",code:"az",continent:"Asia"},{name:"Bahrain",code:"bh",continent:"Asia"},{name:"Bangladesh",code:"bd",continent:"Asia"},{name:"Bhutan",code:"bt",continent:"Asia"},{name:"Brunei",code:"bn",continent:"Asia"},{name:"Cambodia",code:"kh",continent:"Asia"},{name:"China",code:"cn",continent:"Asia"},{name:"Georgia",code:"ge",continent:"Asia"},{name:"India",code:"in",continent:"Asia"},{name:"Indonesia",code:"id",continent:"Asia"},{name:"Iran",code:"ir",continent:"Asia"},{name:"Iraq",code:"iq",continent:"Asia"},{name:"Israel",code:"il",continent:"Asia"},{name:"Japan",code:"jp",continent:"Asia"},{name:"Jordan",code:"jo",continent:"Asia"},{name:"Kazakhstan",code:"kz",continent:"Asia"},{name:"Kuwait",code:"kw",continent:"Asia"},{name:"Kyrgyzstan",code:"kg",continent:"Asia"},{name:"Laos",code:"la",continent:"Asia"},{name:"Lebanon",code:"lb",continent:"Asia"},{name:"Malaysia",code:"my",continent:"Asia"},{name:"Maldives",code:"mv",continent:"Asia"},{name:"Mongolia",code:"mn",continent:"Asia"},{name:"Myanmar",code:"mm",continent:"Asia"},{name:"Nepal",code:"np",continent:"Asia"},{name:"North Korea",code:"kp",continent:"Asia"},{name:"Oman",code:"om",continent:"Asia"},{name:"Pakistan",code:"pk",continent:"Asia"},{name:"Philippines",code:"ph",continent:"Asia"},{name:"Qatar",code:"qa",continent:"Asia"},{name:"Saudi Arabia",code:"sa",continent:"Asia"},{name:"Singapore",code:"sg",continent:"Asia"},{name:"South Korea",code:"kr",continent:"Asia"},{name:"Sri Lanka",code:"lk",continent:"Asia"},{name:"Syria",code:"sy",continent:"Asia"},{name:"Taiwan",code:"tw",continent:"Asia"},{name:"Tajikistan",code:"tj",continent:"Asia"},{name:"Thailand",code:"th",continent:"Asia"},{name:"Timor-Leste",code:"tl",continent:"Asia"},{name:"Turkey",code:"tr",continent:"Asia"},{name:"Turkmenistan",code:"tm",continent:"Asia"},{name:"UAE",code:"ae",continent:"Asia"},{name:"Uzbekistan",code:"uz",continent:"Asia"},{name:"Vietnam",code:"vn",continent:"Asia"},{name:"Yemen",code:"ye",continent:"Asia"},
-  // Europe
-  {name:"Albania",code:"al",continent:"Europe"},{name:"Andorra",code:"ad",continent:"Europe"},{name:"Austria",code:"at",continent:"Europe"},{name:"Belarus",code:"by",continent:"Europe"},{name:"Belgium",code:"be",continent:"Europe"},{name:"Bosnia and Herzegovina",code:"ba",continent:"Europe"},{name:"Bulgaria",code:"bg",continent:"Europe"},{name:"Croatia",code:"hr",continent:"Europe"},{name:"Cyprus",code:"cy",continent:"Europe"},{name:"Czech Republic",code:"cz",continent:"Europe"},{name:"Denmark",code:"dk",continent:"Europe"},{name:"Estonia",code:"ee",continent:"Europe"},{name:"Finland",code:"fi",continent:"Europe"},{name:"France",code:"fr",continent:"Europe"},{name:"Germany",code:"de",continent:"Europe"},{name:"Greece",code:"gr",continent:"Europe"},{name:"Hungary",code:"hu",continent:"Europe"},{name:"Iceland",code:"is",continent:"Europe"},{name:"Ireland",code:"ie",continent:"Europe"},{name:"Italy",code:"it",continent:"Europe"},{name:"Kosovo",code:"xk",continent:"Europe"},{name:"Latvia",code:"lv",continent:"Europe"},{name:"Liechtenstein",code:"li",continent:"Europe"},{name:"Lithuania",code:"lt",continent:"Europe"},{name:"Luxembourg",code:"lu",continent:"Europe"},{name:"Malta",code:"mt",continent:"Europe"},{name:"Moldova",code:"md",continent:"Europe"},{name:"Monaco",code:"mc",continent:"Europe"},{name:"Montenegro",code:"me",continent:"Europe"},{name:"Netherlands",code:"nl",continent:"Europe"},{name:"North Macedonia",code:"mk",continent:"Europe"},{name:"Norway",code:"no",continent:"Europe"},{name:"Poland",code:"pl",continent:"Europe"},{name:"Portugal",code:"pt",continent:"Europe"},{name:"Romania",code:"ro",continent:"Europe"},{name:"Russia",code:"ru",continent:"Europe"},{name:"San Marino",code:"sm",continent:"Europe"},{name:"Serbia",code:"rs",continent:"Europe"},{name:"Slovakia",code:"sk",continent:"Europe"},{name:"Slovenia",code:"si",continent:"Europe"},{name:"Spain",code:"es",continent:"Europe"},{name:"Sweden",code:"se",continent:"Europe"},{name:"Switzerland",code:"ch",continent:"Europe"},{name:"Ukraine",code:"ua",continent:"Europe"},{name:"United Kingdom",code:"gb",continent:"Europe"},{name:"Vatican City",code:"va",continent:"Europe"},
-  // North America
-  {name:"Antigua and Barbuda",code:"ag",continent:"North America"},{name:"Bahamas",code:"bs",continent:"North America"},{name:"Barbados",code:"bb",continent:"North America"},{name:"Belize",code:"bz",continent:"North America"},{name:"Canada",code:"ca",continent:"North America"},{name:"Costa Rica",code:"cr",continent:"North America"},{name:"Cuba",code:"cu",continent:"North America"},{name:"Dominica",code:"dm",continent:"North America"},{name:"Dominican Republic",code:"do",continent:"North America"},{name:"El Salvador",code:"sv",continent:"North America"},{name:"Grenada",code:"gd",continent:"North America"},{name:"Guatemala",code:"gt",continent:"North America"},{name:"Haiti",code:"ht",continent:"North America"},{name:"Honduras",code:"hn",continent:"North America"},{name:"Jamaica",code:"jm",continent:"North America"},{name:"Mexico",code:"mx",continent:"North America"},{name:"Nicaragua",code:"ni",continent:"North America"},{name:"Panama",code:"pa",continent:"North America"},{name:"Saint Kitts and Nevis",code:"kn",continent:"North America"},{name:"Saint Lucia",code:"lc",continent:"North America"},{name:"Saint Vincent",code:"vc",continent:"North America"},{name:"Trinidad and Tobago",code:"tt",continent:"North America"},{name:"United States",code:"us",continent:"North America"},
-  // South America
-  {name:"Argentina",code:"ar",continent:"South America"},{name:"Bolivia",code:"bo",continent:"South America"},{name:"Brazil",code:"br",continent:"South America"},{name:"Chile",code:"cl",continent:"South America"},{name:"Colombia",code:"co",continent:"South America"},{name:"Ecuador",code:"ec",continent:"South America"},{name:"Guyana",code:"gy",continent:"South America"},{name:"Paraguay",code:"py",continent:"South America"},{name:"Peru",code:"pe",continent:"South America"},{name:"Suriname",code:"sr",continent:"South America"},{name:"Uruguay",code:"uy",continent:"South America"},{name:"Venezuela",code:"ve",continent:"South America"},
-  // Oceania
-  {name:"Australia",code:"au",continent:"Oceania"},{name:"Fiji",code:"fj",continent:"Oceania"},{name:"Kiribati",code:"ki",continent:"Oceania"},{name:"Marshall Islands",code:"mh",continent:"Oceania"},{name:"Micronesia",code:"fm",continent:"Oceania"},{name:"Nauru",code:"nr",continent:"Oceania"},{name:"New Zealand",code:"nz",continent:"Oceania"},{name:"Palau",code:"pw",continent:"Oceania"},{name:"Papua New Guinea",code:"pg",continent:"Oceania"},{name:"Samoa",code:"ws",continent:"Oceania"},{name:"Solomon Islands",code:"sb",continent:"Oceania"},{name:"Tonga",code:"to",continent:"Oceania"},{name:"Tuvalu",code:"tv",continent:"Oceania"},{name:"Vanuatu",code:"vu",continent:"Oceania"}
-];
 
 let pool = [];
 let questions = [];
@@ -356,6 +349,7 @@ let streak = 0;
 let bestStreak = 0;
 let totalQuestions = 10;
 let answered = false;
+let currentRegion = 'all';
 
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -370,6 +364,7 @@ function flagUrl(code) {
 }
 
 function startQuiz(region) {
+  currentRegion = region;
   pool = region === 'all' ? [...COUNTRIES] : COUNTRIES.filter(c => c.continent === region);
 
   if (pool.length < 4) return;
@@ -448,6 +443,8 @@ function handleAnswer(btn, isCorrect, correctCode) {
 }
 
 function showResult() {
+  const isRecord  = ArcadeScores.save('fun-with-flags', score);
+  const bestEntry = ArcadeScores.get('fun-with-flags');
   document.getElementById('quiz').style.display = 'none';
   document.getElementById('result').style.display = 'block';
 
@@ -458,6 +455,10 @@ function showResult() {
   document.getElementById('final-pct').textContent    = U.pct(pct);
   document.getElementById('final-streak').textContent = U.bestStreak(bestStreak);
   document.getElementById('progress').style.width = '100%';
+  const bestEl = document.getElementById('res-best');
+  if (isRecord) bestEl.textContent = '🏆 New Record!';
+  else if (bestEntry) bestEl.textContent = `🏆 Best: ${bestEntry.score} correct`;
+  else bestEl.textContent = '';
 }
 
 function backToMenu() {

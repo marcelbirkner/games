@@ -27,33 +27,41 @@
       align-items: center;
     }
     .back-link {
-      color: #94a3b8;
+      display: inline-block;
+      margin-top: 16px;
+      margin-bottom: 20px;
+      color: #a5b4fc;
       text-decoration: none;
-      font-size: .9rem;
-      transition: color .2s;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: color 0.2s;
     }
-    .back-link:hover { color: #10b981; }
+    .back-link:hover { color: #fff; }
 
     /* ── LANG TOGGLE ── */
     .lang-toggle {
       display: flex;
-      gap: .4rem;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 28px;
     }
     .lang-btn {
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.15);
-      border-radius: 8px;
-      color: #cbd5e1;
-      padding: .35rem .75rem;
-      font-size: .85rem;
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 99px;
+      color: #ccc;
+      padding: 8px 22px;
+      font-size: 0.95rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: all .2s;
+      transition: all 0.2s;
     }
-    .lang-btn:hover { background: rgba(255,255,255,.14); }
+    .lang-btn:hover:not(.active) { border-color: rgba(255,255,255,0.4); color: #fff; }
     .lang-btn.active {
-      background: rgba(16,185,129,.2);
+      background: rgba(16,185,129,0.2);
       border-color: #10b981;
       color: #10b981;
+      box-shadow: 0 0 12px rgba(16,185,129,0.3);
     }
 
     /* ── MAIN WRAPPER ── */
@@ -325,15 +333,16 @@
 
 <nav>
   <a class="back-link" href="../index.html">← Back to Arcade</a>
-  <div class="lang-toggle">
-    <button class="lang-btn active" id="btn-en" onclick="setLang('en')">🇬🇧 English</button>
-    <button class="lang-btn" id="btn-de" onclick="setLang('de')">🇩🇪 Deutsch</button>
-  </div>
 </nav>
 
 <main>
-  <h1>⌨️ Speed Typing</h1>
+  <h1>Speed Typing</h1>
   <p class="subtitle" id="subtitle">How fast can you type?</p>
+
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="btn-en" onclick="setLang('en')"><svg viewBox="0 0 60 30" style="width:1.4em;height:.7em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><clipPath id="a"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#a)"><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30m0-30L0 30" clip-path="url(#b)" stroke="#C8102E" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/></g></svg> English</button>
+    <button class="lang-btn" id="btn-de" onclick="setLang('de')"><svg viewBox="0 0 5 3" style="width:1.4em;height:.84em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="3" y="0" fill="#000"/><rect width="5" height="2" y="1" fill="#D00"/><rect width="5" height="1" y="2" fill="#FFCE00"/></svg> Deutsch</button>
+  </div>
 
   <!-- ══ MENU SCREEN ══ -->
   <div class="screen active" id="screen-menu">
@@ -378,7 +387,7 @@
       id="typing-input"
       autocomplete="off"
       autocorrect="off"
-      autocapitalize="characters"
+      autocapitalize="none"
       spellcheck="false"
       placeholder="Type here…"
     />
@@ -395,7 +404,7 @@
         <div class="result-wpm" id="res-wpm">0</div>
         <div class="result-wpm-label" id="lbl-words-min">words/min</div>
       </div>
-      <div class="record-badge" id="record-badge">🏆 New Record!</div>
+      <div class="record-badge" id="record-badge">New Record!</div>
       <div class="divider"></div>
       <div class="result-stats">
         <div class="result-stat">
@@ -423,39 +432,13 @@
   </div>
 </main>
 
+<script src="../scores.js"></script>
+<script src="../data/word-lists.js"></script>
 <script>
 // ══════════════════════════════════════════════
 //  DATA
 // ══════════════════════════════════════════════
-const CATEGORIES = {
-  en: [
-    { key:'animals',   label:'🐾 Animals'  },
-    { key:'countries', label:'🌍 Countries' },
-    { key:'food',      label:'🍕 Food'      },
-    { key:'nature',    label:'🌿 Nature'    },
-    { key:'cities',    label:'🏙️ Cities'    },
-  ],
-  de: [
-    { key:'de_tiere',   label:'🐾 Tiere'   },
-    { key:'de_laender', label:'🌍 Länder'  },
-    { key:'de_essen',   label:'🍕 Essen'   },
-    { key:'de_natur',   label:'🌿 Natur'   },
-    { key:'de_staedte', label:'🏙️ Städte'  },
-  ],
-};
 
-const WORD_LISTS = {
-  animals: ["AARDVARK","ALBATROSS","ALLIGATOR","ANACONDA","ANTELOPE","ARMADILLO","AXOLOTL","BABOON","BADGER","BEAR","BEAVER","BISON","BOAR","BUFFALO","BUTTERFLY","BUZZARD","CAMEL","CARDINAL","CHEETAH","CHIPMUNK","COBRA","COYOTE","CRANE","CROCODILE","CROW","DEER","DINGO","DOLPHIN","DONKEY","DRAGONFLY","EAGLE","EEL","ELEPHANT","EMU","ERMINE","FALCON","FERRET","FINCH","FLAMINGO","FOX","FROG","GECKO","GIRAFFE","GORILLA","GROUSE","HAMSTER","HAWK","HEDGEHOG","HERON","HIPPO","HYENA","IGUANA","IMPALA","JAGUAR","JELLYFISH","KANGAROO","KITE","KOALA","KOOKABURRA","LEMUR","LION","LIZARD","LLAMA","LOBSTER","LYNX","MEERKAT","MOLE","MONKEY","MOOSE","MOUSE","NARWHAL","NEWT","NIGHTINGALE","OCELOT","OCTOPUS","ORANGUTAN","OSTRICH","OTTER","OWL","PANDA","PARROT","PELICAN","PENGUIN","PIRANHA","PLATYPUS","PORCUPINE","PUMA","QUOKKA","RABBIT","RACCOON","RAVEN","RHINOCEROS","ROBIN","SALAMANDER","SHARK","SNAKE","SPARROW","SQUIRREL","STORK","SWAN","TARANTULA","TIGER","TORTOISE","TOUCAN","TURKEY","VULTURE","VIPER","WALRUS","WHALE","WOLF","WOLVERINE","WOMBAT","WREN","YAK","ZEBRA"],
-  countries: ["AFGHANISTAN","ALBANIA","ALGERIA","ANGOLA","ARGENTINA","ARMENIA","AUSTRALIA","AUSTRIA","AZERBAIJAN","BAHRAIN","BANGLADESH","BELARUS","BELGIUM","BELIZE","BOLIVIA","BRAZIL","BULGARIA","CAMBODIA","CAMEROON","CANADA","CHILE","CHINA","COLOMBIA","CROATIA","CUBA","CYPRUS","DENMARK","ECUADOR","EGYPT","ENGLAND","ETHIOPIA","FINLAND","FRANCE","GEORGIA","GERMANY","GHANA","GREECE","GUATEMALA","GUINEA","HAITI","HUNGARY","ICELAND","INDIA","INDONESIA","IRAN","IRAQ","IRELAND","ISRAEL","ITALY","JAMAICA","JAPAN","JORDAN","KAZAKHSTAN","KENYA","KUWAIT","LAOS","LATVIA","LEBANON","LIBYA","LITHUANIA","LUXEMBOURG","MADAGASCAR","MALAYSIA","MALI","MEXICO","MOLDOVA","MONGOLIA","MOROCCO","MOZAMBIQUE","MYANMAR","NAMIBIA","NEPAL","NETHERLANDS","NICARAGUA","NIGER","NIGERIA","NORWAY","OMAN","PAKISTAN","PANAMA","PARAGUAY","PERU","PHILIPPINES","POLAND","PORTUGAL","QATAR","ROMANIA","RUSSIA","RWANDA","SENEGAL","SERBIA","SOMALIA","SPAIN","SUDAN","SWEDEN","SWITZERLAND","SYRIA","TAIWAN","TAJIKISTAN","TANZANIA","THAILAND","TUNISIA","TURKEY","UGANDA","UKRAINE","URUGUAY","VENEZUELA","VIETNAM","WALES","YEMEN","ZAMBIA","ZIMBABWE"],
-  food: ["ALMOND","APPLE","APRICOT","ASPARAGUS","AVOCADO","BANANA","BASIL","BEAN","BEET","BREAD","BROCCOLI","BROWNIE","BUTTER","CABBAGE","CARAMEL","CARROT","CHEESE","CHERRY","CHICKEN","CHILI","CHOCOLATE","CINNAMON","COCONUT","COFFEE","COOKIE","CORN","CREAM","CROISSANT","DATE","DILL","DUMPLING","EGG","EGGPLANT","FIG","FISH","FLOUR","FUDGE","GARLIC","GINGER","GRAPE","GUAVA","HAZELNUT","HONEY","HUMMUS","JAM","JELLY","KALE","KIWI","LEMON","LETTUCE","LIME","LYCHEE","LASAGNE","MANGO","MELON","MINT","MUSHROOM","MUSTARD","MACARON","NOODLE","NUTMEG","OATS","OLIVE","ONION","ORANGE","OREGANO","PAPAYA","PAPRIKA","PARSLEY","PEACH","PEAR","PEPPER","PINEAPPLE","PLUM","POTATO","PRETZEL","PANCAKE","QUINOA","RADISH","RAISIN","RASPBERRY","RICE","ROSEMARY","RHUBARB","SAGE","SALMON","SALT","SHRIMP","SPINACH","STRAWBERRY","SUGAR","TAMARIND","THYME","TOFU","TOMATO","TRUFFLE","TUNA","TURNIP","VANILLA","WALNUT","WATERMELON","WHEAT","WAFFLE","YAM","YOGURT","ZUCCHINI"],
-  nature: ["ARCTIC","AURORA","AVALANCHE","ATOLL","BAY","BEACH","BLIZZARD","BOULDER","BOG","CANYON","CAVE","CLIFF","CLOUD","COAST","CORAL","CREEK","CRATER","CURRENT","DELTA","DESERT","DUNE","DROUGHT","EARTHQUAKE","ESTUARY","EROSION","FJORD","FLOOD","FOREST","FOUNTAIN","FOG","GEYSER","GLACIER","GORGE","GROVE","GULF","HURRICANE","HILL","HAIL","ICEBERG","ISLAND","INLET","JUNGLE","LAGOON","LAKE","LAVA","LIGHTNING","MEADOW","MOUNTAIN","MARSH","MONSOON","MESA","OASIS","OCEAN","PENINSULA","PLATEAU","PRAIRIE","RAINFOREST","RAVINE","REEF","RIVER","ROCK","RAPIDS","SAVANNA","SEA","SPRING","STORM","STREAM","SWAMP","STRAIT","TIDE","TORNADO","TUNDRA","TAIGA","VALLEY","VOLCANO","WATERFALL","WETLAND","WIND","WAVE"],
-  cities: ["AMSTERDAM","ANKARA","ATHENS","ACCRA","ALGIERS","AUSTIN","BANGKOK","BARCELONA","BEIJING","BEIRUT","BELGRADE","BERLIN","BOGOTA","BRUSSELS","BUCHAREST","BUDAPEST","CAIRO","CARACAS","CHICAGO","COLOMBO","DELHI","DHAKA","DUBAI","DUBLIN","EDINBURGH","FRANKFURT","HAMBURG","HANOI","HAVANA","HELSINKI","HOUSTON","ISTANBUL","JAKARTA","JOHANNESBURG","KABUL","KARACHI","KHARTOUM","KINSHASA","KYIV","LAGOS","LAHORE","LIMA","LISBON","LONDON","LUANDA","LUSAKA","MADRID","MANILA","MELBOURNE","MONTREAL","MOSCOW","MUMBAI","NAIROBI","OSLO","PARIS","PRAGUE","PYONGYANG","ROME","ROTTERDAM","SEOUL","SHANGHAI","SINGAPORE","STOCKHOLM","SYDNEY","TAIPEI","TBILISI","TEHRAN","TOKYO","TORONTO","VIENNA","VILNIUS","WARSAW","YEREVAN","ZAGREB","ZURICH"],
-  de_tiere: ["ADLER","AMEISE","AXOLOTL","BIBER","BIENE","DACHS","DELFIN","EICHHORNCHEN","ELEFANT","ENTE","FALKE","FISCH","FROSCH","FUCHS","GECKO","GEPARD","GIRAFFE","GORILLA","HASE","HUND","HYAENE","IGEL","JAGUAR","KATZE","KOALA","KROKODIL","LIBELLE","LOEWE","LUCHS","MARDER","MAUS","NASHORN","NILPFERD","OTTER","PAPAGEI","PFERD","PINGUIN","RABE","RATTE","SCHAF","SCHLANGE","SCHMETTERLING","SEEHUND","SPINNE","STORCH","TIGER","TINTENFISCH","UHU","VOGEL","WASCHBAER","WOLF","ZEBRA","ZIEGE"],
-  de_laender: ["AEGYPTEN","AETHIOPIEN","ALBANIEN","ALGERIEN","ANGOLA","ARGENTINIEN","AUSTRALIEN","BELGIEN","BOLIVIEN","BRASILIEN","BULGARIEN","CHILE","CHINA","DAENEMARK","DEUTSCHLAND","ECUADOR","ENGLAND","FINNLAND","FRANKREICH","GEORGIEN","GHANA","GRIECHENLAND","GUATEMALA","INDIEN","INDONESIEN","IRAK","IRAN","IRLAND","ISLAND","ISRAEL","ITALIEN","JAMAIKA","JAPAN","JORDANIEN","KAMERUN","KANADA","KENIA","KOLUMBIEN","KROATIEN","KUBA","LAOS","LETTLAND","LIBYEN","LITAUEN","LUXEMBURG","MALI","MEXIKO","MOLDAWIEN","MONGOLEI","MAROKKO","NAMIBIA","NEPAL","NIEDERLANDE","NIGERIA","NORWEGEN","OMAN","PAKISTAN","PANAMA","PERU","PHILIPPINEN","POLEN","PORTUGAL","RUMAENIEN","RUSSLAND","RUANDA","SAMBIA","SCHWEDEN","SERBIEN","SIMBABWE","SOMALIA","SPANIEN","SUDAN","SYRIEN","TAIWAN","TANSANIA","THAILAND","TUNESIEN","TUERKEI","UGANDA","UKRAINE","UNGARN","URUGUAY","USBEKISTAN","VENEZUELA","VIETNAM","WALES","JEMEN"],
-  de_essen: ["APFEL","ARTISCHOCKE","AVOCADO","BANANE","BIRNE","BOHNE","BROCCOLI","BROT","BUTTER","DATTEL","EI","ERBSE","FEIGE","FISCH","FLEISCH","GEMUESE","GURKE","HONIG","INGWER","JOGHURT","KAROTTE","KARTOFFEL","KAESE","KIRSCHE","KNOBLAUCH","KOHL","KUCHEN","LACHS","LAUCH","LINSE","MAIS","MANGO","MELONE","MILCH","NUDELN","NUSS","OBST","OLIVE","ORANGE","PFIRSICH","PFLAUME","PILZ","PIZZA","QUARK","RADIESCHEN","REIS","ROSENKOHL","ROSINE","SALAT","SALZ","SCHINKEN","SCHOKOLADE","SENF","SPINAT","SUPPE","THYMIAN","TOMATE","VANILLE","WASSERMELONE","WEIZEN","WURST","ZITRONE","ZUCCHINI","ZWIEBEL"],
-  de_natur: ["ALPEN","AUEN","BACH","BERG","BODEN","DELTA","DUENE","EBENE","EIS","FELS","FLUSS","GEBIRGE","GIPFEL","GLETSCHER","HUEGEL","INSEL","KANAL","KLIPPE","KUESTE","LANDSCHAFT","LAVA","MEER","MONSUN","MOOR","NEBEL","OASE","PLATEAU","REGEN","RIFF","SCHNEE","SEE","STEPPE","STURM","TAL","TAIGA","TORNADO","WALD","WASSER","WELLE","WUESTE"],
-  de_staedte: ["AACHEN","AUGSBURG","BERLIN","BIELEFELD","BOCHUM","BONN","BRAUNSCHWEIG","BREMEN","CHEMNITZ","DORTMUND","DRESDEN","DUISBURG","DUESSELDORF","ERFURT","ESSEN","FRANKFURT","GELSENKIRCHEN","HAMBURG","HANNOVER","INGOLSTADT","JENA","KARLSRUHE","KASSEL","KIEL","KOELN","KOBLENZ","LEIPZIG","LUDWIGSHAFEN","MAGDEBURG","MAINZ","MANNHEIM","MUENCHEN","MUENSTER","NUERNBERG","OBERHAUSEN","REGENSBURG","ROSTOCK","SAARBRUECKEN","STUTTGART","ULM","WIESBADEN","WUPPERTAL","WUERZBURG","WIEN","GRAZ","LINZ","SALZBURG","INNSBRUCK","ZUERICH","BASEL","BERN","LUZERN","LAUSANNE","GENF"],
-};
 
 const UI = {
   en: {
@@ -470,7 +453,7 @@ const UI = {
     menu: '☰ Menu',
     bestWpm: 'Best WPM',
     accuracy: 'Accuracy',
-    record: '🏆 New Record!',
+    record: 'New Record!',
     recent: 'Recent',
     start: '▶ Start',
   },
@@ -486,7 +469,7 @@ const UI = {
     menu: '☰ Menü',
     bestWpm: 'Bestes WPM',
     accuracy: 'Genauigkeit',
-    record: '🏆 Neuer Rekord!',
+    record: 'Neuer Rekord!',
     recent: 'Zuletzt',
     start: '▶ Start',
   },
@@ -784,15 +767,11 @@ function endGame() {
 
   const elapsed = (Date.now() - startTime) / 1000 / 60;
   const wpm = elapsed > 0 ? Math.round((totalCorrectChars / 5) / elapsed) : 0;
+  const isRecord  = ArcadeScores.save('speed-typing', wpm);
+  const bestEntry = ArcadeScores.get('speed-typing');
+  const best = bestEntry ? bestEntry.score : wpm;
   const total = score.correct + score.wrong;
   const accuracy = total > 0 ? Math.round((score.correct / total) * 100) : 0;
-
-  // localStorage best
-  const storageKey = `speedtyping_best_${selectedCategory}`;
-  const prev = parseInt(localStorage.getItem(storageKey) || '0', 10);
-  const isRecord = wpm > prev;
-  if (isRecord) localStorage.setItem(storageKey, wpm);
-  const best = isRecord ? wpm : Math.max(wpm, prev);
 
   document.getElementById('res-wpm').textContent = wpm;
   document.getElementById('res-correct').textContent = score.correct;

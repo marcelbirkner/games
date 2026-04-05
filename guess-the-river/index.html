@@ -25,10 +25,12 @@
 
     .back-link {
       display: inline-block;
-      margin-bottom: 16px;
+      margin-top: 16px;
+      margin-bottom: 20px;
       color: #a5b4fc;
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: 1.1rem;
+      font-weight: 600;
       transition: color 0.2s;
     }
     .back-link:hover { color: #fff; }
@@ -270,23 +272,23 @@
 <body>
 <div class="container">
   <a href="../index.html" class="back-link">← Back to Arcade</a>
-  <h1>🌊 Guess the River</h1>
-  <p class="subtitle">Which country does this river flow through?</p>
+  <h1 id="page-title">Guess the River</h1>
+  <p class="subtitle" id="page-subtitle">Which country does this river flow through?</p>
 
   <!-- MENU -->
   <div id="menu">
     <div class="lang-section">
-      <button id="lang-en" class="lang-btn active" onclick="setLang('en')">🇬🇧 English</button>
-      <button id="lang-de" class="lang-btn"        onclick="setLang('de')">🇩🇪 Deutsch</button>
+      <button id="lang-en" class="lang-btn active" onclick="setLang('en')"><svg viewBox="0 0 60 30" style="width:1.4em;height:.7em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><clipPath id="a"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#a)"><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30m0-30L0 30" clip-path="url(#b)" stroke="#C8102E" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/></g></svg> English</button>
+      <button id="lang-de" class="lang-btn"        onclick="setLang('de')"><svg viewBox="0 0 5 3" style="width:1.4em;height:.84em;display:inline-block;vertical-align:-.1em;border-radius:2px" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="3" y="0" fill="#000"/><rect width="5" height="2" y="1" fill="#D00"/><rect width="5" height="1" y="2" fill="#FFCE00"/></svg> Deutsch</button>
     </div>
     <h2 id="menu-heading">Choose a region</h2>
     <div class="region-grid" id="region-btns">
-      <button class="region-btn all" onclick="startQuiz('all')" data-en="🌍 All Rivers (50)" data-de="🌍 Alle Flüsse (50)">🌍 All Rivers (50)</button>
-      <button class="region-btn" onclick="startQuiz('Africa')" data-en="🌍 Africa" data-de="🌍 Afrika">🌍 Africa</button>
-      <button class="region-btn" onclick="startQuiz('Asia')" data-en="🌏 Asia" data-de="🌏 Asien">🌏 Asia</button>
-      <button class="region-btn" onclick="startQuiz('Europe')" data-en="🌍 Europe" data-de="🌍 Europa">🌍 Europe</button>
-      <button class="region-btn" onclick="startQuiz('North America')" data-en="🌎 North America" data-de="🌎 Nordamerika">🌎 North America</button>
-      <button class="region-btn" onclick="startQuiz('South America')" data-en="🌎 South America" data-de="🌎 Südamerika">🌎 South America</button>
+      <button class="region-btn all" onclick="startQuiz('all')" data-en="All Rivers (50)" data-de="Alle Flüsse (50)">All Rivers (50)</button>
+      <button class="region-btn" onclick="startQuiz('Africa')" data-en="Africa" data-de="Afrika">Africa</button>
+      <button class="region-btn" onclick="startQuiz('Asia')" data-en="Asia" data-de="Asien">Asia</button>
+      <button class="region-btn" onclick="startQuiz('Europe')" data-en="Europe" data-de="Europa">Europe</button>
+      <button class="region-btn" onclick="startQuiz('North America')" data-en="North America" data-de="Nordamerika">North America</button>
+      <button class="region-btn" onclick="startQuiz('South America')" data-en="South America" data-de="Südamerika">South America</button>
     </div>
   </div>
 
@@ -300,7 +302,6 @@
     </div>
 
     <div class="river-card">
-      <span class="river-icon">🏞️</span>
       <div class="river-name" id="river-name"></div>
       <div class="river-meta">
         <span class="river-badge badge-length" id="river-length"></span>
@@ -321,18 +322,20 @@
 
       <div class="percentage" id="final-pct">0%</div>
       <div class="best-streak" id="final-streak">Best streak: 0</div>
+      <div class="best-streak" id="res-best" style="margin-top:8px;color:#a5b4fc"></div>
     </div>
     <button class="play-again-btn" id="play-again-btn" onclick="backToMenu()">Play Again</button>
   </div>
 </div>
 
+<script src="../scores.js"></script>
 <script>
 // ─── Language support ─────────────────────────────────────────────────────
 let language = 'en';
 
 const UI = {
-  en: { menu:"Choose a region", score:"Score: ", question:"Question: ", streak:"Streak: ", questionLabel:"Which country does this river flow through?", rankLabel: n => `#${n} longest`, playAgain:"Play Again", outOf: n => `out of ${n}`, bestStreak: n => `Best streak: ${n} 🔥`, pct: p => `${p}%` },
-  de: { menu:"Region wählen",   score:"Punkte: ", question:"Frage: ",   streak:"Serie: ",  questionLabel:"Durch welches Land fließt dieser Fluss?",         rankLabel: n => `#${n} längster`, playAgain:"Nochmal",    outOf: n => `von ${n}`,    bestStreak: n => `Beste Serie: ${n} 🔥`, pct: p => `${p}%` },
+  en: { title:"Guess the River", subtitle:"Which country does this river flow through?", menu:"Choose a region", score:"Score: ", question:"Question: ", streak:"Streak: ", questionLabel:"Which country does this river flow through?", rankLabel: n => `#${n} longest`, playAgain:"Play Again", outOf: n => `out of ${n}`, bestStreak: n => `Best streak: ${n}`, pct: p => `${p}%` },
+  de: { title:"Rate den Fluss",  subtitle:"Durch welches Land fließt dieser Fluss?",   menu:"Region wählen",   score:"Punkte: ", question:"Frage: ", streak:"Serie: ", questionLabel:"Durch welches Land fließt dieser Fluss?", rankLabel: n => `#${n} längster`, playAgain:"Nochmal", outOf: n => `von ${n}`, bestStreak: n => `Beste Serie: ${n}`, pct: p => `${p}%` },
 };
 
 const DE_NAMES = {
@@ -353,6 +356,8 @@ function setLang(lang) {
   document.getElementById('lang-en').classList.toggle('active', lang === 'en');
   document.getElementById('lang-de').classList.toggle('active', lang === 'de');
   const U = UI[lang];
+  document.getElementById('page-title').textContent     = U.title;
+  document.getElementById('page-subtitle').textContent  = U.subtitle;
   document.getElementById('menu-heading').textContent   = U.menu;
   document.getElementById('lbl-score').textContent      = U.score;
   document.getElementById('lbl-question').textContent   = U.question;
@@ -371,66 +376,66 @@ function setLang(lang) {
 
 const RIVERS = [
   // AFRICA ──────────────────────────────────────────────────────────────────
-  { name:"Nile",          country:"Egypt",        allCountries:["Egypt","Sudan","South Sudan","Ethiopia","Uganda","Rwanda","Burundi","DR Congo","Eritrea","Kenya","Tanzania"], length:6650, rank:1,  continent:"Africa",        fact:"The world's longest river, flowing north through the Sahara desert to the Mediterranean Sea." },
-  { name:"Congo",         country:"DR Congo",     allCountries:["DR Congo","Republic of Congo","Central African Republic","Angola","Zambia","Rwanda","Burundi"],                length:4700, rank:8,  continent:"Africa",        fact:"The deepest river on Earth — some sections exceed 220 metres — and carries the second-greatest volume of water of any river." },
-  { name:"Niger",         country:"Nigeria",      allCountries:["Nigeria","Mali","Niger","Guinea","Benin","Cameroon"],                                                          length:4200, rank:13, continent:"Africa",        fact:"Unusual among major rivers, it starts near the ocean but flows inland before curving back to the sea." },
-  { name:"Zambezi",       country:"Zambia",       allCountries:["Zambia","Angola","Namibia","Botswana","Zimbabwe","Mozambique"],                                               length:3540, rank:18, continent:"Africa",        fact:"Home to one of the world's largest waterfalls, which locals call 'the smoke that thunders'." },
-  { name:"Orange River",  country:"South Africa", allCountries:["South Africa","Lesotho","Namibia","Botswana"],                                                               length:2092, rank:34, continent:"Africa",        fact:"The longest river on the southern tip of the African continent, flowing west to the Atlantic Ocean." },
-  { name:"Okavango",      country:"Botswana",     allCountries:["Botswana","Angola","Namibia"],                                                                               length:1600, rank:43, continent:"Africa",        fact:"One of the world's rare rivers that never reaches the sea — it drains into the Kalahari Desert, forming a vast inland delta." },
-  { name:"Limpopo",       country:"South Africa", allCountries:["South Africa","Zimbabwe","Botswana","Mozambique"],                                                           length:1800, rank:38, continent:"Africa",        fact:"Flows in a great arc through four countries before emptying into the Indian Ocean." },
-  { name:"Senegal River", country:"Senegal",      allCountries:["Senegal","Mali","Guinea","Mauritania"],                                                                      length:1600, rank:44, continent:"Africa",        fact:"Forms a natural political border along a significant part of its lower course." },
+  { name:"Nile",          country:"Egypt",        allCountries:["Egypt","Sudan","South Sudan","Ethiopia","Uganda","Rwanda","Burundi","DR Congo","Eritrea","Kenya","Tanzania"], length:6650, rank:1,  continent:"Africa",        fact:"The world's longest river, flowing north through the Sahara desert to the Mediterranean Sea.", fact_de:"Der längste Fluss der Welt, der durch die Sahara nach Norden zum Mittelmeer fließt." },
+  { name:"Congo",         country:"DR Congo",     allCountries:["DR Congo","Republic of Congo","Central African Republic","Angola","Zambia","Rwanda","Burundi"],                length:4700, rank:8,  continent:"Africa",        fact:"The deepest river on Earth — some sections exceed 220 metres — and carries the second-greatest volume of water of any river.", fact_de:"Der tiefste Fluss der Erde — einige Abschnitte übersteigen 220 Meter — und führt die zweitgrößte Wassermenge aller Flüsse." },
+  { name:"Niger",         country:"Nigeria",      allCountries:["Nigeria","Mali","Niger","Guinea","Benin","Cameroon"],                                                          length:4200, rank:13, continent:"Africa",        fact:"Unusual among major rivers, it starts near the ocean but flows inland before curving back to the sea.", fact_de:"Ungewöhnlich unter großen Flüssen: Er beginnt nahe dem Meer, fließt ins Landesinnere und kehrt dann zum Meer zurück." },
+  { name:"Zambezi",       country:"Zambia",       allCountries:["Zambia","Angola","Namibia","Botswana","Zimbabwe","Mozambique"],                                               length:3540, rank:18, continent:"Africa",        fact:"Home to one of the world's largest waterfalls, which locals call 'the smoke that thunders'.", fact_de:"Heimat eines der größten Wasserfälle der Welt, den die Einheimischen 'den Rauch, der donnert' nennen." },
+  { name:"Orange River",  country:"South Africa", allCountries:["South Africa","Lesotho","Namibia","Botswana"],                                                               length:2092, rank:34, continent:"Africa",        fact:"The longest river on the southern tip of the African continent, flowing west to the Atlantic Ocean.", fact_de:"Der längste Fluss an der Südspitze des afrikanischen Kontinents, der westwärts zum Atlantik fließt." },
+  { name:"Okavango",      country:"Botswana",     allCountries:["Botswana","Angola","Namibia"],                                                                               length:1600, rank:43, continent:"Africa",        fact:"One of the world's rare rivers that never reaches the sea — it drains into the Kalahari Desert, forming a vast inland delta.", fact_de:"Einer der seltenen Flüsse der Welt, der das Meer nie erreicht — er mündet in die Kalahari und bildet ein riesiges Binnendelta." },
+  { name:"Limpopo",       country:"South Africa", allCountries:["South Africa","Zimbabwe","Botswana","Mozambique"],                                                           length:1800, rank:38, continent:"Africa",        fact:"Flows in a great arc through four countries before emptying into the Indian Ocean.", fact_de:"Fließt in einem großen Bogen durch vier Länder, bevor er in den Indischen Ozean mündet." },
+  { name:"Senegal River", country:"Senegal",      allCountries:["Senegal","Mali","Guinea","Mauritania"],                                                                      length:1600, rank:44, continent:"Africa",        fact:"Forms a natural political border along a significant part of its lower course.", fact_de:"Bildet entlang eines großen Teils seines Unterlaufs eine natürliche politische Grenze." },
 
   // ASIA ────────────────────────────────────────────────────────────────────
-  { name:"Yangtze",          country:"China",      allCountries:["China"],                                                          length:6300, rank:3,  continent:"Asia", fact:"The longest river in Asia, flowing entirely within a single country from the Tibetan Plateau to the East China Sea." },
-  { name:"Yellow River",     country:"China",      allCountries:["China"],                                                          length:5464, rank:6,  continent:"Asia", fact:"Called the 'Mother River' of one of the world's oldest civilisations; its yellow colour comes from enormous amounts of silt." },
-  { name:"Yenisei",          country:"Russia",     allCountries:["Russia","Mongolia"],                                              length:5539, rank:5,  continent:"Asia", fact:"The largest river system draining into the Arctic Ocean, crossing three time zones through Siberia." },
-  { name:"Ob-Irtysh",        country:"Russia",     allCountries:["Russia","Kazakhstan","China","Mongolia"],                         length:5410, rank:7,  continent:"Asia", fact:"One of the world's longest river systems, flowing through the vast Siberian plain to the Kara Sea." },
-  { name:"Amur",             country:"Russia",     allCountries:["Russia","China","Mongolia"],                                      length:4444, rank:9,  continent:"Asia", fact:"Forms one of the longest international river borders in the world over thousands of kilometres." },
-  { name:"Lena",             country:"Russia",     allCountries:["Russia"],                                                         length:4400, rank:10, continent:"Asia", fact:"Flows entirely through permafrost in Siberia, forming one of the world's largest river deltas before reaching the Arctic Ocean." },
-  { name:"Mekong",           country:"Vietnam",    allCountries:["Vietnam","China","Myanmar","Laos","Thailand","Cambodia"],         length:4350, rank:11, continent:"Asia", fact:"Flows through six countries and supports the livelihoods of over 60 million people across Southeast Asia." },
-  { name:"Brahmaputra",      country:"India",      allCountries:["India","China","Bangladesh"],                                     length:3848, rank:14, continent:"Asia", fact:"One of the few rivers to cut through the Himalayas, carving some of the deepest gorges on Earth." },
-  { name:"Salween",          country:"Myanmar",    allCountries:["Myanmar","China","Thailand"],                                     length:3289, rank:22, continent:"Asia", fact:"One of the last great free-flowing rivers in Asia, descending steeply through narrow gorges for much of its length." },
-  { name:"Indus",            country:"Pakistan",   allCountries:["Pakistan","India","China"],                                       length:3180, rank:23, continent:"Asia", fact:"One of the longest rivers in Asia and the cradle of one of the world's earliest urban civilisations, dating back 5,000 years." },
-  { name:"Rio Grande",       country:"United States", allCountries:["United States","Mexico"],                                     length:3057, rank:25, continent:"North America", fact:"Stretches over 3,000 km and forms a natural border for roughly half of its course." },
-  { name:"Syr Darya",        country:"Kazakhstan", allCountries:["Kazakhstan","Uzbekistan","Tajikistan","Kyrgyzstan"],              length:3078, rank:24, continent:"Asia", fact:"Its waters were so heavily diverted for irrigation during the 20th century that it contributed to a massive environmental disaster." },
-  { name:"Euphrates",        country:"Iraq",       allCountries:["Iraq","Turkey","Syria"],                                         length:2800, rank:28, continent:"Asia", fact:"Together with the Tigris, it defined ancient Mesopotamia — the 'cradle of civilisation' — and still irrigates millions of farmers today." },
-  { name:"Amu Darya",        country:"Uzbekistan", allCountries:["Uzbekistan","Tajikistan","Afghanistan","Turkmenistan"],           length:2400, rank:30, continent:"Asia", fact:"Known to the ancient Greeks as the Oxus, this river was a key corridor along the Silk Road trade routes." },
-  { name:"Pearl River",      country:"China",      allCountries:["China"],                                                          length:2400, rank:31, continent:"Asia", fact:"Flows past one of the world's most densely populated river deltas before emptying into the South China Sea." },
-  { name:"Irrawaddy",        country:"Myanmar",    allCountries:["Myanmar"],                                                        length:2170, rank:33, continent:"Asia", fact:"Runs the entire length of its country from north to south, serving as the nation's most important commercial waterway." },
-  { name:"Tarim",            country:"China",      allCountries:["China"],                                                          length:2179, rank:32, continent:"Asia", fact:"The longest inland river in the driest region of its country, flowing through one of the world's largest deserts." },
-  { name:"Ganges",           country:"India",      allCountries:["India","Bangladesh"],                                             length:2525, rank:27, continent:"Asia", fact:"One of the most sacred rivers in the world, revered for thousands of years by hundreds of millions of people." },
-  { name:"Tigris",           country:"Iraq",       allCountries:["Iraq","Turkey","Syria"],                                         length:1950, rank:36, continent:"Asia", fact:"The faster of the two rivers that defined ancient Mesopotamia; the capital of a major Arab country is built on its banks." },
-  { name:"Kolyma",           country:"Russia",     allCountries:["Russia"],                                                         length:2129, rank:35, continent:"Asia", fact:"One of the most remote rivers on Earth, flowing through a vast, nearly uninhabited region of northeastern Siberia." },
+  { name:"Yangtze",          country:"China",      allCountries:["China"],                                                          length:6300, rank:3,  continent:"Asia", fact:"The longest river in Asia, flowing entirely within a single country from the Tibetan Plateau to the Pacific coast.", fact_de:"Der längste Fluss Asiens, der vollständig innerhalb eines einzigen Landes vom Tibetischen Plateau bis zur Pazifikküste fließt." },
+  { name:"Yellow River",     country:"China",      allCountries:["China"],                                                          length:5464, rank:6,  continent:"Asia", fact:"Called the 'Mother River' of one of the world's oldest civilisations; its yellow colour comes from enormous amounts of silt.", fact_de:"Als 'Mutterfluss' einer der ältesten Zivilisationen der Welt bekannt; seine gelbe Farbe stammt von enormen Schlickmengen." },
+  { name:"Yenisei",          country:"Russia",     allCountries:["Russia","Mongolia"],                                              length:5539, rank:5,  continent:"Asia", fact:"The largest river system draining into the Arctic Ocean, crossing three time zones through boreal forest and tundra.", fact_de:"Das größte in den Arktischen Ozean entwässernde Flusssystem, das drei Zeitzonen durch borealen Wald und Tundra durchquert." },
+  { name:"Ob-Irtysh",        country:"Russia",     allCountries:["Russia","Kazakhstan","China","Mongolia"],                         length:5410, rank:7,  continent:"Asia", fact:"One of the world's longest river systems, flowing through a vast northern plain to the Kara Sea.", fact_de:"Eines der längsten Flusssysteme der Welt, das durch eine weite nördliche Ebene bis zum Karischen Meer fließt." },
+  { name:"Amur",             country:"Russia",     allCountries:["Russia","China","Mongolia"],                                      length:4444, rank:9,  continent:"Asia", fact:"Forms one of the longest international river borders in the world over thousands of kilometres.", fact_de:"Bildet eine der längsten internationalen Flussgrenzen der Welt über Tausende von Kilometern." },
+  { name:"Lena",             country:"Russia",     allCountries:["Russia"],                                                         length:4400, rank:10, continent:"Asia", fact:"Flows entirely through permafrost, forming one of the world's largest river deltas before reaching the Arctic Ocean.", fact_de:"Fließt vollständig durch Permafrost und bildet eines der größten Flussdeltas der Welt vor dem Arktischen Ozean." },
+  { name:"Mekong",           country:"Vietnam",    allCountries:["Vietnam","China","Myanmar","Laos","Thailand","Cambodia"],         length:4350, rank:11, continent:"Asia", fact:"Flows through six countries and supports the livelihoods of over 60 million people across Southeast Asia.", fact_de:"Fließt durch sechs Länder und sichert den Lebensunterhalt von über 60 Millionen Menschen in Südostasien." },
+  { name:"Brahmaputra",      country:"India",      allCountries:["India","China","Bangladesh"],                                     length:3848, rank:14, continent:"Asia", fact:"One of the few rivers to cut through the Himalayas, carving some of the deepest gorges on Earth.", fact_de:"Einer der wenigen Flüsse, der durch den Himalaya fließt und dabei einige der tiefsten Schluchten der Erde gräbt." },
+  { name:"Salween",          country:"Myanmar",    allCountries:["Myanmar","China","Thailand"],                                     length:3289, rank:22, continent:"Asia", fact:"One of the last great free-flowing rivers in Asia, descending steeply through narrow gorges for much of its length.", fact_de:"Einer der letzten großen frei fließenden Flüsse Asiens, der steil durch enge Schluchten absteigt." },
+  { name:"Indus",            country:"Pakistan",   allCountries:["Pakistan","India","China"],                                       length:3180, rank:23, continent:"Asia", fact:"One of the longest rivers in Asia and the cradle of one of the world's earliest urban civilisations, dating back 5,000 years.", fact_de:"Einer der längsten Flüsse Asiens und die Wiege einer der frühesten Stadtzivilisationen der Welt vor 5.000 Jahren." },
+  { name:"Rio Grande",       country:"United States", allCountries:["United States","Mexico"],                                     length:3057, rank:25, continent:"North America", fact:"Stretches over 3,000 km and forms a natural border for roughly half of its course.", fact_de:"Erstreckt sich über 3.000 km und bildet auf etwa der Hälfte seines Laufes eine natürliche Grenze." },
+  { name:"Syr Darya",        country:"Kazakhstan", allCountries:["Kazakhstan","Uzbekistan","Tajikistan","Kyrgyzstan"],              length:3078, rank:24, continent:"Asia", fact:"Its waters were so heavily diverted for irrigation during the 20th century that it contributed to a massive environmental disaster.", fact_de:"Sein Wasser wurde im 20. Jahrhundert so stark zur Bewässerung umgeleitet, dass es zu einer massiven Umweltkatastrophe beitrug." },
+  { name:"Euphrates",        country:"Iraq",       allCountries:["Iraq","Turkey","Syria"],                                         length:2800, rank:28, continent:"Asia", fact:"Together with the Tigris, it defined ancient Mesopotamia — the 'cradle of civilisation' — and still irrigates millions of farmers today.", fact_de:"Zusammen mit dem Tigris definierte er das antike Mesopotamien — die 'Wiege der Zivilisation' — und bewässert noch heute Millionen von Bauern." },
+  { name:"Amu Darya",        country:"Uzbekistan", allCountries:["Uzbekistan","Tajikistan","Afghanistan","Turkmenistan"],           length:2400, rank:30, continent:"Asia", fact:"Known to the ancient Greeks as the Oxus, this river was a key corridor along the Silk Road trade routes.", fact_de:"Den alten Griechen als Oxus bekannt, war er ein wichtiger Korridor auf den Seidenstraßen-Handelsrouten." },
+  { name:"Pearl River",      country:"China",      allCountries:["China"],                                                          length:2400, rank:31, continent:"Asia", fact:"Flows past one of the world's most densely populated river deltas before emptying into the South China Sea.", fact_de:"Fließt an einem der dichtest besiedelten Flussdeltas der Welt vorbei, bevor er ins Südchinesische Meer mündet." },
+  { name:"Irrawaddy",        country:"Myanmar",    allCountries:["Myanmar"],                                                        length:2170, rank:33, continent:"Asia", fact:"Runs the entire length of its country from north to south, serving as the nation's most important commercial waterway.", fact_de:"Durchquert sein Land von Nord nach Süd und ist der wichtigste kommerzielle Wasserweg der Nation." },
+  { name:"Tarim",            country:"China",      allCountries:["China"],                                                          length:2179, rank:32, continent:"Asia", fact:"The longest inland river in the driest region of its country, flowing through one of the world's largest deserts.", fact_de:"Der längste Binnensee im trockensten Gebiet seines Landes, der durch eine der größten Wüsten der Welt fließt." },
+  { name:"Ganges",           country:"India",      allCountries:["India","Bangladesh"],                                             length:2525, rank:27, continent:"Asia", fact:"One of the most sacred rivers in the world, revered for thousands of years by hundreds of millions of people.", fact_de:"Einer der heiligsten Flüsse der Welt, von Hunderten Millionen Menschen seit Jahrtausenden verehrt." },
+  { name:"Tigris",           country:"Iraq",       allCountries:["Iraq","Turkey","Syria"],                                         length:1950, rank:36, continent:"Asia", fact:"The faster of the two rivers that defined ancient Mesopotamia; the capital of a major Arab country is built on its banks.", fact_de:"Der schnellere der beiden Flüsse des antiken Mesopotamiens; die Hauptstadt eines bedeutenden arabischen Landes liegt an seinen Ufern." },
+  { name:"Kolyma",           country:"Russia",     allCountries:["Russia"],                                                         length:2129, rank:35, continent:"Asia", fact:"One of the most remote rivers on Earth, flowing through a vast, nearly uninhabited region near the Arctic.", fact_de:"Einer der entlegensten Flüsse der Erde, der durch eine weite, nahezu unbewohnte Region nahe der Arktis fließt." },
 
   // EUROPE ──────────────────────────────────────────────────────────────────
-  { name:"Volga",    country:"Russia",  allCountries:["Russia"],                                                                                                  length:3531, rank:16, continent:"Europe", fact:"The longest river in Europe, draining into the world's largest inland body of water — a lake so big it's called a sea." },
-  { name:"Danube",   country:"Romania", allCountries:["Romania","Germany","Austria","Slovakia","Hungary","Croatia","Serbia","Bulgaria","Moldova","Ukraine"],       length:2860, rank:29, continent:"Europe", fact:"The only major European river flowing from west to east; it passes through or borders ten countries and four capital cities." },
-  { name:"Ural",     country:"Russia",  allCountries:["Russia","Kazakhstan"],                                                                                     length:2428, rank:32, continent:"Europe", fact:"Traditionally considered the natural geographic boundary between Europe and Asia." },
-  { name:"Dnieper",  country:"Ukraine", allCountries:["Ukraine","Russia","Belarus"],                                                                             length:2285, rank:33, continent:"Europe", fact:"The fourth-longest river in Europe; the capital of Ukraine was founded on its banks over a thousand years ago." },
-  { name:"Don",      country:"Russia",  allCountries:["Russia"],                                                                                                  length:1870, rank:38, continent:"Europe", fact:"One of Russia's great historic rivers, used for centuries as a trade and military route into the southern steppes." },
-  { name:"Pechora",  country:"Russia",  allCountries:["Russia"],                                                                                                  length:1809, rank:39, continent:"Europe", fact:"Flows north through Russian tundra and taiga to drain into the Barents Sea in the Arctic." },
-  { name:"Rhine",    country:"Germany", allCountries:["Germany","Switzerland","Austria","France","Netherlands","Liechtenstein"],                                  length:1230, rank:45, continent:"Europe", fact:"One of Europe's most commercially important waterways, flowing from the Alps through the industrial heartland of central Europe." },
-  { name:"Elbe",     country:"Germany", allCountries:["Germany","Czech Republic"],                                                                               length:1091, rank:47, continent:"Europe", fact:"A major Central European river; the famous wartime meeting of Allied and Soviet forces took place on its banks in 1945." },
+  { name:"Volga",    country:"Russia",  allCountries:["Russia"],                                                                                                  length:3531, rank:16, continent:"Europe", fact:"The longest river in Europe, draining into the world's largest inland body of water — a lake so big it's called a sea.", fact_de:"Der längste Fluss Europas, der in das größte Binnengewässer der Welt mündet — so groß, dass es als Meer bezeichnet wird." },
+  { name:"Danube",   country:"Romania", allCountries:["Romania","Germany","Austria","Slovakia","Hungary","Croatia","Serbia","Bulgaria","Moldova","Ukraine"],       length:2860, rank:29, continent:"Europe", fact:"The only major European river flowing from west to east; it passes through or borders ten countries and four capital cities.", fact_de:"Der einzige bedeutende europäische Fluss, der von West nach Ost fließt; er durchquert oder grenzt an zehn Länder und vier Hauptstädte." },
+  { name:"Ural",     country:"Russia",  allCountries:["Russia","Kazakhstan"],                                                                                     length:2428, rank:32, continent:"Europe", fact:"Traditionally considered the natural geographic boundary between Europe and Asia.", fact_de:"Traditionell als natürliche geografische Grenze zwischen Europa und Asien betrachtet." },
+  { name:"Dnieper",  country:"Ukraine", allCountries:["Ukraine","Russia","Belarus"],                                                                             length:2285, rank:33, continent:"Europe", fact:"The fourth-longest river in Europe; one of the continent's oldest capital cities was founded on its banks over a thousand years ago.", fact_de:"Der viertlängste Fluss Europas; eine der ältesten Hauptstädte des Kontinents wurde vor über tausend Jahren an seinen Ufern gegründet." },
+  { name:"Don",      country:"Russia",  allCountries:["Russia"],                                                                                                  length:1870, rank:38, continent:"Europe", fact:"One of the great historic rivers of Eastern Europe, used for centuries as a trade and military route into the southern steppes.", fact_de:"Einer der großen historischen Flüsse Osteuropas, jahrhundertelang als Handels- und Militärroute in die südlichen Steppen genutzt." },
+  { name:"Pechora",  country:"Russia",  allCountries:["Russia"],                                                                                                  length:1809, rank:39, continent:"Europe", fact:"Flows north through vast tundra and taiga forests to drain into the Barents Sea in the Arctic.", fact_de:"Fließt durch weite Tundra und Taigawälder nach Norden zur Barentssee in der Arktis." },
+  { name:"Rhine",    country:"Germany", allCountries:["Germany","Switzerland","Austria","France","Netherlands","Liechtenstein"],                                  length:1230, rank:45, continent:"Europe", fact:"One of Europe's most commercially important waterways, flowing from the Alps through the industrial heartland of central Europe.", fact_de:"Einer der wichtigsten kommerziellen Wasserstraßen Europas, der von den Alpen durch das industrielle Herz Mitteleuropas fließt." },
+  { name:"Elbe",     country:"Germany", allCountries:["Germany","Czech Republic"],                                                                               length:1091, rank:47, continent:"Europe", fact:"A major Central European river; the famous wartime meeting of Allied and Soviet forces took place on its banks in 1945.", fact_de:"Ein bedeutender mitteleuropäischer Fluss; das berühmte Kriegsende-Treffen der alliierten und sowjetischen Streitkräfte fand 1945 an seinen Ufern statt." },
 
   // NORTH AMERICA ───────────────────────────────────────────────────────────
-  { name:"Mississippi-Missouri", country:"United States", allCountries:["United States"],          length:6275, rank:4,  continent:"North America", fact:"The largest river system in North America, draining land from 31 states and two Canadian provinces." },
-  { name:"Mackenzie",            country:"Canada",        allCountries:["Canada"],                 length:4241, rank:12, continent:"North America", fact:"The longest river in its country, flowing north through boreal forest and tundra to the Beaufort Sea." },
-  { name:"Yukon",                country:"Canada",        allCountries:["Canada","United States"], length:3190, rank:22, continent:"North America", fact:"Became world-famous during the 1896–99 Gold Rush, when tens of thousands of prospectors flooded its valley." },
-  { name:"Colorado River",       country:"United States", allCountries:["United States","Mexico"], length:2333, rank:31, continent:"North America", fact:"Carved one of the world's most spectacular natural wonders over millions of years." },
-  { name:"Columbia River",       country:"United States", allCountries:["United States","Canada"], length:1953, rank:37, continent:"North America", fact:"The largest river flowing into the Pacific Ocean from the Americas, generating enormous amounts of hydroelectric power." },
-  { name:"Nelson-Saskatchewan",  country:"Canada",        allCountries:["Canada"],                 length:2570, rank:28, continent:"North America", fact:"Drains the vast grain-growing prairies of central Canada before emptying into Hudson Bay." },
-  { name:"Arkansas River",       country:"United States", allCountries:["United States"],          length:2364, rank:30, continent:"North America", fact:"Rises in the Rocky Mountains and flows across the Great Plains as a major tributary of the Mississippi." },
+  { name:"Mississippi-Missouri", country:"United States", allCountries:["United States"],          length:6275, rank:4,  continent:"North America", fact:"The largest river system in North America, draining land from 31 states and two provinces.", fact_de:"Das größte Flusssystem Nordamerikas, das Land aus 31 Bundesstaaten und zwei Provinzen entwässert." },
+  { name:"Mackenzie",            country:"Canada",        allCountries:["Canada"],                 length:4241, rank:12, continent:"North America", fact:"The longest river in its country, flowing north through boreal forest and tundra to the Beaufort Sea.", fact_de:"Der längste Fluss des Landes, der durch boreale Wälder und Tundra nach Norden zur Beaufort-See fließt." },
+  { name:"Yukon",                country:"Canada",        allCountries:["Canada","United States"], length:3190, rank:22, continent:"North America", fact:"Became world-famous during the 1896–99 Gold Rush, when tens of thousands of prospectors flooded its valley.", fact_de:"Wurde während des Goldrausches von 1896–99 weltberühmt, als Zehntausende von Goldgräbern sein Tal überfluteten." },
+  { name:"Colorado River",       country:"United States", allCountries:["United States","Mexico"], length:2333, rank:31, continent:"North America", fact:"Carved one of the world's most spectacular natural wonders over millions of years.", fact_de:"Hat über Millionen von Jahren eines der spektakulärsten Naturwunder der Welt geformt." },
+  { name:"Columbia River",       country:"United States", allCountries:["United States","Canada"], length:1953, rank:37, continent:"North America", fact:"The largest river flowing into the Pacific Ocean from the Americas, generating enormous amounts of hydroelectric power.", fact_de:"Der größte aus Amerika in den Pazifischen Ozean fließende Fluss, der enorme Mengen an Wasserkraft erzeugt." },
+  { name:"Nelson-Saskatchewan",  country:"Canada",        allCountries:["Canada"],                 length:2570, rank:28, continent:"North America", fact:"Drains the vast grain-growing prairies of central North America before emptying into Hudson Bay.", fact_de:"Entwässert die weiten Getreideanbau-Prärien Zentralnordamerikas, bevor er in die Hudson Bay mündet." },
+  { name:"Arkansas River",       country:"United States", allCountries:["United States"],          length:2364, rank:30, continent:"North America", fact:"Rises in the Rocky Mountains and flows across the Great Plains as a major tributary of the Mississippi.", fact_de:"Entspringt in den Rocky Mountains und fließt über die Great Plains als bedeutender Nebenfluss des Mississippi." },
 
   // SOUTH AMERICA ───────────────────────────────────────────────────────────
-  { name:"Amazon",        country:"Brazil",    allCountries:["Brazil","Peru","Colombia"],           length:6400, rank:2,  continent:"South America", fact:"Carries roughly 20% of all fresh water that flows into the world's oceans — more than the next seven largest rivers combined." },
-  { name:"Paraná",        country:"Brazil",    allCountries:["Brazil","Paraguay","Argentina"],      length:3998, rank:19, continent:"South America", fact:"The second-longest river in South America, flowing south through the continent's heartland before meeting the Atlantic." },
-  { name:"Tocantins",     country:"Brazil",    allCountries:["Brazil"],                             length:3650, rank:17, continent:"South America", fact:"Flows entirely within one country and is dammed by one of the world's largest hydroelectric reservoirs." },
-  { name:"Orinoco",       country:"Venezuela", allCountries:["Venezuela","Colombia"],               length:2736, rank:26, continent:"South America", fact:"Its vast delta was among the first parts of the Americas glimpsed by Christopher Columbus in 1498." },
-  { name:"São Francisco", country:"Brazil",    allCountries:["Brazil"],                             length:2914, rank:24, continent:"South America", fact:"Known as the 'River of National Unity', it flows entirely within one country and crosses five states." },
-  { name:"Uruguay River", country:"Uruguay",   allCountries:["Uruguay","Brazil","Argentina"],      length:1838, rank:40, continent:"South America", fact:"Gives its name to one of the countries it borders; its basin was home to the Guaraní people for centuries." },
+  { name:"Amazon",        country:"Brazil",    allCountries:["Brazil","Peru","Colombia"],           length:6400, rank:2,  continent:"South America", fact:"Carries roughly 20% of all fresh water that flows into the world's oceans — more than the next seven largest rivers combined.", fact_de:"Führt etwa 20 % allen Süßwassers, das in die Weltmeere fließt — mehr als die nächsten sieben größten Flüsse zusammen." },
+  { name:"Paraná",        country:"Brazil",    allCountries:["Brazil","Paraguay","Argentina"],      length:3998, rank:19, continent:"South America", fact:"The second-longest river in South America, flowing south through the continent's heartland before meeting the Atlantic.", fact_de:"Der zweitlängste Fluss Südamerikas, der durch das Herz des Kontinents nach Süden fließt, bevor er auf den Atlantik trifft." },
+  { name:"Tocantins",     country:"Brazil",    allCountries:["Brazil"],                             length:3650, rank:17, continent:"South America", fact:"Flows entirely within one country and is dammed by one of the world's largest hydroelectric reservoirs.", fact_de:"Fließt vollständig innerhalb eines Landes und wird von einem der größten Wasserkraftreservoire der Welt aufgestaut." },
+  { name:"Orinoco",       country:"Venezuela", allCountries:["Venezuela","Colombia"],               length:2736, rank:26, continent:"South America", fact:"Its vast delta was among the first parts of the Americas glimpsed by Christopher Columbus in 1498.", fact_de:"Sein riesiges Delta gehörte zu den ersten Teilen Amerikas, die Christoph Kolumbus 1498 erblickte." },
+  { name:"São Francisco", country:"Brazil",    allCountries:["Brazil"],                             length:2914, rank:24, continent:"South America", fact:"Known as the 'River of National Unity', it flows entirely within one country and crosses five states.", fact_de:"Als 'Fluss der nationalen Einheit' bekannt, fließt er vollständig in einem Land durch fünf Bundesstaaten." },
+  { name:"Uruguay River", country:"Uruguay",   allCountries:["Uruguay","Brazil","Argentina"],      length:1838, rank:40, continent:"South America", fact:"Gives its name to one of the countries it borders; its basin was home to the Guaraní people for centuries.", fact_de:"Gibt einem der Länder, die er begrenzt, seinen Namen; sein Becken war jahrhundertelang die Heimat des Guaraní-Volkes." },
 
   // OCEANIA ─────────────────────────────────────────────────────────────────
-  { name:"Murray-Darling", country:"Australia", allCountries:["Australia"], length:3750, rank:15, continent:"Oceania", fact:"The longest river system on the driest inhabited continent, supplying water to a third of the nation's food production." },
+  { name:"Murray-Darling", country:"Australia", allCountries:["Australia"], length:3750, rank:15, continent:"Oceania", fact:"The longest river system on the driest inhabited continent, supplying water to a third of the nation's food production.", fact_de:"Das längste Flusssystem des trockensten bewohnten Kontinents, das einem Drittel der nationalen Lebensmittelproduktion Wasser liefert." },
 ];
 
 // ─── Country pool for wrong answers ─────────────────────────────────────────
@@ -447,6 +452,7 @@ const COUNTRY_POOL = {
 let pool = [], questions = [], currentQ = 0;
 let score = 0, streak = 0, bestStreak = 0, totalQuestions = 10;
 let answered = false;
+let currentRegion = 'all';
 
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -457,6 +463,7 @@ function shuffle(arr) {
 }
 
 function startQuiz(region) {
+  currentRegion = region;
   pool = region === 'all'
     ? [...RIVERS]
     : RIVERS.filter(r => r.continent === region);
@@ -483,9 +490,10 @@ function showQuestion() {
   document.getElementById('progress').style.width = `${(currentQ / totalQuestions) * 100}%`;
 
   document.getElementById('river-name').textContent   = q.name;
-  document.getElementById('river-length').textContent = `📏 ${q.length.toLocaleString()} km`;
+  document.getElementById('river-length').textContent = `${q.length.toLocaleString()} km`;
   document.getElementById('river-rank').textContent   = UI[language].rankLabel(q.rank);
-  document.getElementById('river-fact').textContent   = `"${q.fact}"`;
+  const factText = (language === 'de' && q.fact_de) ? q.fact_de : q.fact;
+  document.getElementById('river-fact').textContent   = `"${factText}"`;
 
   // Build 4 options: 1 correct + 3 wrong from same continent
   const sameContinent = (COUNTRY_POOL[q.continent] || []).filter(c => !q.allCountries.includes(c));
@@ -538,6 +546,8 @@ function handleAnswer(btn, isCorrect, correctCountry) {
 }
 
 function showResult() {
+  const isRecord  = ArcadeScores.save('guess-the-river', score);
+  const bestEntry = ArcadeScores.get('guess-the-river');
   document.getElementById('quiz').style.display   = 'none';
   document.getElementById('result').style.display = 'block';
   const pct = Math.round((score / totalQuestions) * 100);
@@ -546,6 +556,10 @@ function showResult() {
   document.getElementById('final-total').textContent  = U.outOf(totalQuestions);
   document.getElementById('final-pct').textContent    = U.pct(pct);
   document.getElementById('final-streak').textContent = U.bestStreak(bestStreak);
+  const bestEl = document.getElementById('res-best');
+  if (isRecord) bestEl.textContent = '🏆 New Record!';
+  else if (bestEntry) bestEl.textContent = `🏆 Best: ${bestEntry.score} correct`;
+  else bestEl.textContent = '';
 }
 
 function backToMenu() {
