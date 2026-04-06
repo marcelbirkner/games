@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <title>Guess the Lyrics</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 24px 0;
+    }
+
+    .container { max-width: 640px; width: 100%; padding: 20px; }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    h1 { text-align: center; font-size: 2rem; margin-bottom: 6px; }
+    .subtitle { text-align: center; color: #aaa; margin-bottom: 28px; font-size: 0.95rem; }
+
+    /* ── MENU ── */
+    #menu { text-align: center; }
+    #menu h2 { font-size: 1.1rem; margin-bottom: 14px; color: #ccc; font-weight: 600; }
+
+    .level-toggle {
+      display: flex; justify-content: center; gap: 10px; margin-bottom: 24px;
+    }
+    .level-btn {
+      padding: 10px 32px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 99px;
+      background: rgba(255,255,255,0.06);
+      color: #ccc; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    }
+    .level-btn:hover:not(.active) { border-color: rgba(255,255,255,0.4); color: #fff; }
+    .level-btn.active {
+      border-color: #ec4899;
+      background: rgba(236,72,153,0.2);
+      color: #f9a8d4;
+      box-shadow: 0 0 12px rgba(236,72,153,0.3);
+    }
+
+    .decade-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .decade-btn {
+      padding: 14px 10px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .decade-btn:hover { background: rgba(255,255,255,0.13); border-color: rgba(255,255,255,0.3); transform: translateY(-2px); }
+    .decade-btn.all {
+      grid-column: 1 / -1;
+      background: rgba(236,72,153,0.2);
+      border-color: rgba(236,72,153,0.45);
+    }
+    .decade-btn.all:hover { background: rgba(236,72,153,0.35); }
+
+    /* ── QUIZ ── */
+    #quiz { display: none; }
+
+    .progress-bar {
+      width: 100%; height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px; margin-bottom: 20px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ec4899, #f97316);
+      border-radius: 3px; transition: width 0.3s;
+    }
+
+    .score-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px; padding: 12px 16px;
+      background: rgba(255,255,255,0.06); border-radius: 12px; font-size: 0.95rem;
+    }
+    .score-bar .label { color: #aaa; }
+    .score-bar .value { font-weight: 700; font-size: 1.1rem; }
+    .score-bar .streak { color: #f59e0b; }
+    .score-bar .correct-count { color: #ec4899; }
+
+    .lyric-card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 28px 24px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .lyric-label {
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; color: #ec4899; margin-bottom: 18px;
+    }
+    .lyric-quote {
+      font-size: 1.1rem; line-height: 1.75; font-style: italic;
+      color: #f1f5f9; white-space: pre-line;
+    }
+    .lyric-quote::before { content: '\201C'; font-size: 1.4rem; color: #ec4899; }
+    .lyric-quote::after  { content: '\201D'; font-size: 1.4rem; color: #ec4899; }
+
+    .options {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    }
+    .option-btn {
+      padding: 14px 12px;
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #fff; cursor: pointer; transition: all 0.2s;
+      text-align: center; line-height: 1.35;
+    }
+    .option-btn .opt-title { font-size: 0.95rem; font-weight: 700; display: block; }
+    .option-btn .opt-artist { font-size: 0.78rem; color: #94a3b8; margin-top: 3px; display: block; }
+    .option-btn:hover:not(.disabled) {
+      background: rgba(255,255,255,0.13);
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    .option-btn.correct  { background: rgba(16,185,129,0.3); border-color: #10b981; }
+    .option-btn.wrong    { background: rgba(239,68,68,0.25); border-color: #ef4444; }
+    .option-btn.reveal   { border-color: #10b981; opacity: 0.85; }
+    .option-btn.disabled { cursor: default; pointer-events: none; }
+
+    /* ── RESULT ── */
+    #result { display: none; text-align: center; }
+    .result-card {
+      background: rgba(255,255,255,0.06);
+      border-radius: 16px; padding: 40px 30px; margin-bottom: 24px;
+    }
+    .result-card .big-score {
+      font-size: 4rem; font-weight: 800;
+      background: linear-gradient(135deg, #ec4899, #f97316);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .result-card .out-of   { font-size: 1.2rem; color: #aaa; margin-top: 4px; }
+    .result-card .percentage { font-size: 1.5rem; margin-top: 12px; color: #e2e8f0; }
+    .result-card .best-streak { margin-top: 12px; color: #f59e0b; font-size: 1rem; }
+
+    .play-again-btn {
+      padding: 14px 40px; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #ec4899, #f97316);
+      color: #fff; font-size: 1.1rem; font-weight: 700;
+      cursor: pointer; transition: transform 0.2s; margin-top: 8px;
+    }
+    .play-again-btn:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="../index.html" class="back-link">← Back to Arcade</a>
+  <h1>🎵 Guess the Lyrics</h1>
+  <p class="subtitle">Which song are these lyrics from?</p>
+
+  <!-- MENU -->
+  <div id="menu">
+    <h2>Choose a level</h2>
+    <div class="level-toggle">
+      <button class="level-btn active" id="btn-easy" onclick="setLevel('easy')">Easy</button>
+      <button class="level-btn"        id="btn-hard" onclick="setLevel('hard')">Hard</button>
+    </div>
+    <h2>Choose a decade</h2>
+    <div class="decade-grid">
+      <button class="decade-btn all"  onclick="startQuiz('all')">All Decades</button>
+      <button class="decade-btn"      onclick="startQuiz('60s70s')">60s &amp; 70s</button>
+      <button class="decade-btn"      onclick="startQuiz('80s')">80s</button>
+      <button class="decade-btn"      onclick="startQuiz('90s')">90s</button>
+      <button class="decade-btn"      onclick="startQuiz('2000s')">2000s</button>
+      <button class="decade-btn"      onclick="startQuiz('2010s')">2010s+</button>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz">
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+    <div class="score-bar">
+      <div><span class="label">Score: </span><span class="value correct-count" id="score">0</span></div>
+      <div><span class="label">Question: </span><span class="value" id="qnum">1/10</span></div>
+      <div><span class="label">Streak: </span><span class="value streak" id="streak">0</span></div>
+    </div>
+    <div class="lyric-card">
+      <div class="lyric-label" id="lyric-label">Which song is this from?</div>
+      <div class="lyric-quote" id="lyric-text"></div>
+    </div>
+    <div class="options" id="options"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result">
+    <div class="result-card">
+      <div class="big-score" id="final-score">0</div>
+      <div class="out-of" id="final-total">out of 10</div>
+      <div class="percentage" id="final-pct">0%</div>
+      <div class="best-streak" id="final-streak">Best streak: 0</div>
+      <div class="best-streak" id="res-best" style="margin-top:8px;color:#a5b4fc"></div>
+    </div>
+    <button class="play-again-btn" onclick="backToMenu()">Play Again</button>
+  </div>
+</div>
+
+<script src="../scores.js"></script>
+<script>
+const LYRICS = [
+  // ── 60s & 70s ────────────────────────────────────────────────────────────
+  { lyric: "Yesterday, all my troubles seemed so far away\nNow it looks as though they're here to stay", song: "Yesterday", artist: "The Beatles", decade: "60s70s" },
+  { lyric: "Hey Jude, don't make it bad\nTake a sad song and make it better", song: "Hey Jude", artist: "The Beatles", decade: "60s70s" },
+  { lyric: "Let it be, let it be, let it be, let it be\nWhispering words of wisdom, let it be", song: "Let It Be", artist: "The Beatles", decade: "60s70s" },
+  { lyric: "She loves you, yeah yeah yeah\nShe loves you, yeah yeah yeah", song: "She Loves You", artist: "The Beatles", decade: "60s70s" },
+  { lyric: "Imagine all the people\nLiving life in peace", song: "Imagine", artist: "John Lennon", decade: "60s70s" },
+  { lyric: "I can't get no satisfaction\n'Cause I try and I try and I try", song: "(I Can't Get No) Satisfaction", artist: "The Rolling Stones", decade: "60s70s" },
+  { lyric: "R-E-S-P-E-C-T\nFind out what it means to me", song: "Respect", artist: "Aretha Franklin", decade: "60s70s" },
+  { lyric: "What's going on? What's going on?\nWhat's going on, oh what's going on", song: "What's Going On", artist: "Marvin Gaye", decade: "60s70s" },
+  { lyric: "Superstition ain't the way\nVery superstitious, washing's on the wall", song: "Superstition", artist: "Stevie Wonder", decade: "60s70s" },
+  { lyric: "No woman, no cry\nNo woman, no cry", song: "No Woman No Cry", artist: "Bob Marley", decade: "60s70s" },
+  { lyric: "Rocket man, burning out his fuse up here alone", song: "Rocket Man", artist: "Elton John", decade: "60s70s" },
+  { lyric: "Stairway to heaven\nAnd she's buying a stairway to heaven", song: "Stairway to Heaven", artist: "Led Zeppelin", decade: "60s70s" },
+  { lyric: "Hotel California — such a lovely place\nSuch a lovely face", song: "Hotel California", artist: "The Eagles", decade: "60s70s" },
+  { lyric: "Dancing queen, young and sweet, only seventeen", song: "Dancing Queen", artist: "ABBA", decade: "60s70s" },
+  { lyric: "Go your own way, you can call it another lonely day", song: "Go Your Own Way", artist: "Fleetwood Mac", decade: "60s70s" },
+
+  // ── 80s ─────────────────────────────────────────────────────────────────
+  { lyric: "Is this the real life? Is this just fantasy?\nCaught in a landslide, no escape from reality", song: "Bohemian Rhapsody", artist: "Queen", decade: "80s" },
+  { lyric: "We will, we will rock you!\nWe will, we will rock you!", song: "We Will Rock You", artist: "Queen", decade: "80s" },
+  { lyric: "Billie Jean is not my lover\nShe's just a girl who claims that I am the one", song: "Billie Jean", artist: "Michael Jackson", decade: "80s" },
+  { lyric: "Thriller, thriller night\nAnd no one's gonna save you from the beast about to strike", song: "Thriller", artist: "Michael Jackson", decade: "80s" },
+  { lyric: "Just beat it, beat it, beat it\nNo one wants to be defeated", song: "Beat It", artist: "Michael Jackson", decade: "80s" },
+  { lyric: "Girls just wanna have fun\nOh, girls just wanna have fun", song: "Girls Just Want to Have Fun", artist: "Cyndi Lauper", decade: "80s" },
+  { lyric: "Take on me, take me on\nI'll be gone in a day or two", song: "Take On Me", artist: "a-ha", decade: "80s" },
+  { lyric: "Every breath you take, every move you make\nEvery bond you break, every step you take, I'll be watching you", song: "Every Breath You Take", artist: "The Police", decade: "80s" },
+  { lyric: "Don't you forget about me\nDon't don't don't don't", song: "Don't You (Forget About Me)", artist: "Simple Minds", decade: "80s" },
+  { lyric: "Like a virgin, touched for the very first time", song: "Like a Virgin", artist: "Madonna", decade: "80s" },
+  { lyric: "Sweet home Alabama, where the skies are so blue\nSweet home Alabama, Lord, I'm coming home to you", song: "Sweet Home Alabama", artist: "Lynyrd Skynyrd", decade: "80s" },
+  { lyric: "It's the eye of the tiger, it's the thrill of the fight\nRising up to the challenge of our rival", song: "Eye of the Tiger", artist: "Survivor", decade: "80s" },
+  { lyric: "With or without you\nWith or without you, I can't live", song: "With or Without You", artist: "U2", decade: "80s" },
+  { lyric: "Pour some sugar on me, in the name of love", song: "Pour Some Sugar on Me", artist: "Def Leppard", decade: "80s" },
+  { lyric: "Should I stay or should I go now?\nIf I go there will be trouble", song: "Should I Stay or Should I Go", artist: "The Clash", decade: "80s" },
+
+  // ── 90s ─────────────────────────────────────────────────────────────────
+  { lyric: "With the lights out, it's less dangerous\nHere we are now, entertain us", song: "Smells Like Teen Spirit", artist: "Nirvana", decade: "90s" },
+  { lyric: "I will always love you\nI will always love you", song: "I Will Always Love You", artist: "Whitney Houston", decade: "90s" },
+  { lyric: "I would do anything for love\nBut I won't do that", song: "I'd Do Anything for Love", artist: "Meat Loaf", decade: "90s" },
+  { lyric: "Creep, I'm a weirdo\nWhat the hell am I doing here?", song: "Creep", artist: "Radiohead", decade: "90s" },
+  { lyric: "Under the bridge downtown\nIs where I drew some blood", song: "Under the Bridge", artist: "Red Hot Chili Peppers", decade: "90s" },
+  { lyric: "Baby can't you see, I'm calling\nA guy like you should wear a warning", song: "Toxic", artist: "Britney Spears", decade: "90s" },
+  { lyric: "...Baby one more time\nMy loneliness is killing me", song: "...Baby One More Time", artist: "Britney Spears", decade: "90s" },
+  { lyric: "Enter sandman\nExit light, enter night\nTake my hand, we're off to never never land", song: "Enter Sandman", artist: "Metallica", decade: "90s" },
+  { lyric: "I bless the rains down in Africa\nGonna take some time to do the things we never had", song: "Africa", artist: "Toto", decade: "90s" },
+  { lyric: "Purple rain, purple rain\nI only wanted to see you bathing in the purple rain", song: "Purple Rain", artist: "Prince", decade: "90s" },
+  { lyric: "Mr. Brightside — coming out of my cage\nAnd I've been doing just fine", song: "Mr. Brightside", artist: "The Killers", decade: "90s" },
+  { lyric: "I'm coming out of my cage and I've been doing just fine\nGotta gotta be down because I want it all", song: "Mr. Brightside", artist: "The Killers", decade: "90s" },
+  { lyric: "I like big butts and I cannot lie\nYou other brothers can't deny", song: "Baby Got Back", artist: "Sir Mix-a-Lot", decade: "90s" },
+
+  // ── 2000s ────────────────────────────────────────────────────────────────
+  { lyric: "Look, if you had one shot, one opportunity\nTo seize everything you ever wanted, one moment", song: "Lose Yourself", artist: "Eminem", decade: "2000s" },
+  { lyric: "Clap along if you feel like a room without a roof\nClap along if you feel like happiness is the truth", song: "Happy", artist: "Pharrell Williams", decade: "2000s" },
+  { lyric: "Somebody that I used to know\nNow you're just somebody that I used to know", song: "Somebody That I Used to Know", artist: "Gotye", decade: "2000s" },
+  { lyric: "In New York, concrete jungle where dreams are made of\nThere's nothing you can't do", song: "Empire State of Mind", artist: "Jay-Z ft. Alicia Keys", decade: "2000s" },
+  { lyric: "She's got a smile that it seems to me\nReminds me of childhood memories", song: "Sweet Child O' Mine", artist: "Guns N' Roses", decade: "2000s" },
+  { lyric: "I'm on the highway to hell\nHighway to hell", song: "Highway to Hell", artist: "AC/DC", decade: "2000s" },
+  { lyric: "Stronger, what doesn't kill me makes me stronger\nStand a little taller", song: "Stronger", artist: "Kanye West", decade: "2000s" },
+  { lyric: "Hips don't lie and I'm starting to feel it's right\nAll the attraction, the tension", song: "Hips Don't Lie", artist: "Shakira", decade: "2000s" },
+  { lyric: "Umbrella — ella ella eh eh eh\nUnder my umbrella", song: "Umbrella", artist: "Rihanna", decade: "2000s" },
+  { lyric: "Crazy in love, got me looking so crazy right now\nYour love's got me looking so crazy right now", song: "Crazy in Love", artist: "Beyoncé", decade: "2000s" },
+  { lyric: "Just dance, gonna be okay\nDa da doo-doo-mmm", song: "Just Dance", artist: "Lady Gaga", decade: "2000s" },
+  { lyric: "I kissed a girl and I liked it\nThe taste of her cherry chapstick", song: "I Kissed a Girl", artist: "Katy Perry", decade: "2000s" },
+
+  // ── 2010s+ ───────────────────────────────────────────────────────────────
+  { lyric: "Hello from the other side\nI must have called a thousand times", song: "Hello", artist: "Adele", decade: "2010s" },
+  { lyric: "Rolling in the deep\nWe could have had it all", song: "Rolling in the Deep", artist: "Adele", decade: "2010s" },
+  { lyric: "Never mind, I'll find someone like you\nI wish nothing but the best for you", song: "Someone Like You", artist: "Adele", decade: "2010s" },
+  { lyric: "We found love in a hopeless place\nWe found love in a hopeless place", song: "We Found Love", artist: "Rihanna", decade: "2010s" },
+  { lyric: "I got that sunshine in my pocket, got that good soul in my feet\nI feel that hot blood in my body when it drops", song: "Can't Stop the Feeling!", artist: "Justin Timberlake", decade: "2010s" },
+  { lyric: "Shake it off, shake it off\nI shake it off, I shake it off", song: "Shake It Off", artist: "Taylor Swift", decade: "2010s" },
+  { lyric: "We are never ever ever getting back together\nLike, ever", song: "We Are Never Getting Back Together", artist: "Taylor Swift", decade: "2010s" },
+  { lyric: "Bad romance, want your bad romance\nI want your love and I want your revenge", song: "Bad Romance", artist: "Lady Gaga", decade: "2010s" },
+  { lyric: "Roar! — I am a champion\nAnd you're gonna hear me roar", song: "Roar", artist: "Katy Perry", decade: "2010s" },
+  { lyric: "Shape of you, I'm in love with the shape of you\nWe push and pull like a magnet do", song: "Shape of You", artist: "Ed Sheeran", decade: "2010s" },
+  { lyric: "God's plan, God's plan\nI hold back, sometimes I won't, yeah", song: "God's Plan", artist: "Drake", decade: "2010s" },
+  { lyric: "Started from the bottom, now we're here\nStarted from the bottom, now my whole team here", song: "Started From the Bottom", artist: "Drake", decade: "2010s" },
+  { lyric: "Sit down, be humble\nSit down, be humble", song: "HUMBLE.", artist: "Kendrick Lamar", decade: "2010s" },
+  { lyric: "Old town road — gonna take my horse to the old town road\nI'm gonna ride 'til I can't no more", song: "Old Town Road", artist: "Lil Nas X", decade: "2010s" },
+  { lyric: "I said, ooh, I'm blinded by the lights\nNo, I can't sleep until I feel your touch", song: "Blinding Lights", artist: "The Weeknd", decade: "2010s" },
+  { lyric: "Uptown funk you up, uptown funk you up\nSay what?", song: "Uptown Funk", artist: "Bruno Mars", decade: "2010s" },
+  { lyric: "I'm levitating — the Milky Way, we're renegading\nYeah, yeah, yeah, yeah, yeah", song: "Levitating", artist: "Dua Lipa", decade: "2010s" },
+  { lyric: "I'm not your friend, or anything, damn\nYou think that you're the man\nI think, therefore I am", song: "bad guy", artist: "Billie Eilish", decade: "2010s" },
+  { lyric: "Drivers license — I got my driver's license last week\nJust like we always talked about", song: "drivers license", artist: "Olivia Rodrigo", decade: "2010s" },
+  { lyric: "Watermelon sugar high\nWatermelon sugar high", song: "Watermelon Sugar", artist: "Harry Styles", decade: "2010s" },
+];
+
+let questions = [], currentQ = 0;
+let score = 0, streak = 0, bestStreak = 0, totalQuestions = 10;
+let answered = false;
+let currentDecade = 'all';
+let currentLevel = 'easy';
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function setLevel(level) {
+  currentLevel = level;
+  document.getElementById('btn-easy').classList.toggle('active', level === 'easy');
+  document.getElementById('btn-hard').classList.toggle('active', level === 'hard');
+}
+
+function startQuiz(decade) {
+  currentDecade = decade;
+  const pool = decade === 'all' ? [...LYRICS] : LYRICS.filter(l => l.decade === decade);
+  if (pool.length < 4) { alert('Not enough songs for this decade yet. Try another!'); return; }
+  totalQuestions = Math.min(pool.length, 10);
+  questions = shuffle(pool).slice(0, totalQuestions);
+  currentQ = 0; score = 0; streak = 0; bestStreak = 0;
+  document.getElementById('menu').style.display   = 'none';
+  document.getElementById('quiz').style.display   = 'block';
+  document.getElementById('result').style.display = 'none';
+  showQuestion();
+}
+
+function showQuestion() {
+  answered = false;
+  const q = questions[currentQ];
+  const isHard = currentLevel === 'hard';
+
+  document.getElementById('score').textContent    = score;
+  document.getElementById('qnum').textContent     = `${currentQ + 1}/${totalQuestions}`;
+  document.getElementById('streak').textContent   = streak;
+  document.getElementById('progress').style.width = `${(currentQ / totalQuestions) * 100}%`;
+  document.getElementById('lyric-text').textContent = q.lyric;
+  document.getElementById('lyric-label').textContent = isHard ? 'Who sang this?' : 'Which song is this from?';
+
+  const el = document.getElementById('options');
+  el.innerHTML = '';
+
+  if (isHard) {
+    // Hard: options are artist names — deduplicate across full pool
+    const others = shuffle(LYRICS.filter(l => l.artist !== q.artist));
+    const distractors = [];
+    const seenArtists = new Set([q.artist]);
+    for (const l of others) {
+      if (!seenArtists.has(l.artist)) { seenArtists.add(l.artist); distractors.push(l); }
+      if (distractors.length === 3) break;
+    }
+    shuffle([q, ...distractors]).forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.innerHTML = `<span class="opt-title">${opt.artist}</span>`;
+      btn.addEventListener('click', () => handleAnswer(btn, opt.artist === q.artist, q.artist, true));
+      el.appendChild(btn);
+    });
+  } else {
+    // Easy: options are song title + artist — deduplicate by song
+    const others = shuffle(LYRICS.filter(l => l.song !== q.song));
+    const distractors = [];
+    const seenSongs = new Set([q.song]);
+    for (const l of others) {
+      if (!seenSongs.has(l.song)) { seenSongs.add(l.song); distractors.push(l); }
+      if (distractors.length === 3) break;
+    }
+    shuffle([q, ...distractors]).forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.innerHTML = `<span class="opt-title">${opt.song}</span><span class="opt-artist">${opt.artist}</span>`;
+      btn.addEventListener('click', () => handleAnswer(btn, opt.song === q.song, q.song, false));
+      el.appendChild(btn);
+    });
+  }
+}
+
+function handleAnswer(btn, isCorrect, correctValue, isHard) {
+  if (answered) return;
+  answered = true;
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+  if (isCorrect) {
+    btn.classList.add('correct');
+    score++; streak++;
+    if (streak > bestStreak) bestStreak = streak;
+  } else {
+    btn.classList.add('wrong');
+    streak = 0;
+    document.querySelectorAll('.option-btn').forEach(b => {
+      const title = b.querySelector('.opt-title');
+      if (title && title.textContent === correctValue) b.classList.add('reveal');
+    });
+  }
+  document.getElementById('score').textContent  = score;
+  document.getElementById('streak').textContent = streak;
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ < totalQuestions) showQuestion();
+    else showResult();
+  }, 1400);
+}
+
+function showResult() {
+  const isRecord  = ArcadeScores.save('guess-the-lyrics', score, currentLevel);
+  const bestEntry = ArcadeScores.get('guess-the-lyrics', currentLevel);
+  document.getElementById('quiz').style.display   = 'none';
+  document.getElementById('result').style.display = 'block';
+  const pct = Math.round((score / totalQuestions) * 100);
+  document.getElementById('final-score').textContent  = score;
+  document.getElementById('final-total').textContent  = `out of ${totalQuestions}`;
+  document.getElementById('final-pct').textContent    = `${pct}%`;
+  document.getElementById('final-streak').textContent = `Best streak: ${bestStreak}`;
+  const bestEl = document.getElementById('res-best');
+  const levelLabel = currentLevel === 'hard' ? 'Hard' : 'Easy';
+  if (isRecord) bestEl.textContent = `🏆 New ${levelLabel} Record!`;
+  else if (bestEntry) bestEl.textContent = `🏆 Best (${levelLabel}): ${bestEntry.score} correct`;
+  else bestEl.textContent = '';
+}
+
+function backToMenu() {
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('quiz').style.display   = 'none';
+  document.getElementById('menu').style.display   = 'block';
+}
+</script>
+</body>
+</html>

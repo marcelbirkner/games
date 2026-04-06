@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0" />
+  <title>Music Anagram</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #a78bfa;
+      --accent-hover: #c4b5fd;
+      --bg-card: rgba(255,255,255,0.07);
+      --bg-card-hover: rgba(255,255,255,0.12);
+      --border: rgba(255,255,255,0.15);
+      --text: #e2e8f0;
+      --text-dim: #94a3b8;
+      --tile-pool-bg: #312e81;
+      --tile-pool-border: #6366f1;
+      --tile-answer-bg: #3b0764;
+      --tile-answer-border: #a78bfa;
+      --correct: #22c55e;
+      --wrong: #ef4444;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .top-bar {
+      width: 100%; max-width: 760px;
+      display: flex; align-items: center;
+      padding: 18px 20px 0;
+    }
+    .back-link {
+      color: #a5b4fc; text-decoration: none;
+      font-size: 1.1rem; font-weight: 600; transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    h1 {
+      text-align: center; font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 800;
+      background: linear-gradient(90deg, #a78bfa, #ec4899);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      padding: 18px 20px 4px;
+    }
+    .subtitle { text-align: center; color: var(--text-dim); font-size: 0.95rem; margin-bottom: 28px; }
+
+    .screen { display: none; width: 100%; max-width: 720px; padding: 0 16px 40px; }
+    .screen.active { display: block; }
+
+    /* ── Menu ── */
+    .section-label {
+      font-size: 0.82rem; color: var(--text-dim); text-transform: uppercase;
+      letter-spacing: 0.1em; margin-bottom: 12px;
+    }
+    .menu-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px; margin-bottom: 22px;
+    }
+    .menu-btn {
+      background: var(--bg-card); border: 2px solid var(--border);
+      color: var(--text); padding: 14px 10px; border-radius: var(--radius);
+      cursor: pointer; font-size: 0.95rem; text-align: center; transition: all 0.2s;
+    }
+    .menu-btn:hover { background: var(--bg-card-hover); border-color: var(--accent); transform: translateY(-2px); }
+    .menu-btn.selected {
+      background: rgba(167,139,250,0.2); border-color: var(--accent);
+      color: var(--accent-hover); font-weight: 700;
+    }
+    .menu-btn.all-btn {
+      grid-column: 1 / -1;
+      background: rgba(167,139,250,0.15); border-color: rgba(167,139,250,0.4);
+    }
+
+    .artist-divider {
+      display: flex; align-items: center; gap: 10px;
+      margin: 4px 0 14px; color: var(--text-dim); font-size: 0.78rem;
+      text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .artist-divider::before, .artist-divider::after {
+      content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1);
+    }
+    .artist-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px; margin-bottom: 22px;
+    }
+    .artist-btn {
+      background: rgba(236,72,153,0.08); border: 2px solid rgba(236,72,153,0.25);
+      color: var(--text); padding: 12px 10px; border-radius: var(--radius);
+      cursor: pointer; font-size: 0.9rem; text-align: center; transition: all 0.2s;
+    }
+    .artist-btn:hover { background: rgba(236,72,153,0.18); border-color: rgba(236,72,153,0.6); transform: translateY(-2px); }
+    .artist-btn.selected {
+      background: rgba(236,72,153,0.25); border-color: #ec4899;
+      color: #f9a8d4; font-weight: 700;
+    }
+    #decade-section { transition: opacity 0.2s; }
+    #decade-section.dimmed { opacity: 0.3; pointer-events: none; }
+
+    .primary-btn {
+      display: block; width: 100%; max-width: 260px; margin: 0 auto;
+      padding: 14px; background: var(--accent); color: #fff;
+      font-size: 1.1rem; font-weight: 700; border: none; border-radius: var(--radius);
+      cursor: pointer; transition: all 0.2s; text-align: center;
+    }
+    .primary-btn:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(167,139,250,0.4); }
+    .primary-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ── Game ── */
+    .game-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+    }
+    .stat-label { font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+    .stat-val { font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+
+    .timer-track {
+      width: 100%; height: 8px; background: rgba(255,255,255,0.12);
+      border-radius: 4px; overflow: hidden; margin-bottom: 22px;
+    }
+    #timer-bar {
+      height: 100%; width: 100%;
+      background: linear-gradient(90deg, var(--accent), #ec4899);
+      border-radius: 4px; transition: width 0.5s linear, background 0.5s;
+    }
+    #timer-bar.urgent { background: linear-gradient(90deg, #ef4444, #f97316); }
+
+    .word-type-badge {
+      display: inline-block; text-align: center;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .word-pattern {
+      text-align: center; font-size: 1.1rem; letter-spacing: 4px;
+      color: rgba(255,255,255,0.35); margin-bottom: 16px; font-family: monospace;
+      min-height: 26px;
+    }
+
+    .tile-zone {
+      min-height: 80px; display: flex; flex-wrap: wrap; gap: 10px;
+      justify-content: center; align-items: center; padding: 14px;
+      border-radius: var(--radius); border: 2px dashed var(--border); margin-bottom: 14px;
+    }
+    .tile-zone.answer-zone {
+      border-color: rgba(167,139,250,0.4); background: rgba(167,139,250,0.04); min-height: 88px;
+    }
+    .tile-zone.answer-zone.zone-hint { border-color: rgba(167,139,250,0.7); }
+
+    .tile {
+      width: 44px; height: 52px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; font-weight: 800; border-radius: 8px;
+      cursor: pointer; user-select: none; transition: transform 0.12s, box-shadow 0.12s;
+    }
+    .tile:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.4); }
+    .tile:active { transform: scale(0.92); }
+    .tile.pool-tile { background: var(--tile-pool-bg); border: 2px solid var(--tile-pool-border); color: #c7d2fe; }
+    .tile.answer-tile { background: var(--tile-answer-bg); border: 2px solid var(--tile-answer-border); color: #ddd6fe; }
+    .tile.flash-correct { background: #14532d !important; border-color: var(--correct) !important; color: #86efac !important; }
+    .tile.flash-wrong { background: #450a0a !important; border-color: var(--wrong) !important; color: #fca5a5 !important; animation: shake 0.45s ease; }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      15% { transform: translateX(-6px); }
+      30% { transform: translateX(6px); }
+      45% { transform: translateX(-5px); }
+      60% { transform: translateX(5px); }
+      75% { transform: translateX(-3px); }
+      90% { transform: translateX(3px); }
+    }
+
+    #feedback { text-align: center; font-size: 1rem; font-weight: 700; min-height: 26px; margin-bottom: 14px; }
+    #feedback.correct { color: var(--correct); }
+    #feedback.wrong   { color: var(--wrong); }
+
+    .game-actions { display: flex; gap: 12px; justify-content: center; margin-top: 6px; }
+    .sec-btn {
+      padding: 10px 22px; background: var(--bg-card); border: 1px solid var(--border);
+      color: var(--text); border-radius: var(--radius); cursor: pointer;
+      font-size: 0.95rem; font-weight: 600; transition: all 0.2s;
+    }
+    .sec-btn:hover { background: var(--bg-card-hover); border-color: var(--accent); }
+    .submit-btn {
+      padding: 10px 28px; background: rgba(167,139,250,0.2); border: 2px solid var(--accent);
+      color: var(--accent-hover); border-radius: var(--radius); cursor: pointer;
+      font-size: 0.95rem; font-weight: 700; transition: all 0.2s;
+    }
+    .submit-btn:hover { background: var(--accent); color: #fff; }
+
+    .empty-hint { color: rgba(255,255,255,0.2); font-size: 0.85rem; pointer-events: none; }
+
+    .tile.hint-tile {
+      background: rgba(167,139,250,0.1); border: 2px solid rgba(167,139,250,0.3);
+      color: rgba(167,139,250,0.7); cursor: default;
+    }
+    .tile.hint-tile:hover { transform: none; box-shadow: none; }
+    .answer-slot {
+      width: 44px; height: 52px; border: 2px dashed rgba(167,139,250,0.2);
+      border-radius: 8px; flex-shrink: 0;
+    }
+
+    /* ── Result ── */
+    .result-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 18px; padding: 36px 28px; text-align: center;
+    }
+    .result-card h2 {
+      font-size: 1.8rem; font-weight: 800; margin-bottom: 6px;
+      background: linear-gradient(90deg, #a78bfa, #ec4899);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .result-stats { display: flex; justify-content: center; gap: 40px; margin: 28px 0; }
+    .res-stat { text-align: center; }
+    .res-stat .num { font-size: 2.8rem; font-weight: 900; color: var(--accent); line-height: 1; }
+    .res-stat .lbl { font-size: 0.8rem; color: var(--text-dim); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .result-actions { display: flex; gap: 14px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a class="back-link" href="../index.html">← Back to Arcade</a>
+</div>
+
+<h1>🎸 Music Anagram</h1>
+<p class="subtitle">Unscramble the artist or song title!</p>
+
+<!-- MENU -->
+<div class="screen active" id="screen-menu">
+  <div id="decade-section">
+    <p class="section-label">Choose a decade</p>
+    <div class="menu-grid" id="decade-grid">
+      <button class="menu-btn all-btn" onclick="selectDecade('all')">All Decades</button>
+      <button class="menu-btn" onclick="selectDecade('60s70s')">60s &amp; 70s</button>
+      <button class="menu-btn" onclick="selectDecade('80s')">80s</button>
+      <button class="menu-btn" onclick="selectDecade('90s')">90s</button>
+      <button class="menu-btn" onclick="selectDecade('2000s')">2000s</button>
+      <button class="menu-btn" onclick="selectDecade('2010s')">2010s+</button>
+    </div>
+  </div>
+
+  <p class="section-label" style="margin-top:8px;">Choose a category</p>
+  <div class="menu-grid" id="cat-grid">
+    <button class="menu-btn all-btn" onclick="selectCat('mix')">Mix (Artists + Songs)</button>
+    <button class="menu-btn" onclick="selectCat('artists')">Artists</button>
+    <button class="menu-btn" onclick="selectCat('songs')">Song Titles</button>
+  </div>
+
+  <div class="artist-divider">or play by artist</div>
+  <div class="artist-grid" id="artist-grid">
+    <button class="artist-btn" onclick="selectArtist('billie-eilish')">Billie Eilish</button>
+    <button class="artist-btn" onclick="selectArtist('dua-lipa')">Dua Lipa</button>
+    <button class="artist-btn" onclick="selectArtist('ed-sheeran')">Ed Sheeran</button>
+    <button class="artist-btn" onclick="selectArtist('coldplay')">Coldplay</button>
+    <button class="artist-btn" onclick="selectArtist('nina-chuba')">Nina Chuba</button>
+    <button class="artist-btn" onclick="selectArtist('zahide')">Zahide</button>
+    <button class="artist-btn" onclick="selectArtist('imagine-dragons')">Imagine Dragons</button>
+  </div>
+
+  <button class="primary-btn" id="start-btn" disabled onclick="startGame()">▶ Start</button>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="screen-game">
+  <div class="game-header">
+    <div>
+      <div class="stat-label">Score</div>
+      <div class="stat-val" id="score-val">0</div>
+    </div>
+    <div style="text-align:center;">
+      <div class="stat-label">Streak</div>
+      <div class="stat-val" id="streak-val">0</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="stat-label">Time</div>
+      <div class="stat-val" id="time-val">90</div>
+    </div>
+  </div>
+  <div class="timer-track"><div id="timer-bar"></div></div>
+
+  <div class="word-type-badge" id="word-type"></div>
+  <div class="word-pattern" id="word-pattern"></div>
+
+  <div class="tile-zone answer-zone" id="answer-zone">
+    <span class="empty-hint" id="answer-hint">Click tiles below ↓</span>
+  </div>
+
+  <div id="feedback"></div>
+
+  <div class="tile-zone" id="pool-zone"></div>
+
+  <div class="game-actions">
+    <button class="sec-btn" onclick="skipWord()">Skip</button>
+    <button class="submit-btn" onclick="submitAnswer()">Submit</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="screen-result">
+  <div class="result-card">
+    <h2>Time's Up!</h2>
+    <p id="result-sub" style="color:var(--text-dim); margin-top:6px; font-size:0.95rem;"></p>
+    <div class="result-stats">
+      <div class="res-stat">
+        <div class="num" id="res-score">0</div>
+        <div class="lbl">Words</div>
+      </div>
+      <div class="res-stat">
+        <div class="num" id="res-streak">0</div>
+        <div class="lbl">Best Streak</div>
+      </div>
+    </div>
+    <div id="res-best-row" style="display:none; text-align:center; margin:10px 0 2px; font-size:0.9rem; color:#a78bfa; font-weight:600">
+      <span id="res-best"></span>
+    </div>
+    <div class="result-actions">
+      <button class="primary-btn" style="max-width:160px;" onclick="startGame()">Play Again</button>
+      <button class="sec-btn" onclick="showMenu()">Menu</button>
+    </div>
+  </div>
+</div>
+
+<script src="../scores.js"></script>
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+// Each entry: { text, type: 'artist'|'song', era }
+// Letters are scrambled ignoring spaces; word pattern shown as hint
+const MUSIC_WORDS = [
+  // 60s & 70s — artists
+  { text: "Beatles",      type: "artist", era: "60s70s" },
+  { text: "Stones",       type: "artist", era: "60s70s" },
+  { text: "Hendrix",      type: "artist", era: "60s70s" },
+  { text: "Bowie",        type: "artist", era: "60s70s" },
+  { text: "Lennon",       type: "artist", era: "60s70s" },
+  { text: "Dylan",        type: "artist", era: "60s70s" },
+  { text: "Elton",        type: "artist", era: "60s70s" },
+  { text: "Floyd",        type: "artist", era: "60s70s" },
+  { text: "Zeppelin",     type: "artist", era: "60s70s" },
+  { text: "Eagles",       type: "artist", era: "60s70s" },
+  { text: "ABBA",         type: "artist", era: "60s70s" },
+  { text: "Marley",       type: "artist", era: "60s70s" },
+  { text: "Jagger",       type: "artist", era: "60s70s" },
+  { text: "Stevie",       type: "artist", era: "60s70s" },
+  { text: "Aretha",       type: "artist", era: "60s70s" },
+  // 60s & 70s — songs
+  { text: "Imagine",      type: "song",   era: "60s70s" },
+  { text: "Yesterday",    type: "song",   era: "60s70s" },
+  { text: "Respect",      type: "song",   era: "60s70s" },
+  { text: "Roxanne",      type: "song",   era: "60s70s" },
+  { text: "Heroes",       type: "song",   era: "60s70s" },
+  { text: "Stairway",     type: "song",   era: "60s70s" },
+  { text: "Superstition", type: "song",   era: "60s70s" },
+  { text: "Angie",        type: "song",   era: "60s70s" },
+  { text: "California",   type: "song",   era: "60s70s" },
+  { text: "Ziggy",        type: "song",   era: "60s70s" },
+
+  // 80s — artists
+  { text: "Jackson",      type: "artist", era: "80s" },
+  { text: "Madonna",      type: "artist", era: "80s" },
+  { text: "Prince",       type: "artist", era: "80s" },
+  { text: "Queen",        type: "artist", era: "80s" },
+  { text: "Metallica",    type: "artist", era: "80s" },
+  { text: "Lauper",       type: "artist", era: "80s" },
+  { text: "Bono",         type: "artist", era: "80s" },
+  { text: "Springsteen",  type: "artist", era: "80s" },
+  { text: "Toto",         type: "artist", era: "80s" },
+  // 80s — songs
+  { text: "Thriller",     type: "song",   era: "80s" },
+  { text: "Billie",       type: "song",   era: "80s" },
+  { text: "Africa",       type: "song",   era: "80s" },
+  { text: "Gloria",       type: "song",   era: "80s" },
+  { text: "Roxanne",      type: "song",   era: "80s" },
+  { text: "Purple",       type: "song",   era: "80s" },
+  { text: "Material",     type: "song",   era: "80s" },
+  { text: "Sandman",      type: "song",   era: "80s" },
+  { text: "Holiday",      type: "song",   era: "80s" },
+  { text: "Careless",     type: "song",   era: "80s" },
+
+  // 90s — artists
+  { text: "Nirvana",      type: "artist", era: "90s" },
+  { text: "Eminem",       type: "artist", era: "90s" },
+  { text: "Radiohead",    type: "artist", era: "90s" },
+  { text: "Oasis",        type: "artist", era: "90s" },
+  { text: "Tupac",        type: "artist", era: "90s" },
+  { text: "Mariah",       type: "artist", era: "90s" },
+  { text: "Celine",       type: "artist", era: "90s" },
+  { text: "Britney",      type: "artist", era: "90s" },
+  { text: "Spice",        type: "artist", era: "90s" },
+  // 90s — songs
+  { text: "Creep",        type: "song",   era: "90s" },
+  { text: "Wannabe",      type: "song",   era: "90s" },
+  { text: "Zombie",       type: "song",   era: "90s" },
+  { text: "Gangsta",      type: "song",   era: "90s" },
+  { text: "Wonderwall",   type: "song",   era: "90s" },
+  { text: "Toxic",        type: "song",   era: "90s" },
+  { text: "Karma",        type: "song",   era: "90s" },
+  { text: "Waterfalls",   type: "song",   era: "90s" },
+  { text: "Sandstorm",    type: "song",   era: "90s" },
+  { text: "Smooth",       type: "song",   era: "90s" },
+
+  // 2000s — artists
+  { text: "Beyonce",      type: "artist", era: "2000s" },
+  { text: "Shakira",      type: "artist", era: "2000s" },
+  { text: "Rihanna",      type: "artist", era: "2000s" },
+  { text: "Coldplay",     type: "artist", era: "2000s" },
+  { text: "Gorillaz",     type: "artist", era: "2000s" },
+  { text: "Gaga",         type: "artist", era: "2000s" },
+  { text: "Daft",         type: "artist", era: "2000s" },
+  { text: "Linkin",       type: "artist", era: "2000s" },
+  // 2000s — songs
+  { text: "Umbrella",     type: "song",   era: "2000s" },
+  { text: "Stronger",     type: "song",   era: "2000s" },
+  { text: "Numb",         type: "song",   era: "2000s" },
+  { text: "Yellow",       type: "song",   era: "2000s" },
+  { text: "Rehab",        type: "song",   era: "2000s" },
+  { text: "Bootylicious", type: "song",   era: "2000s" },
+  { text: "Crazy",        type: "song",   era: "2000s" },
+  { text: "Beautiful",    type: "song",   era: "2000s" },
+  { text: "Dilemma",      type: "song",   era: "2000s" },
+  { text: "Halo",         type: "song",   era: "2000s" },
+
+  // 2010s+ — artists
+  { text: "Adele",        type: "artist", era: "2010s" },
+  { text: "Sheeran",      type: "artist", era: "2010s" },
+  { text: "Kendrick",     type: "artist", era: "2010s" },
+  { text: "Weeknd",       type: "artist", era: "2010s" },
+  { text: "Drake",        type: "artist", era: "2010s" },
+  { text: "Billie",       type: "artist", era: "2010s" },
+  { text: "Lizzo",        type: "artist", era: "2010s" },
+  { text: "Olivia",       type: "artist", era: "2010s" },
+  { text: "Lorde",        type: "artist", era: "2010s" },
+  { text: "Sia",          type: "artist", era: "2010s" },
+  { text: "Dua",          type: "artist", era: "2010s" },
+  { text: "Ariana",       type: "artist", era: "2010s" },
+  // 2010s+ — songs
+  { text: "Levitating",   type: "song",   era: "2010s" },
+  { text: "Blinding",     type: "song",   era: "2010s" },
+  { text: "Humble",       type: "song",   era: "2010s" },
+  { text: "Royals",       type: "song",   era: "2010s" },
+  { text: "Chandelier",   type: "song",   era: "2010s" },
+  { text: "Shallow",      type: "song",   era: "2010s" },
+  { text: "Circles",      type: "song",   era: "2010s" },
+  { text: "Watermelon",   type: "song",   era: "2010s" },
+  { text: "Demons",       type: "song",   era: "2010s" },
+  { text: "Despacito",    type: "song",   era: "2010s" },
+];
+
+// ── Artist-specific song data ─────────────────────────────────────────────────
+const ARTIST_SONGS = {
+  'billie-eilish': {
+    label: 'Billie Eilish',
+    songs: ['Bad Guy', 'Lovely', 'Ocean Eyes', 'Bellyache', 'Oxytocin', 'Ilomilo',
+            'Happier', 'Skinny', 'Lunch', 'Therefore', 'Bored', 'Birds',
+            'Bury a Friend', 'Wish You Were Gay', 'Lost Cause', 'TV']
+  },
+  'dua-lipa': {
+    label: 'Dua Lipa',
+    songs: ['Levitating', 'Physical', 'Houdini', 'Hallucinate', 'Prisoner', 'Fever',
+            'New Rules', 'One Kiss', 'Cold Heart', 'Love Again', 'Electricity',
+            'Be the One', 'Pretty Please', 'Illusion', 'Training Season']
+  },
+  'ed-sheeran': {
+    label: 'Ed Sheeran',
+    songs: ['Perfect', 'Photograph', 'Shivers', 'Happier', 'Drunk', 'Castle',
+            'Lego House', 'Bad Habits', 'Shape of You', 'Galway Girl',
+            'Overpass Graffiti', 'Celestial', 'Spark', 'Thinking Out Loud']
+  },
+  'coldplay': {
+    label: 'Coldplay',
+    songs: ['Yellow', 'Clocks', 'Paradise', 'Fix You', 'Trouble', 'Sparks',
+            'Scientist', 'Adventure', 'Hymn', 'Higher Power', 'My Universe',
+            'Speed of Sound', 'Magic', 'Everglow', 'Champion']
+  },
+  'nina-chuba': {
+    label: 'Nina Chuba',
+    songs: ['Wildberry Lillet', 'Neben mir', 'Ich hass dich', 'Glatteis',
+            'Mangos mit Chili', 'Zorn und Liebe', 'Femminello', 'Fata Morgana',
+            'Farbenblind', 'Ende', 'Unsicher', 'Rage Girl',
+            'Blaues Licht', 'Vulkan', 'Karma']
+  },
+  'zahide': {
+    label: 'Zahide',
+    songs: ['TikTok Sportlich', 'Ballert auf Lautlos', 'Mona Lisa Motion',
+            'Zahide Did It Better', 'Kotti Azur', 'Uff Yaa', 'Rede',
+            'Pretty Privilege', 'Labubu Freestyle']
+  },
+  'imagine-dragons': {
+    label: 'Imagine Dragons',
+    songs: ['Demons', 'Thunder', 'Believer', 'Radioactive', 'Enemy', 'Natural',
+            'Monster', 'Bones', 'Warriors', 'Friction', 'Dream', 'Evolve',
+            'Sharks', 'Wrecked', 'Follow You']
+  },
+};
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let selectedDecade = null, selectedCat = null, selectedArtist = null;
+let score = 0, streak = 0, bestStreak = 0, timeLeft = 90, timerInterval = null;
+let currentItem = null, scrambled = [], poolOrder = [], answerSlots = [];
+let inputLocked = false, usedWords = new Set();
+
+// ── Menu ──────────────────────────────────────────────────────────────────────
+function selectDecade(d) {
+  selectedDecade = d;
+  document.querySelectorAll('#decade-grid .menu-btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent.includes(d === 'all' ? 'All' : d === '60s70s' ? '60s' : d));
+  });
+  checkReady();
+}
+
+function selectCat(c) {
+  selectedCat = c;
+  selectedArtist = null;
+  document.querySelectorAll('#cat-grid .menu-btn').forEach(b => {
+    b.classList.toggle('selected',
+      (c === 'mix' && b.textContent.includes('Mix')) ||
+      (c === 'artists' && b.textContent === 'Artists') ||
+      (c === 'songs' && b.textContent === 'Song Titles')
+    );
+  });
+  document.querySelectorAll('.artist-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('decade-section').classList.remove('dimmed');
+  checkReady();
+}
+
+function selectArtist(key) {
+  selectedArtist = key;
+  selectedCat = null;
+  selectedDecade = 'all'; // decade irrelevant for artist mode
+  document.querySelectorAll('.artist-btn').forEach(b => {
+    b.classList.toggle('selected', b.getAttribute('onclick').includes(key));
+  });
+  document.querySelectorAll('#cat-grid .menu-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('decade-section').classList.add('dimmed');
+  checkReady();
+}
+
+function checkReady() {
+  const ready = selectedArtist !== null || (selectedDecade !== null && selectedCat !== null);
+  document.getElementById('start-btn').disabled = !ready;
+}
+
+function showMenu() {
+  clearInterval(timerInterval);
+  showScreen('menu');
+  if (!selectedArtist) document.getElementById('decade-section').classList.remove('dimmed');
+}
+
+function showScreen(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + n).classList.add('active');
+}
+
+// ── Scramble ──────────────────────────────────────────────────────────────────
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function scrambleLetters(word) {
+  const letters = word.replace(/\s/g, '').toUpperCase().split('');
+  if (letters.length <= 1) return letters;
+  let attempt = shuffle(letters), tries = 0;
+  while (attempt.join('') === letters.join('') && tries < 50) {
+    attempt = shuffle(letters); tries++;
+  }
+  return attempt;
+}
+
+function wordPattern(text) {
+  return text.split(' ').map(w => Array(w.length).fill('_').join(' ')).join('   ');
+}
+
+// ── Game ──────────────────────────────────────────────────────────────────────
+function getPool() {
+  if (selectedArtist) {
+    return ARTIST_SONGS[selectedArtist].songs.map(s => ({ text: s, type: 'song', era: 'artist' }));
+  }
+  const byEra = selectedDecade === 'all' ? MUSIC_WORDS : MUSIC_WORDS.filter(w => w.era === selectedDecade);
+  if (selectedCat === 'artists') return byEra.filter(w => w.type === 'artist');
+  if (selectedCat === 'songs')   return byEra.filter(w => w.type === 'song');
+  return byEra;
+}
+
+function pickItem() {
+  const pool = getPool();
+  const available = pool.filter(w => !usedWords.has(w.text));
+  if (available.length === 0) { usedWords.clear(); return pickItem(); }
+  return available[Math.floor(Math.random() * available.length)];
+}
+
+function startGame() {
+  clearInterval(timerInterval);
+  score = 0; streak = 0; bestStreak = 0; timeLeft = 90; usedWords = new Set(); inputLocked = false; answerSlots = [];
+  document.getElementById('score-val').textContent  = 0;
+  document.getElementById('streak-val').textContent = 0;
+  document.getElementById('time-val').textContent   = 90;
+  document.getElementById('timer-bar').style.width  = '100%';
+  document.getElementById('timer-bar').classList.remove('urgent');
+  document.getElementById('feedback').textContent   = '';
+  document.getElementById('feedback').className     = '';
+  showScreen('game');
+  loadWord();
+  startTimer();
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    document.getElementById('time-val').textContent = timeLeft;
+    const pct = (timeLeft / 90) * 100;
+    document.getElementById('timer-bar').style.width = pct + '%';
+    document.getElementById('timer-bar').classList.toggle('urgent', timeLeft <= 15);
+    if (timeLeft <= 0) { clearInterval(timerInterval); endGame(); }
+  }, 1000);
+}
+
+function loadWord() {
+  currentItem = pickItem();
+  usedWords.add(currentItem.text);
+
+  const origLetters = currentItem.text.replace(/\s/g, '').toUpperCase().split('');
+
+  // Positions 0, 3, 6, ... are locked hints shown pre-placed in the answer zone
+  const hintSet = new Set(origLetters.map((_, i) => i).filter(i => i % 3 === 0));
+
+  // Only non-hint letters go into the scrambled pool
+  const nonHint = origLetters.map((l, i) => ({ origPos: i, letter: l })).filter(t => !hintSet.has(t.origPos));
+  let tiles = shuffle(nonHint.map((t, i) => ({ id: i, letter: t.letter })));
+  // Ensure pool isn't in the same order as the correct answer
+  let tries = 0;
+  while (tiles.map(t => t.letter).join('') === nonHint.map(t => t.letter).join('') && tries < 50) {
+    tiles = shuffle(tiles); tries++;
+  }
+  scrambled = tiles;
+  poolOrder = tiles.map(t => t.id);
+
+  // Build answer slots: locked hint | empty user slot
+  answerSlots = origLetters.map((l, i) =>
+    hintSet.has(i) ? { locked: true, letter: l } : { locked: false, tileId: null }
+  );
+
+  inputLocked = false;
+
+  const artistLabel = selectedArtist ? `🎵 ${ARTIST_SONGS[selectedArtist].label}` : null;
+  const typeLabel = artistLabel || (currentItem.type === 'artist' ? '🎤 Artist' : '🎵 Song Title');
+  document.getElementById('word-type').textContent    = typeLabel;
+  document.getElementById('word-pattern').textContent = wordPattern(currentItem.text);
+  renderTiles();
+  setFeedback('', '');
+}
+
+const hintEl = document.getElementById('answer-hint');
+
+function renderTiles() {
+  const poolZone   = document.getElementById('pool-zone');
+  const answerZone = document.getElementById('answer-zone');
+  poolZone.querySelectorAll('.tile').forEach(t => t.remove());
+  answerZone.querySelectorAll('.tile, .answer-slot').forEach(t => t.remove());
+
+  // Hint tiles are always shown, so the "Click tiles below" prompt is not needed
+  hintEl.style.display = 'none';
+
+  // Render each answer slot
+  answerSlots.forEach((slot, idx) => {
+    if (slot.locked) {
+      const div = document.createElement('div');
+      div.className = 'tile hint-tile';
+      div.textContent = slot.letter;
+      answerZone.appendChild(div);
+    } else if (slot.tileId !== null) {
+      answerZone.appendChild(makeTile(scrambled.find(t => t.id === slot.tileId), 'answer', idx));
+    } else {
+      const div = document.createElement('div');
+      div.className = 'answer-slot';
+      answerZone.appendChild(div);
+    }
+  });
+
+  poolOrder.forEach(id => poolZone.appendChild(makeTile(scrambled.find(t => t.id === id), 'pool', -1)));
+
+  const allFilled = answerSlots.every(s => s.locked || s.tileId !== null);
+  answerZone.classList.toggle('zone-hint', allFilled && poolOrder.length === 0);
+}
+
+function makeTile(tile, zone, slotIdx) {
+  const div = document.createElement('div');
+  div.className = 'tile ' + (zone === 'pool' ? 'pool-tile' : 'answer-tile');
+  div.textContent = tile.letter;
+  div.dataset.id  = tile.id;
+  div.onclick = () => {
+    if (inputLocked) return;
+    if (zone === 'pool') {
+      const emptyIdx = answerSlots.findIndex(s => !s.locked && s.tileId === null);
+      if (emptyIdx === -1) return;
+      poolOrder = poolOrder.filter(x => x !== tile.id);
+      answerSlots[emptyIdx].tileId = tile.id;
+    } else {
+      answerSlots[slotIdx].tileId = null;
+      poolOrder.push(tile.id);
+    }
+    renderTiles();
+    if (answerSlots.every(s => s.locked || s.tileId !== null)) setTimeout(submitAnswer, 180);
+  };
+  return div;
+}
+
+function submitAnswer() {
+  if (inputLocked) return;
+  if (!answerSlots.every(s => s.locked || s.tileId !== null)) return;
+  const guess   = answerSlots.map(s => s.locked ? s.letter : scrambled.find(t => t.id === s.tileId).letter).join('').toLowerCase();
+  const correct = currentItem.text.replace(/\s/g, '').toLowerCase();
+  if (guess === correct) {
+    inputLocked = true;
+    score++; streak++;
+    if (streak > bestStreak) bestStreak = streak;
+    document.getElementById('score-val').textContent  = score;
+    document.getElementById('streak-val').textContent = streak;
+    setFeedback('✓ Correct!', 'correct');
+    document.getElementById('answer-zone').querySelectorAll('.tile:not(.hint-tile)').forEach(t => t.classList.add('flash-correct'));
+    setTimeout(loadWord, 800);
+  } else {
+    inputLocked = true;
+    streak = 0;
+    document.getElementById('streak-val').textContent = 0;
+    setFeedback('✗ Wrong — try again', 'wrong');
+    document.getElementById('answer-zone').querySelectorAll('.tile:not(.hint-tile)').forEach(t => t.classList.add('flash-wrong'));
+    setTimeout(() => {
+      answerSlots.forEach(s => {
+        if (!s.locked && s.tileId !== null) { poolOrder.push(s.tileId); s.tileId = null; }
+      });
+      inputLocked = false;
+      renderTiles();
+      setFeedback('', '');
+    }, 800);
+  }
+}
+
+function skipWord() {
+  if (inputLocked) return;
+  streak = 0;
+  document.getElementById('streak-val').textContent = 0;
+  loadWord();
+}
+
+function setFeedback(text, type) {
+  const el = document.getElementById('feedback');
+  el.textContent = text;
+  el.className   = type;
+}
+
+function endGame() {
+  const scoreKey  = selectedArtist || 'default';
+  const isRecord  = ArcadeScores.save('music-anagram', score, scoreKey);
+  const bestEntry = ArcadeScores.get('music-anagram', scoreKey);
+  inputLocked = true;
+  showScreen('result');
+  document.getElementById('result-sub').textContent  = score + ' words solved';
+  document.getElementById('res-score').textContent   = score;
+  document.getElementById('res-streak').textContent  = bestStreak;
+  const bestRow = document.getElementById('res-best-row');
+  const bestEl  = document.getElementById('res-best');
+  if (bestRow && bestEl && bestEntry) {
+    bestRow.style.display = 'block';
+    bestEl.textContent = isRecord ? '🏆 New Record!' : `🏆 Best: ${bestEntry.score} words (90s)`;
+  }
+}
+</script>
+</body>
+</html>

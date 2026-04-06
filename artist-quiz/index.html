@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <title>Artist Quiz</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 24px 0;
+    }
+
+    .container { max-width: 620px; width: 100%; padding: 20px; }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    h1 { text-align: center; font-size: 2rem; margin-bottom: 6px; }
+    .subtitle { text-align: center; color: #aaa; margin-bottom: 28px; font-size: 0.95rem; }
+
+    /* ── MENU ── */
+    #menu { text-align: center; }
+    #menu h2 { font-size: 1.1rem; margin-bottom: 14px; color: #ccc; font-weight: 600; }
+
+    .decade-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .decade-btn {
+      padding: 14px 10px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #fff; font-size: 0.95rem; cursor: pointer; transition: all 0.2s;
+    }
+    .decade-btn:hover { background: rgba(255,255,255,0.13); border-color: rgba(255,255,255,0.3); transform: translateY(-2px); }
+    .decade-btn.all {
+      grid-column: 1 / -1;
+      background: rgba(249,115,22,0.2);
+      border-color: rgba(249,115,22,0.45);
+    }
+    .decade-btn.all:hover { background: rgba(249,115,22,0.35); }
+
+    /* ── QUIZ ── */
+    #quiz { display: none; }
+
+    .progress-bar {
+      width: 100%; height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px; margin-bottom: 20px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f97316, #ec4899);
+      border-radius: 3px; transition: width 0.3s;
+    }
+
+    .score-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px; padding: 12px 16px;
+      background: rgba(255,255,255,0.06); border-radius: 12px; font-size: 0.95rem;
+    }
+    .score-bar .label { color: #aaa; }
+    .score-bar .value { font-weight: 700; font-size: 1.1rem; }
+    .score-bar .streak { color: #f59e0b; }
+    .score-bar .correct-count { color: #f97316; }
+
+    .clue-card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px; padding: 28px 24px; margin-bottom: 24px;
+    }
+    .clue-label {
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; color: #f97316; margin-bottom: 18px; text-align: center;
+    }
+    .clues-grid { display: flex; flex-direction: column; gap: 12px; }
+    .clue-row {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(255,255,255,0.05); border-radius: 10px; padding: 12px 16px;
+    }
+    .clue-icon {
+      width: 36px; height: 36px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; color: #a78bfa;
+    }
+    .clue-icon svg { width: 1.5rem; height: 1.5rem; fill: currentColor; }
+    .clue-text { text-align: left; }
+    .clue-type { font-size: 0.72rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+    .clue-value { font-size: 1.05rem; font-weight: 700; color: #f1f5f9; }
+
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .option-btn {
+      padding: 16px 12px;
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 12px; background: rgba(255,255,255,0.06);
+      color: #fff; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; text-align: center; line-height: 1.3;
+    }
+    .option-btn:hover:not(.disabled) {
+      background: rgba(255,255,255,0.13); border-color: rgba(255,255,255,0.3); transform: translateY(-2px);
+    }
+    .option-btn.correct  { background: rgba(16,185,129,0.3); border-color: #10b981; }
+    .option-btn.wrong    { background: rgba(239,68,68,0.25); border-color: #ef4444; }
+    .option-btn.reveal   { border-color: #10b981; opacity: 0.8; }
+    .option-btn.disabled { cursor: default; pointer-events: none; }
+
+    /* ── RESULT ── */
+    #result { display: none; text-align: center; }
+    .result-card {
+      background: rgba(255,255,255,0.06); border-radius: 16px; padding: 40px 30px; margin-bottom: 24px;
+    }
+    .result-card .big-score {
+      font-size: 4rem; font-weight: 800;
+      background: linear-gradient(135deg, #f97316, #ec4899);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .result-card .out-of   { font-size: 1.2rem; color: #aaa; margin-top: 4px; }
+    .result-card .percentage { font-size: 1.5rem; margin-top: 12px; color: #e2e8f0; }
+    .result-card .best-streak { margin-top: 12px; color: #f59e0b; font-size: 1rem; }
+
+    .play-again-btn {
+      padding: 14px 40px; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #f97316, #ec4899);
+      color: #fff; font-size: 1.1rem; font-weight: 700;
+      cursor: pointer; transition: transform 0.2s; margin-top: 8px;
+    }
+    .play-again-btn:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="../index.html" class="back-link">← Back to Arcade</a>
+  <h1>🎤 Artist Quiz</h1>
+  <p class="subtitle">Genre, country, decade & hit — name that artist!</p>
+
+  <!-- MENU -->
+  <div id="menu">
+    <h2>Choose a decade</h2>
+    <div class="decade-grid">
+      <button class="decade-btn all"  onclick="startQuiz('all')">All Decades</button>
+      <button class="decade-btn"      onclick="startQuiz('60s70s')">60s &amp; 70s</button>
+      <button class="decade-btn"      onclick="startQuiz('80s')">80s</button>
+      <button class="decade-btn"      onclick="startQuiz('90s')">90s</button>
+      <button class="decade-btn"      onclick="startQuiz('2000s')">2000s</button>
+      <button class="decade-btn"      onclick="startQuiz('2010s')">2010s+</button>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz">
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+    <div class="score-bar">
+      <div><span class="label">Score: </span><span class="value correct-count" id="score">0</span></div>
+      <div><span class="label">Question: </span><span class="value" id="qnum">1/10</span></div>
+      <div><span class="label">Streak: </span><span class="value streak" id="streak">0</span></div>
+    </div>
+
+    <div class="clue-card">
+      <div class="clue-label">Who is this artist?</div>
+      <div class="clues-grid">
+        <div class="clue-row">
+          <span class="clue-icon"><svg viewBox="0 0 16 16"><path d="M6 13c0 1.105-1.12 2-2.5 2S1 14.105 1 13s1.12-2 2.5-2 2.5.895 2.5 2m9-2c0 1.105-1.12 2-2.5 2s-2.5-.895-2.5-2 1.12-2 2.5-2 2.5.895 2.5 2"/><path fill-rule="evenodd" d="M14 11V2h1v9zM6 3v10H5V3z"/><path d="M5 2.905a1 1 0 0 1 .9-.995l8-.8a1 1 0 0 1 1.1.995V3L5 4z"/></svg></span>
+          <div class="clue-text">
+            <div class="clue-type">Genre</div>
+            <div class="clue-value" id="clue-genre">—</div>
+          </div>
+        </div>
+        <div class="clue-row">
+          <span class="clue-icon"><svg viewBox="0 0 16 16"><path d="M14.778.085A.5.5 0 0 1 15 .5V8a.5.5 0 0 1-.314.464L14.5 8l.186.464-.003.001-.006.003-.023.009a12 12 0 0 1-.397.15c-.264.095-.631.223-1.047.35-.816.252-1.879.523-2.71.523-.847 0-1.548-.28-2.158-.525l-.028-.01C7.68 8.71 7.14 8.5 6.5 8.5c-.7 0-1.638.23-2.437.477A20 20 0 0 0 3 9.342V15.5a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 1 0v.282c.226-.079.496-.17.79-.26C4.606.272 5.67 0 6.5 0c.84 0 1.524.277 2.121.519l.043.018C9.286.788 9.828 1 10.5 1c.7 0 1.638-.23 2.437-.477a20 20 0 0 0 1.349-.476l.019-.007.004-.002h.001"/></svg></span>
+          <div class="clue-text">
+            <div class="clue-type">From</div>
+            <div class="clue-value" id="clue-from">—</div>
+          </div>
+        </div>
+        <div class="clue-row">
+          <span class="clue-icon"><svg viewBox="0 0 16 16"><path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5z"/><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/></svg></span>
+          <div class="clue-text">
+            <div class="clue-type">Decade</div>
+            <div class="clue-value" id="clue-decade">—</div>
+          </div>
+        </div>
+        <div class="clue-row">
+          <span class="clue-icon"><svg viewBox="0 0 16 16"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/></svg></span>
+          <div class="clue-text">
+            <div class="clue-type">Known for</div>
+            <div class="clue-value" id="clue-hit">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="options" id="options"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result">
+    <div class="result-card">
+      <div class="big-score" id="final-score">0</div>
+      <div class="out-of" id="final-total">out of 10</div>
+      <div class="percentage" id="final-pct">0%</div>
+      <div class="best-streak" id="final-streak">Best streak: 0</div>
+      <div class="best-streak" id="res-best" style="margin-top:8px;color:#a5b4fc"></div>
+    </div>
+    <button class="play-again-btn" onclick="backToMenu()">Play Again</button>
+  </div>
+</div>
+
+<script src="../scores.js"></script>
+<script>
+const ARTISTS = [
+  // 60s & 70s
+  { name: "The Beatles",         genre: "Rock / Pop",        from: "England",        decade: "1960s", hit: "Hey Jude",                   era: "60s70s" },
+  { name: "The Rolling Stones",  genre: "Rock",              from: "England",        decade: "1960s", hit: "Paint It Black",             era: "60s70s" },
+  { name: "Aretha Franklin",     genre: "Soul / R&B",        from: "United States",  decade: "1960s", hit: "Respect",                    era: "60s70s" },
+  { name: "Bob Dylan",           genre: "Folk / Rock",       from: "United States",  decade: "1960s", hit: "Blowin' in the Wind",        era: "60s70s" },
+  { name: "Jimi Hendrix",        genre: "Rock / Blues",      from: "United States",  decade: "1960s", hit: "Purple Haze",                era: "60s70s" },
+  { name: "The Doors",           genre: "Rock / Blues",      from: "United States",  decade: "1960s", hit: "Light My Fire",              era: "60s70s" },
+  { name: "Marvin Gaye",         genre: "Soul / R&B",        from: "United States",  decade: "1970s", hit: "Let's Get It On",            era: "60s70s" },
+  { name: "Stevie Wonder",       genre: "Soul / R&B",        from: "United States",  decade: "1970s", hit: "Superstition",               era: "60s70s" },
+  { name: "John Lennon",         genre: "Rock / Pop",        from: "England",        decade: "1970s", hit: "Imagine",                    era: "60s70s" },
+  { name: "Elton John",          genre: "Pop / Rock",        from: "England",        decade: "1970s", hit: "Rocket Man",                 era: "60s70s" },
+  { name: "David Bowie",         genre: "Rock / Glam",       from: "England",        decade: "1970s", hit: "Heroes",                     era: "60s70s" },
+  { name: "Led Zeppelin",        genre: "Hard Rock",         from: "England",        decade: "1970s", hit: "Stairway to Heaven",         era: "60s70s" },
+  { name: "Pink Floyd",          genre: "Progressive Rock",  from: "England",        decade: "1970s", hit: "Comfortably Numb",           era: "60s70s" },
+  { name: "Bob Marley",          genre: "Reggae",            from: "Jamaica",        decade: "1970s", hit: "No Woman No Cry",            era: "60s70s" },
+  { name: "ABBA",                genre: "Pop",               from: "Sweden",         decade: "1970s", hit: "Dancing Queen",              era: "60s70s" },
+  { name: "The Eagles",          genre: "Rock / Country",    from: "United States",  decade: "1970s", hit: "Hotel California",           era: "60s70s" },
+  { name: "Fleetwood Mac",       genre: "Rock / Pop",        from: "England",        decade: "1970s", hit: "Go Your Own Way",            era: "60s70s" },
+  { name: "James Brown",         genre: "Funk / Soul",       from: "United States",  decade: "1960s", hit: "I Got You (I Feel Good)",    era: "60s70s" },
+  { name: "Elvis Presley",       genre: "Rock / Pop",        from: "United States",  decade: "1950s", hit: "Hound Dog",                  era: "60s70s" },
+
+  // 80s
+  { name: "Michael Jackson",     genre: "Pop / R&B",         from: "United States",  decade: "1980s", hit: "Thriller",                   era: "80s" },
+  { name: "Madonna",             genre: "Pop",               from: "United States",  decade: "1980s", hit: "Like a Virgin",              era: "80s" },
+  { name: "Prince",              genre: "Pop / R&B / Rock",  from: "United States",  decade: "1980s", hit: "Purple Rain",                era: "80s" },
+  { name: "Queen",               genre: "Rock / Pop",        from: "England",        decade: "1980s", hit: "Bohemian Rhapsody",          era: "80s" },
+  { name: "U2",                  genre: "Rock",              from: "Ireland",        decade: "1980s", hit: "With or Without You",        era: "80s" },
+  { name: "AC/DC",               genre: "Hard Rock",         from: "Australia",      decade: "1980s", hit: "Highway to Hell",            era: "80s" },
+  { name: "Metallica",           genre: "Heavy Metal",       from: "United States",  decade: "1980s", hit: "Enter Sandman",              era: "80s" },
+  { name: "The Police",          genre: "Rock / New Wave",   from: "England",        decade: "1980s", hit: "Every Breath You Take",      era: "80s" },
+  { name: "Bruce Springsteen",   genre: "Rock",              from: "United States",  decade: "1980s", hit: "Born to Run",                era: "80s" },
+  { name: "Whitney Houston",     genre: "Pop / R&B",         from: "United States",  decade: "1980s", hit: "Greatest Love of All",       era: "80s" },
+  { name: "George Michael",      genre: "Pop / R&B",         from: "England",        decade: "1980s", hit: "Careless Whisper",           era: "80s" },
+  { name: "Cyndi Lauper",        genre: "Pop / New Wave",    from: "United States",  decade: "1980s", hit: "Girls Just Want to Have Fun", era: "80s" },
+  { name: "Toto",                genre: "Rock / Pop",        from: "United States",  decade: "1980s", hit: "Africa",                     era: "80s" },
+  { name: "a-ha",                genre: "Synth-Pop",         from: "Norway",         decade: "1980s", hit: "Take On Me",                 era: "80s" },
+  { name: "Def Leppard",         genre: "Hard Rock",         from: "England",        decade: "1980s", hit: "Pour Some Sugar on Me",      era: "80s" },
+
+  // 90s
+  { name: "Nirvana",             genre: "Grunge / Rock",     from: "United States",  decade: "1990s", hit: "Smells Like Teen Spirit",    era: "90s" },
+  { name: "Mariah Carey",        genre: "Pop / R&B",         from: "United States",  decade: "1990s", hit: "We Belong Together",         era: "90s" },
+  { name: "Celine Dion",         genre: "Pop",               from: "Canada",         decade: "1990s", hit: "My Heart Will Go On",        era: "90s" },
+  { name: "Radiohead",           genre: "Alternative Rock",  from: "England",        decade: "1990s", hit: "Creep",                      era: "90s" },
+  { name: "Red Hot Chili Peppers",genre: "Rock / Funk",      from: "United States",  decade: "1990s", hit: "Under the Bridge",           era: "90s" },
+  { name: "Britney Spears",      genre: "Pop",               from: "United States",  decade: "1990s", hit: "...Baby One More Time",       era: "90s" },
+  { name: "Backstreet Boys",     genre: "Pop",               from: "United States",  decade: "1990s", hit: "I Want It That Way",         era: "90s" },
+  { name: "Eminem",              genre: "Hip-Hop",           from: "United States",  decade: "1990s", hit: "Lose Yourself",              era: "90s" },
+  { name: "Tupac Shakur",        genre: "Hip-Hop",           from: "United States",  decade: "1990s", hit: "California Love",            era: "90s" },
+  { name: "Destiny's Child",     genre: "R&B / Pop",         from: "United States",  decade: "1990s", hit: "Bootylicious",               era: "90s" },
+  { name: "Oasis",               genre: "Brit-Pop / Rock",   from: "England",        decade: "1990s", hit: "Wonderwall",                 era: "90s" },
+  { name: "The Notorious B.I.G.",genre: "Hip-Hop",           from: "United States",  decade: "1990s", hit: "Juicy",                      era: "90s" },
+  { name: "Spice Girls",         genre: "Pop",               from: "England",        decade: "1990s", hit: "Wannabe",                    era: "90s" },
+
+  // 2000s
+  { name: "Beyoncé",             genre: "Pop / R&B",         from: "United States",  decade: "2000s", hit: "Crazy in Love",              era: "2000s" },
+  { name: "Jay-Z",               genre: "Hip-Hop",           from: "United States",  decade: "2000s", hit: "Empire State of Mind",       era: "2000s" },
+  { name: "Kanye West",          genre: "Hip-Hop",           from: "United States",  decade: "2000s", hit: "Stronger",                   era: "2000s" },
+  { name: "Justin Timberlake",   genre: "Pop / R&B",         from: "United States",  decade: "2000s", hit: "Cry Me a River",             era: "2000s" },
+  { name: "Shakira",             genre: "Pop / Latin",       from: "Colombia",       decade: "2000s", hit: "Hips Don't Lie",             era: "2000s" },
+  { name: "Rihanna",             genre: "Pop / R&B",         from: "Barbados",       decade: "2000s", hit: "Umbrella",                   era: "2000s" },
+  { name: "Lady Gaga",           genre: "Pop / Electronic",  from: "United States",  decade: "2000s", hit: "Bad Romance",                era: "2000s" },
+  { name: "Katy Perry",          genre: "Pop",               from: "United States",  decade: "2000s", hit: "Roar",                       era: "2000s" },
+  { name: "Coldplay",            genre: "Alternative Rock",  from: "England",        decade: "2000s", hit: "Yellow",                     era: "2000s" },
+  { name: "Daft Punk",           genre: "Electronic / Dance",from: "France",         decade: "2000s", hit: "Get Lucky",                  era: "2000s" },
+  { name: "Amy Winehouse",       genre: "Soul / Jazz",       from: "England",        decade: "2000s", hit: "Rehab",                      era: "2000s" },
+  { name: "Gorillaz",            genre: "Alternative / Pop", from: "England",        decade: "2000s", hit: "Feel Good Inc.",             era: "2000s" },
+  { name: "Linkin Park",         genre: "Alternative Metal", from: "United States",  decade: "2000s", hit: "In the End",                 era: "2000s" },
+
+  // 2010s+
+  { name: "Adele",               genre: "Pop / Soul",        from: "England",        decade: "2010s", hit: "Rolling in the Deep",        era: "2010s" },
+  { name: "Ed Sheeran",          genre: "Pop",               from: "England",        decade: "2010s", hit: "Shape of You",               era: "2010s" },
+  { name: "Taylor Swift",        genre: "Pop / Country",     from: "United States",  decade: "2010s", hit: "Shake It Off",               era: "2010s" },
+  { name: "Drake",               genre: "Hip-Hop / R&B",     from: "Canada",         decade: "2010s", hit: "God's Plan",                 era: "2010s" },
+  { name: "The Weeknd",          genre: "R&B / Pop",         from: "Canada",         decade: "2010s", hit: "Blinding Lights",            era: "2010s" },
+  { name: "Kendrick Lamar",      genre: "Hip-Hop",           from: "United States",  decade: "2010s", hit: "HUMBLE.",                    era: "2010s" },
+  { name: "Bruno Mars",          genre: "Pop / R&B",         from: "United States",  decade: "2010s", hit: "Uptown Funk",                era: "2010s" },
+  { name: "Billie Eilish",       genre: "Pop / Alternative", from: "United States",  decade: "2020s", hit: "bad guy",                    era: "2010s" },
+  { name: "Dua Lipa",            genre: "Pop / Dance",       from: "England",        decade: "2020s", hit: "Levitating",                 era: "2010s" },
+  { name: "Ariana Grande",       genre: "Pop / R&B",         from: "United States",  decade: "2010s", hit: "thank u, next",              era: "2010s" },
+  { name: "Post Malone",         genre: "Hip-Hop / Pop",     from: "United States",  decade: "2010s", hit: "Circles",                    era: "2010s" },
+  { name: "Harry Styles",        genre: "Pop / Rock",        from: "England",        decade: "2020s", hit: "Watermelon Sugar",           era: "2010s" },
+  { name: "Olivia Rodrigo",      genre: "Pop / Alt",         from: "United States",  decade: "2020s", hit: "drivers license",            era: "2010s" },
+  { name: "Lorde",               genre: "Pop / Alternative", from: "New Zealand",    decade: "2010s", hit: "Royals",                     era: "2010s" },
+  { name: "Sia",                 genre: "Pop / Electronic",  from: "Australia",      decade: "2010s", hit: "Chandelier",                 era: "2010s" },
+  { name: "Sam Smith",           genre: "Pop / Soul",        from: "England",        decade: "2010s", hit: "Stay With Me",               era: "2010s" },
+  { name: "Calvin Harris",       genre: "Electronic / Dance",from: "Scotland",       decade: "2010s", hit: "Summer",                     era: "2010s" },
+  { name: "Imagine Dragons",     genre: "Pop Rock",          from: "United States",  decade: "2010s", hit: "Demons",                     era: "2010s" },
+];
+
+let questions = [], currentQ = 0;
+let score = 0, streak = 0, bestStreak = 0, totalQuestions = 12;
+let answered = false;
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz(era) {
+  const pool = era === 'all' ? [...ARTISTS] : ARTISTS.filter(a => a.era === era);
+  if (pool.length < 4) { alert('Not enough artists for this era yet. Try another!'); return; }
+  totalQuestions = Math.min(pool.length, 12);
+  questions = shuffle(pool).slice(0, totalQuestions);
+  currentQ = 0; score = 0; streak = 0; bestStreak = 0;
+  document.getElementById('menu').style.display   = 'none';
+  document.getElementById('quiz').style.display   = 'block';
+  document.getElementById('result').style.display = 'none';
+  showQuestion();
+}
+
+function showQuestion() {
+  answered = false;
+  const q = questions[currentQ];
+  document.getElementById('score').textContent    = score;
+  document.getElementById('qnum').textContent     = `${currentQ + 1}/${totalQuestions}`;
+  document.getElementById('streak').textContent   = streak;
+  document.getElementById('progress').style.width = `${(currentQ / totalQuestions) * 100}%`;
+  document.getElementById('clue-genre').textContent  = q.genre;
+  document.getElementById('clue-from').textContent   = q.from;
+  document.getElementById('clue-decade').textContent = q.decade;
+  document.getElementById('clue-hit').textContent    = q.hit;
+
+  const others = shuffle(ARTISTS.filter(a => a.name !== q.name));
+  const distractors = others.slice(0, 3);
+  const options = shuffle([q, ...distractors]);
+
+  const el = document.getElementById('options');
+  el.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt.name;
+    btn.addEventListener('click', () => handleAnswer(btn, opt.name === q.name, q.name));
+    el.appendChild(btn);
+  });
+}
+
+function handleAnswer(btn, isCorrect, correctName) {
+  if (answered) return;
+  answered = true;
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+  if (isCorrect) {
+    btn.classList.add('correct');
+    score++; streak++;
+    if (streak > bestStreak) bestStreak = streak;
+  } else {
+    btn.classList.add('wrong');
+    streak = 0;
+    document.querySelectorAll('.option-btn').forEach(b => {
+      if (b.textContent === correctName) b.classList.add('reveal');
+    });
+  }
+  document.getElementById('score').textContent  = score;
+  document.getElementById('streak').textContent = streak;
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ < totalQuestions) showQuestion();
+    else showResult();
+  }, 1400);
+}
+
+function showResult() {
+  const isRecord  = ArcadeScores.save('artist-quiz', score);
+  const bestEntry = ArcadeScores.get('artist-quiz');
+  document.getElementById('quiz').style.display   = 'none';
+  document.getElementById('result').style.display = 'block';
+  const pct = Math.round((score / totalQuestions) * 100);
+  document.getElementById('final-score').textContent  = score;
+  document.getElementById('final-total').textContent  = `out of ${totalQuestions}`;
+  document.getElementById('final-pct').textContent    = `${pct}%`;
+  document.getElementById('final-streak').textContent = `Best streak: ${bestStreak}`;
+  const bestEl = document.getElementById('res-best');
+  if (isRecord) bestEl.textContent = '🏆 New Record!';
+  else if (bestEntry) bestEl.textContent = `🏆 Best: ${bestEntry.score} correct`;
+  else bestEl.textContent = '';
+}
+
+function backToMenu() {
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('quiz').style.display   = 'none';
+  document.getElementById('menu').style.display   = 'block';
+}
+</script>
+</body>
+</html>

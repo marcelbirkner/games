@@ -708,7 +708,7 @@ function showResult() {
   document.getElementById('result').style.display = 'block';
 
   const found    = wordData.filter(w => w.found).length;
-  const levelKey = `${language}_${difficulty}`;
+  const levelKey = difficulty;
   const isRecord = ArcadeScores.save('word-hunt', found, levelKey, timeLeft);
   const bestEntry = ArcadeScores.get('word-hunt', levelKey);
   const bestRow = document.getElementById('res-best-row');

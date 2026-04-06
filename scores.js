@@ -61,12 +61,9 @@ var ArcadeScores = (function () {
       games: [
         { id: 'word-hunt', name: 'Word Hunt', unit: 'found',
           levels: [
-            { key: 'en_easy',   label: 'EN · Easy'   },
-            { key: 'en_medium', label: 'EN · Medium'  },
-            { key: 'en_hard',   label: 'EN · Hard'    },
-            { key: 'de_easy',   label: 'DE · Easy'    },
-            { key: 'de_medium', label: 'DE · Medium'  },
-            { key: 'de_hard',   label: 'DE · Hard'    },
+            { key: 'easy',   label: 'Easy'   },
+            { key: 'medium', label: 'Medium' },
+            { key: 'hard',   label: 'Hard'   },
           ]
         },
         { id: 'scattergories', name: 'Scattergories', unit: '/ 9',
@@ -83,6 +80,15 @@ var ArcadeScores = (function () {
       ]
     },
     {
+      name: 'Music', color: '#ec4899',
+      games: [
+        { id: 'music-notes',     name: 'Music Notes',     unit: 'correct' },
+        { id: 'music-melodies', name: 'Music Melodies', unit: 'correct' },
+        { id: 'artist-quiz',   name: 'Artist Quiz',   unit: 'correct' },
+        { id: 'music-anagram', name: 'Music Anagram', unit: 'words'   },
+      ]
+    },
+    {
       name: 'Brain & Math', color: '#f59e0b',
       games: [
         { id: 'math-blitz', name: 'Math Blitz', unit: 'correct',
@@ -93,8 +99,25 @@ var ArcadeScores = (function () {
             { key: 'master',    label: 'Masters'      },
           ]
         },
-        { id: 'tic-tac-toe',  name: 'Tic Tac Toe',  unit: 'wins'  },
-        { id: 'puzzle-rush',  name: 'Puzzle Rush',   unit: 'stars' },
+        { id: 'tic-tac-toe',  name: 'Tic Tac Toe',  unit: 'wins',
+          levels: [
+            { key: '2p_p1',      label: '2P · Player 1', noPoints: true },
+            { key: '2p_p2',      label: '2P · Player 2', noPoints: true },
+            { key: 'cpu_easy',   label: 'CPU · Easy',    multiplier: 2  },
+            { key: 'cpu_medium', label: 'CPU · Medium',  multiplier: 5  },
+            { key: 'cpu_hard',   label: 'CPU · Hard',    multiplier: 10 },
+          ]
+        },
+        { id: 'puzzle-rush',  name: 'Puzzle Rush',   unit: 'stars',
+          levels: [
+            { key: 'easy',        label: 'Easy'         },
+            { key: 'easy_time',   label: 'Easy · Time',   isTime: true },
+            { key: 'medium',      label: 'Medium'       },
+            { key: 'medium_time', label: 'Medium · Time', isTime: true },
+            { key: 'hard',        label: 'Hard'         },
+            { key: 'hard_time',   label: 'Hard · Time',   isTime: true },
+          ]
+        },
         { id: 'four-wins',    name: 'Four Wins',     unit: 'wins'  },
       ]
     },

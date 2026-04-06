@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
   <title>Puzzle Rush</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -548,7 +548,10 @@ function showResult() {
   if (won && (bestMoves[n] === undefined || moveCount < bestMoves[n])) {
     bestMoves[n] = moveCount;
   }
-  ArcadeScores.save('puzzle-rush', won ? (pctLeft > 0.6 ? 3 : pctLeft > 0.3 ? 2 : 1) : 0);
+  const diffKey = n === 3 ? 'easy' : n === 4 ? 'medium' : 'hard';
+  ArcadeScores.save('puzzle-rush', won ? (pctLeft > 0.6 ? 3 : pctLeft > 0.3 ? 2 : 1) : 0, diffKey);
+  // Store best time as -timeUsed so lower time = higher score (works with "higher is better" save logic)
+  if (won) ArcadeScores.save('puzzle-rush', -timeUsed, diffKey + '_time');
 
   document.getElementById('game').style.display = 'none';
   document.getElementById('result').style.display = 'block';

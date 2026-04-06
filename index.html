@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0" />
   <title>Game Arcade</title>
   <style>
     * {
@@ -433,19 +433,35 @@
       padding-bottom: 10px;
       text-align: left;
     }
-    .scores-table th:last-child { text-align: right; }
+    .scores-table th:nth-child(2),
+    .scores-table th:nth-child(3) { text-align: right; }
     .scores-table td {
       padding: 9px 0;
       border-top: 1px solid rgba(255,255,255,0.07);
       font-size: 0.92rem;
       color: #e2e8f0;
     }
-    .scores-table td:last-child {
+    .scores-table td:nth-child(2) {
       text-align: right;
       font-weight: 700;
       color: #10b981;
     }
+    .scores-table td:nth-child(3) {
+      text-align: right;
+      font-weight: 700;
+      color: #f59e0b;
+      padding-left: 12px;
+    }
     .score-none { color: rgba(255,255,255,0.25) !important; font-weight: 400 !important; }
+    .scores-total-row td {
+      padding: 12px 0 8px;
+      font-size: 1rem;
+      font-weight: 800;
+      border-top: 2px solid rgba(245,158,11,0.5) !important;
+      border-bottom: 1px solid rgba(245,158,11,0.3);
+    }
+    .scores-total-row td:first-child { color: #fbbf24; }
+    .scores-total-row td:last-child { color: #fbbf24; font-size: 1.1rem; }
     .game-header-row td {
       padding: 10px 0 2px;
       font-size: 0.82rem;
@@ -507,6 +523,13 @@
         <button class="modal-close" onclick="closeScores()" aria-label="Close">&#215;</button>
         <div class="modal-title"><svg viewBox="0 0 16 16" style="width:1em;height:1em;display:inline-block;vertical-align:-.125em;fill:currentColor"><path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5q0 .807-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33 33 0 0 1 2.5.5m.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935m10.083 3.935a2 2 0 0 0 .72-3.935c-.133 1.59-.388 2.885-.72 3.935M3.504 1q.01.775.056 1.469c.13 2.028.457 3.546.87 4.667C5.294 9.48 6.484 10 7 10a.5.5 0 0 1 .5.5v2.61a1 1 0 0 1-.757.97l-1.426.356a.5.5 0 0 0-.179.085L4.5 15h7l-.638-.479a.5.5 0 0 0-.18-.085l-1.425-.356a1 1 0 0 1-.757-.97V10.5A.5.5 0 0 1 9 10c.516 0 1.706-.52 2.57-2.864.413-1.12.74-2.64.87-4.667q.045-.694.056-1.469z"/></svg> High Scores</div>
         <table class="scores-table">
+          <thead>
+            <tr>
+              <th>Game</th>
+              <th>Best</th>
+              <th>Pts</th>
+            </tr>
+          </thead>
           <tbody id="scores-tbody"></tbody>
         </table>
         <button class="modal-reset" onclick="resetScores()">Reset all scores</button>
@@ -666,6 +689,54 @@
       </div>
     </div>
 
+    <!-- 🎵 Music -->
+    <div class="category">
+      <div class="category-header" style="--cat-color:#ec4899">
+        <span class="category-icon" style="--cat-color:#ec4899"><svg viewBox="0 0 16 16"><path d="M6 13c0 1.105-1.12 2-2.5 2S1 14.105 1 13s1.12-2 2.5-2 2.5.895 2.5 2m9-2c0 1.105-1.12 2-2.5 2s-2.5-.895-2.5-2 1.12-2 2.5-2 2.5.895 2.5 2"/><path fill-rule="evenodd" d="M14 11V2h1v9zM6 3v10H5V3z"/><path d="M5 2.905a1 1 0 0 1 .9-.995l8-.8a1 1 0 0 1 1.1.995V3L5 4z"/></svg></span>
+        <span class="category-title" style="color:#ec4899">Music</span>
+        <div class="category-line" style="background:linear-gradient(90deg,#ec4899,transparent);"></div>
+      </div>
+      <div class="games-grid">
+
+        <a href="./music-notes/index.html" class="game-card"
+           style="--accent:#ec4899; --glow:linear-gradient(135deg,rgba(236,72,153,0.08),transparent); --shadow-color:rgba(236,72,153,0.3);">
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M9 13c0 1.105-1.12 2-2.5 2S4 14.105 4 13s1.12-2 2.5-2 2.5.895 2.5 2"/><path fill-rule="evenodd" d="M9 3v10H8V3z"/><path d="M8 2.982a1 1 0 0 1 .8-.98l3-.6A1 1 0 0 1 13 2.4V3l-5 1z"/></svg></span>
+          <div class="game-title">Music Notes</div>
+          <div class="game-desc">A note appears on a real musical staff — can you name it? Learn to read sheet music!</div>
+          <span class="badge" style="background:#ec4899;">Music</span>
+          <span class="play-btn" style="border-color:#ec4899; color:#ec4899;">Play</span>
+        </a>
+
+        <a href="./music-melodies/index.html" class="game-card"
+           style="--accent:#d946ef; --glow:linear-gradient(135deg,rgba(217,70,239,0.08),transparent); --shadow-color:rgba(217,70,239,0.3);">
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M6 13c0 1.105-1.12 2-2.5 2S1 14.105 1 13s1.12-2 2.5-2 2.5.895 2.5 2m9-2c0 1.105-1.12 2-2.5 2s-2.5-.895-2.5-2 1.12-2 2.5-2 2.5.895 2.5 2"/><path fill-rule="evenodd" d="M14 11V2h1v9zM6 3v10H5V3z"/><path d="M5 2.905a1 1 0 0 1 .9-.995l8-.8a1 1 0 0 1 1.1.995V3L5 4z"/></svg></span>
+          <div class="game-title">Music Melodies</div>
+          <div class="game-desc">See the colored note bubbles and guess the melody! Classical, film &amp; TV, and pop songs.</div>
+          <span class="badge" style="background:#d946ef;">Music</span>
+          <span class="play-btn" style="border-color:#d946ef; color:#d946ef;">Play</span>
+        </a>
+
+        <a href="./artist-quiz/index.html" class="game-card"
+           style="--accent:#f97316; --glow:linear-gradient(135deg,rgba(249,115,22,0.08),transparent); --shadow-color:rgba(249,115,22,0.3);">
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M8 1a3 3 0 1 0 0 6 3 3 0 0 0 0-6M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999zm2.493 8.574a.5.5 0 0 1-.411.575c-.712.118-1.28.295-1.655.493a1.3 1.3 0 0 0-.37.265.3.3 0 0 0-.057.09V14l.002.008.016.033a.6.6 0 0 0 .145.15c.165.13.435.27.813.395.751.25 1.82.414 3.024.414s2.273-.163 3.024-.414c.378-.126.648-.265.813-.395a.6.6 0 0 0 .146-.15l.015-.033L12 14v-.004a.3.3 0 0 0-.057-.09 1.3 1.3 0 0 0-.37-.264c-.376-.198-.943-.375-1.655-.493a.5.5 0 1 1 .164-.986c.77.127 1.452.328 1.957.594C12.5 13 13 13.4 13 14c0 .426-.26.752-.544.977-.29.228-.68.413-1.116.558-.878.293-2.059.465-3.34.465s-2.462-.172-3.34-.465c-.436-.145-.826-.33-1.116-.558C3.26 14.752 3 14.426 3 14c0-.599.5-1 .961-1.243.505-.266 1.187-.467 1.957-.594a.5.5 0 0 1 .575.411"/></svg></span>
+          <div class="game-title">Artist Quiz</div>
+          <div class="game-desc">Genre, country, decade & hit song — can you name the artist from the clues? Pick by era!</div>
+          <span class="badge" style="background:#f97316;">Music</span>
+          <span class="play-btn" style="border-color:#f97316; color:#f97316;">Play</span>
+        </a>
+
+        <a href="./music-anagram/index.html" class="game-card"
+           style="--accent:#a78bfa; --glow:linear-gradient(135deg,rgba(167,139,250,0.08),transparent); --shadow-color:rgba(167,139,250,0.3);">
+          <span class="icon"><svg viewBox="0 0 16 16"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2z"/><path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8m0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5"/></svg></span>
+          <div class="game-title">Music Anagram</div>
+          <div class="game-desc">Unscramble artist names and song titles against the clock! Choose your decade and beat your record.</div>
+          <span class="badge" style="background:#a78bfa;">Music</span>
+          <span class="play-btn" style="border-color:#a78bfa; color:#a78bfa;">Play</span>
+        </a>
+
+      </div>
+    </div>
+
     <!-- 🧠 Brain & Math -->
     <div class="category">
       <div class="category-header" style="--cat-color:#f59e0b">
@@ -751,7 +822,7 @@
     </div>
 
     <footer>
-      Built with <svg viewBox="0 0 16 16" style="width:1em;height:1em;fill:#f43f5e;display:inline-block;vertical-align:-.125em"><path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/></svg> for Emma and Theo
+      Built with <svg viewBox="0 0 16 16" style="width:1em;height:1em;fill:#f43f5e;display:inline-block;vertical-align:-.125em"><path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/></svg> for Emma and Theo &bull; Version 1.4.0
     </footer>
   </div>
 
@@ -760,7 +831,19 @@
     function openScores() {
       var tbody = document.getElementById('scores-tbody');
       var all = ArcadeScores.getAll();
-      tbody.innerHTML = ArcadeScores.CATEGORIES.map(function(cat) {
+      var totalPoints = 0;
+
+      function calcPts(g, best, level) {
+        if (best === null) return null;
+        if (level && level.multiplier !== undefined) return best * level.multiplier;
+        return g.unit === 'wins' ? best * 10 : best * 2;
+      }
+
+      function ptsCell(pts) {
+        return '<td class="' + (pts === null ? 'score-none' : '') + '">' + (pts !== null ? pts : '—') + '</td>';
+      }
+
+      var catRows = ArcadeScores.CATEGORIES.map(function(cat) {
         var rows = cat.games.map(function(g) {
           var gameData = all[g.id] || {};
           if (!g.levels || g.levels.length === 0) {
@@ -771,13 +854,14 @@
             });
             var hasScore = best !== null;
             var display = hasScore ? (best + ' ' + g.unit) : '—';
-            return '<tr><td>' + g.name + '</td><td class="' + (hasScore ? '' : 'score-none') + '">' + display + '</td></tr>';
+            var pts = calcPts(g, best);
+            if (pts !== null) totalPoints += pts;
+            return '<tr><td>' + g.name + '</td><td class="' + (hasScore ? '' : 'score-none') + '">' + display + '</td>' + ptsCell(pts) + '</tr>';
           }
           // Multi-level game — game name header + one row per level
           var levelRows = g.levels.map(function(level) {
             var best = null;
             if (g.prefix) {
-              // word-chain: key includes speed suffix, match by prefix
               Object.keys(gameData).forEach(function(k) {
                 if (k === level.key || k.indexOf(level.key + '_') === 0) {
                   var entry = gameData[k];
@@ -789,13 +873,27 @@
               if (entry) best = entry.score;
             }
             var hasScore = best !== null;
-            var display = hasScore ? (best + ' ' + g.unit) : '—';
-            return '<tr class="level-row"><td>' + level.label + '</td><td class="' + (hasScore ? '' : 'score-none') + '">' + display + '</td></tr>';
+            var display;
+            if (level.isTime && hasScore) {
+              var secs = -best; // stored as -timeUsed, negate back
+              var m = Math.floor(secs / 60), s = secs % 60;
+              display = m > 0 ? m + 'm ' + (s > 0 ? s + 's' : '') : secs + 's';
+            } else {
+              display = hasScore ? (best + ' ' + g.unit) : '—';
+            }
+            var pts = (level.isTime || level.noPoints) ? null : calcPts(g, best, level);
+            if (pts !== null) totalPoints += pts;
+            return '<tr class="level-row"><td>' + level.label + '</td><td class="' + (hasScore ? '' : 'score-none') + '">' + (hasScore ? display : '—') + '</td>' + ptsCell(pts) + '</tr>';
           }).join('');
-          return '<tr class="game-header-row"><td colspan="2">' + g.name + '</td></tr>' + levelRows;
+          return '<tr class="game-header-row"><td colspan="3">' + g.name + '</td></tr>' + levelRows;
         }).join('');
-        return '<tr><td colspan="2" class="scores-cat-header" style="--cat-color:' + cat.color + '">' + cat.name + '</td></tr>' + rows;
+        return '<tr><td colspan="3" class="scores-cat-header" style="--cat-color:' + cat.color + '">' + cat.name + '</td></tr>' + rows;
       }).join('');
+
+      var starIcon = '<svg viewBox="0 0 16 16" style="width:1em;height:1em;fill:#fbbf24;display:inline-block;vertical-align:-.125em;margin-right:4px"><path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/></svg>';
+      var totalRow = '<tr class="scores-total-row"><td>' + starIcon + 'TOTAL</td><td></td><td>' + totalPoints + '</td></tr>';
+
+      tbody.innerHTML = totalRow + catRows;
       document.getElementById('scores-modal').classList.add('open');
     }
 

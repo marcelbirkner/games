@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0" />
+  <title>Music Notes</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --accent: #ec4899; --accent-hover: #f472b6;
+      --bg-card: rgba(255,255,255,0.07); --bg-card-hover: rgba(255,255,255,0.12);
+      --border: rgba(255,255,255,0.15); --text: #e2e8f0; --text-dim: #94a3b8;
+      --correct: #22c55e; --wrong: #ef4444; --radius: 12px;
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #1a0533, #3b0764, #1e1b4b);
+      min-height: 100vh; color: var(--text);
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .top-bar { width: 100%; max-width: 680px; display: flex; align-items: center; padding: 18px 20px 0; }
+    .back-link { color: #f9a8d4; text-decoration: none; font-size: 1.1rem; font-weight: 600; transition: color 0.2s; }
+    .back-link:hover { color: #fff; }
+    h1 {
+      text-align: center; font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 800;
+      background: linear-gradient(90deg, #ec4899, #f472b6, #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      padding: 18px 20px 4px;
+    }
+    .subtitle { text-align: center; color: var(--text-dim); font-size: 0.95rem; margin-bottom: 24px; }
+    .screen { display: none; width: 100%; max-width: 560px; padding: 0 16px 40px; }
+    .screen.active { display: block; }
+
+    .section-label {
+      font-size: 0.82rem; color: var(--text-dim); text-transform: uppercase;
+      letter-spacing: 0.1em; margin-bottom: 12px;
+    }
+    .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 22px; }
+    .diff-grid  { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
+
+    .menu-btn {
+      background: var(--bg-card); border: 2px solid var(--border); color: var(--text);
+      padding: 12px 8px; border-radius: var(--radius); cursor: pointer;
+      font-size: 0.88rem; text-align: center; transition: all 0.2s; line-height: 1.3;
+    }
+    .menu-btn:hover { background: var(--bg-card-hover); border-color: var(--accent); transform: translateY(-2px); }
+    .menu-btn.selected { background: rgba(236,72,153,0.2); border-color: var(--accent); color: var(--accent-hover); font-weight: 700; }
+    .menu-btn .clef-char { display: block; font-size: 3rem; line-height: 1.1; margin: 0 auto 4px; font-family: 'Times New Roman', Georgia, 'Palatino Linotype', serif; }
+    .menu-btn small { display: block; font-size: 0.72rem; color: var(--text-dim); font-weight: 400; margin-top: 2px; }
+
+    .primary-btn {
+      display: block; width: 100%; max-width: 260px; margin: 0 auto;
+      padding: 14px; background: var(--accent); color: #fff;
+      font-size: 1.1rem; font-weight: 700; border: none; border-radius: var(--radius);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .primary-btn:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(236,72,153,0.4); }
+    .primary-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .game-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .stat-label { font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+    .stat-val { font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+
+    .progress-track { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-bottom: 26px; }
+    #progress-bar { height: 100%; background: linear-gradient(90deg, #ec4899, #a78bfa); border-radius: 3px; transition: width 0.4s ease; }
+
+    .staff-card {
+      background: #faf7f0; border-radius: 16px; padding: 14px 8px; margin-bottom: 26px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5); display: flex; justify-content: center;
+    }
+    .staff-svg { display: block; width: 100%; max-width: 460px; }
+
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .option-btn {
+      padding: 18px 12px; background: var(--bg-card); border: 2px solid var(--border);
+      color: var(--text); border-radius: var(--radius); cursor: pointer;
+      font-size: 1.5rem; font-weight: 800; text-align: center; transition: all 0.18s;
+    }
+    .option-btn:hover:not(:disabled) { background: var(--bg-card-hover); border-color: var(--accent); transform: translateY(-2px); }
+    .option-btn:disabled { cursor: default; }
+    .option-btn.correct { background: rgba(34,197,94,0.18); border-color: var(--correct); color: #86efac; }
+    .option-btn.wrong   { background: rgba(239,68,68,0.18); border-color: var(--wrong); color: #fca5a5; }
+
+    #feedback { text-align: center; font-size: 1rem; font-weight: 700; min-height: 24px; margin-bottom: 4px; }
+    #feedback.correct { color: var(--correct); }
+    #feedback.wrong   { color: var(--wrong); }
+
+    .result-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 36px 28px; text-align: center; }
+    .result-card h2 {
+      font-size: 2rem; font-weight: 800; margin-bottom: 6px;
+      background: linear-gradient(90deg, #ec4899, #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .result-stats { display: flex; justify-content: center; gap: 40px; margin: 28px 0; }
+    .res-stat .num { font-size: 3rem; font-weight: 900; color: var(--accent); line-height: 1; }
+    .res-stat .lbl { font-size: 0.8rem; color: var(--text-dim); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .result-actions { display: flex; gap: 14px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+    .sec-btn {
+      padding: 10px 22px; background: var(--bg-card); border: 1px solid var(--border);
+      color: var(--text); border-radius: var(--radius); cursor: pointer;
+      font-size: 0.95rem; font-weight: 600; transition: all 0.2s;
+    }
+    .sec-btn:hover { background: var(--bg-card-hover); border-color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a class="back-link" href="../index.html">← Back to Arcade</a>
+</div>
+<h1>🎼 Music Notes</h1>
+<p class="subtitle">Can you name the note on the staff?</p>
+
+<!-- MENU -->
+<div class="screen active" id="screen-menu">
+  <p class="section-label">Clef</p>
+  <div class="menu-grid">
+    <button class="menu-btn" onclick="selectClef('treble')">
+      <span class="clef-char">𝄞</span>
+      Treble Clef
+      <small>(G Clef)</small>
+    </button>
+    <button class="menu-btn" onclick="selectClef('bass')">
+      <span class="clef-char">𝄢</span>
+      Bass Clef
+      <small>(F Clef)</small>
+    </button>
+    <button class="menu-btn" onclick="selectClef('alto')">
+      <span class="clef-char">𝄡</span>
+      Alto Clef
+      <small>(C Clef)</small>
+    </button>
+  </div>
+
+  <p class="section-label">Difficulty</p>
+  <div class="diff-grid">
+    <button class="menu-btn" onclick="selectDiff('beginner')">🌱 Beginner<small>Lines only</small></button>
+    <button class="menu-btn" onclick="selectDiff('easy')">⭐ Easy<small>Lower half</small></button>
+    <button class="menu-btn" onclick="selectDiff('all')">🎯 Full Staff<small>All notes</small></button>
+  </div>
+  <button class="primary-btn" id="start-btn" disabled onclick="startGame()">▶ Start</button>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="screen-game">
+  <div class="game-header">
+    <div><div class="stat-label">Score</div><div class="stat-val" id="score-val">0</div></div>
+    <div style="text-align:right;"><div class="stat-label">Question</div><div class="stat-val" id="q-val">1 / 10</div></div>
+  </div>
+  <div class="progress-track"><div id="progress-bar" style="width:10%"></div></div>
+  <div class="staff-card">
+    <svg class="staff-svg" id="staff-svg" viewBox="0 0 420 155" xmlns="http://www.w3.org/2000/svg" overflow="visible"></svg>
+  </div>
+  <div id="feedback"></div>
+  <div class="options-grid" id="options-grid"></div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="screen-result">
+  <div class="result-card">
+    <h2 id="result-title">Well Done!</h2>
+    <p id="result-sub" style="color:var(--text-dim);margin-top:6px;font-size:0.95rem;"></p>
+    <div class="result-stats">
+      <div class="res-stat"><div class="num" id="res-score">0</div><div class="lbl">Correct</div></div>
+      <div class="res-stat"><div class="num" id="res-out-of">10</div><div class="lbl">Questions</div></div>
+    </div>
+    <div id="res-record" style="display:none;text-align:center;margin:8px 0;font-size:0.9rem;color:#f9a8d4;font-weight:700"></div>
+    <div class="result-actions">
+      <button class="primary-btn" style="max-width:160px;" onclick="startGame()">Play Again</button>
+      <button class="sec-btn" onclick="showMenu()">Menu</button>
+    </div>
+  </div>
+</div>
+
+<script src="../scores.js"></script>
+<script>
+// ── Staff layout ──────────────────────────────────────────────────────────────
+// 5 lines at y = 38, 54, 70, 86, 102  (spacing = 16, half-step = 8)
+const SY = { top: 38, sp: 16 };  // top line y, line spacing
+
+function lineY(i) { return SY.top + i * SY.sp; }   // i=0..4
+function stepY(s) { return SY.top + s * (SY.sp / 2); } // s=0..10
+
+// ── Note pools per clef ───────────────────────────────────────────────────────
+// steps 0-10: 0=top line, 2=4th line, 4=middle line, 6=2nd line, 8=bottom line
+// odd = spaces, even = lines; step 10 = ledger line below staff
+
+const CLEF_NOTES = {
+  treble: [
+    { name:'F', steps:0  }, { name:'E', steps:1  }, { name:'D', steps:2  },
+    { name:'C', steps:3  }, { name:'B', steps:4  }, { name:'A', steps:5  },
+    { name:'G', steps:6  }, { name:'F', steps:7  }, { name:'E', steps:8  },
+    { name:'D', steps:9  }, { name:'C', steps:10, ledger:true },
+  ],
+  bass: [
+    { name:'A', steps:0  }, { name:'G', steps:1  }, { name:'F', steps:2  },
+    { name:'E', steps:3  }, { name:'D', steps:4  }, { name:'C', steps:5  },
+    { name:'B', steps:6  }, { name:'A', steps:7  }, { name:'G', steps:8  },
+    { name:'F', steps:9  }, { name:'E', steps:10, ledger:true },
+  ],
+  alto: [
+    { name:'G', steps:0  }, { name:'F', steps:1  }, { name:'E', steps:2  },
+    { name:'D', steps:3  }, { name:'C', steps:4  }, { name:'B', steps:5  },
+    { name:'A', steps:6  }, { name:'G', steps:7  }, { name:'F', steps:8  },
+    { name:'E', steps:9  }, { name:'D', steps:10, ledger:true },
+  ],
+};
+
+const DIFF_POOLS = {
+  beginner: [0, 2, 4, 6, 8],
+  easy:     [4, 5, 6, 7, 8, 9, 10],
+  all:      [0,1,2,3,4,5,6,7,8,9,10],
+};
+
+const ALL_NAMES = ['C','D','E','F','G','A','B'];
+const TOTAL_Q = 10;
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let selectedClef = null, selectedDiff = null;
+let pool = [], usedSet = new Set(), currentNotes = [];
+let questionNum = 0, score = 0, answered = false;
+
+// ── Menu ──────────────────────────────────────────────────────────────────────
+function selectClef(c) {
+  selectedClef = c;
+  document.querySelectorAll('.menu-grid .menu-btn').forEach(b => {
+    b.classList.toggle('selected',
+      (c==='treble' && b.textContent.includes('Treble')) ||
+      (c==='bass'   && b.textContent.includes('Bass'))   ||
+      (c==='alto'   && b.textContent.includes('Alto'))
+    );
+  });
+  checkReady();
+}
+
+function selectDiff(d) {
+  selectedDiff = d;
+  document.querySelectorAll('.diff-grid .menu-btn').forEach(b => {
+    b.classList.toggle('selected',
+      (d==='beginner' && b.textContent.includes('Beginner')) ||
+      (d==='easy'     && b.textContent.includes('Easy'))     ||
+      (d==='all'      && b.textContent.includes('Full'))
+    );
+  });
+  checkReady();
+}
+
+function checkReady() {
+  document.getElementById('start-btn').disabled = !(selectedClef && selectedDiff);
+}
+
+function showMenu() { showScreen('menu'); }
+function showScreen(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + n).classList.add('active');
+}
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+// ── Clef characters ───────────────────────────────────────────────────────────
+const CLEF_CHARS = { treble: '𝄞', bass: '𝄢', alto: '𝄡' };
+
+// ── Staff rendering ───────────────────────────────────────────────────────────
+function drawStaff(note) {
+  const lc = '#1a1a2e';
+  let h = '';
+
+  // 5 staff lines (start at x=70 to leave room for clef on the left)
+  for (let i = 0; i < 5; i++) {
+    const y = lineY(i);
+    h += `<line x1="70" y1="${y}" x2="400" y2="${y}" stroke="${lc}" stroke-width="1.5"/>`;
+  }
+  // Right bar line
+  h += `<line x1="400" y1="${lineY(0)}" x2="400" y2="${lineY(4)}" stroke="${lc}" stroke-width="2"/>`;
+
+  // Clef symbol: Unicode character to the left of the staff lines
+  // overflow="visible" on the SVG handles any characters that render taller than the viewBox
+  h += `<text x="6" y="108" font-size="86" font-family="'Times New Roman', Georgia, 'Palatino Linotype', serif" fill="${lc}">${CLEF_CHARS[selectedClef]}</text>`;
+
+  // Note
+  const ny = stepY(note.steps);
+  const nx = 300, rx = 11, ry = 8;
+
+  if (note.ledger) {
+    h += `<line x1="${nx-18}" y1="${ny}" x2="${nx+18}" y2="${ny}" stroke="${lc}" stroke-width="1.5"/>`;
+  }
+  // Stem: up if below middle line (steps >= 4), down otherwise
+  const up = note.steps >= 4;
+  if (up) {
+    h += `<line x1="${nx+rx-1}" y1="${ny}" x2="${nx+rx-1}" y2="${ny-50}" stroke="${lc}" stroke-width="2.2"/>`;
+  } else {
+    h += `<line x1="${nx-rx+1}" y1="${ny}" x2="${nx-rx+1}" y2="${ny+50}" stroke="${lc}" stroke-width="2.2"/>`;
+  }
+  // Note head
+  h += `<ellipse cx="${nx}" cy="${ny}" rx="${rx}" ry="${ry}" transform="rotate(-12,${nx},${ny})" fill="${lc}"/>`;
+
+  document.getElementById('staff-svg').innerHTML = h;
+}
+
+// ── Game logic ────────────────────────────────────────────────────────────────
+function startGame() {
+  pool = shuffle(DIFF_POOLS[selectedDiff]);
+  usedSet = new Set();
+  currentNotes = CLEF_NOTES[selectedClef];
+  questionNum = 0; score = 0;
+  showScreen('game');
+  nextQuestion();
+}
+
+function nextQuestion() {
+  if (questionNum >= TOTAL_Q) { endGame(); return; }
+  answered = false;
+  questionNum++;
+  document.getElementById('score-val').textContent = score;
+  document.getElementById('q-val').textContent = questionNum + ' / ' + TOTAL_Q;
+  document.getElementById('progress-bar').style.width = ((questionNum-1)/TOTAL_Q*100) + '%';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = '';
+
+  if (usedSet.size >= pool.length) usedSet.clear();
+  let idx;
+  do { idx = pool[Math.floor(Math.random()*pool.length)]; } while (usedSet.has(idx));
+  usedSet.add(idx);
+
+  const note = currentNotes[idx];
+  drawStaff(note);
+
+  const correct = note.name;
+  const wrongs = shuffle(ALL_NAMES.filter(n => n !== correct)).slice(0, 3);
+  const options = shuffle([correct, ...wrongs]);
+
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  options.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = name;
+    btn.onclick = () => answer(btn, name === correct, correct);
+    grid.appendChild(btn);
+  });
+}
+
+function answer(btn, isCorrect, correctName) {
+  if (answered) return;
+  answered = true;
+  document.querySelectorAll('.option-btn').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correctName) b.classList.add('correct');
+  });
+  if (isCorrect) { score++; setFeedback('✓ Correct!', 'correct'); }
+  else { btn.classList.add('wrong'); setFeedback('✗ It was ' + correctName, 'wrong'); }
+  setTimeout(nextQuestion, 1200);
+}
+
+function setFeedback(t, c) {
+  const el = document.getElementById('feedback');
+  el.textContent = t; el.className = c;
+}
+
+function endGame() {
+  document.getElementById('progress-bar').style.width = '100%';
+  const levelKey = selectedClef + '_' + selectedDiff;
+  const isRecord = ArcadeScores.save('music-notes', score, levelKey);
+  const best = ArcadeScores.get('music-notes', levelKey);
+  showScreen('result');
+  const titles = ['Keep Practicing!', 'Getting There!', 'Nice Work!', 'Great Job!', 'Perfect Score!'];
+  document.getElementById('result-title').textContent = titles[Math.floor(score/TOTAL_Q*(titles.length-1))];
+  document.getElementById('result-sub').textContent = Math.round(score/TOTAL_Q*100) + '% correct';
+  document.getElementById('res-score').textContent = score;
+  document.getElementById('res-out-of').textContent = TOTAL_Q;
+  const recEl = document.getElementById('res-record');
+  if (best) { recEl.style.display = 'block'; recEl.textContent = isRecord ? '🏆 New Record!' : '🏆 Best: ' + best.score + ' / ' + TOTAL_Q; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0" />
+  <title>Music Melodies</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #ec4899;
+      --accent-hover: #f472b6;
+      --bg-card: rgba(255,255,255,0.07);
+      --bg-card-hover: rgba(255,255,255,0.12);
+      --border: rgba(255,255,255,0.15);
+      --text: #e2e8f0;
+      --text-dim: #94a3b8;
+      --correct: #22c55e;
+      --wrong: #ef4444;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #1a0533, #3b0764, #1e1b4b);
+      min-height: 100vh;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .top-bar {
+      width: 100%; max-width: 760px;
+      display: flex; align-items: center;
+      padding: 18px 20px 0;
+    }
+    .back-link {
+      color: #f9a8d4; text-decoration: none;
+      font-size: 1.1rem; font-weight: 600; transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    h1 {
+      text-align: center; font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 800;
+      background: linear-gradient(90deg, #ec4899, #f472b6, #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      padding: 18px 20px 4px;
+    }
+    .subtitle { text-align: center; color: var(--text-dim); font-size: 0.95rem; margin-bottom: 28px; }
+
+    .screen { display: none; width: 100%; max-width: 680px; padding: 0 16px 40px; }
+    .screen.active { display: block; }
+
+    /* ── Menu ── */
+    .section-label {
+      font-size: 0.82rem; color: var(--text-dim); text-transform: uppercase;
+      letter-spacing: 0.1em; margin-bottom: 12px;
+    }
+    .menu-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px; margin-bottom: 24px;
+    }
+    .menu-btn {
+      background: var(--bg-card); border: 2px solid var(--border);
+      color: var(--text); padding: 14px 10px; border-radius: var(--radius);
+      cursor: pointer; font-size: 0.95rem; text-align: center; transition: all 0.2s;
+    }
+    .menu-btn:hover { background: var(--bg-card-hover); border-color: var(--accent); transform: translateY(-2px); }
+    .menu-btn.selected {
+      background: rgba(236,72,153,0.2); border-color: var(--accent);
+      color: var(--accent-hover); font-weight: 700;
+    }
+    .menu-btn.all-btn {
+      grid-column: 1 / -1;
+      background: rgba(236,72,153,0.1); border-color: rgba(236,72,153,0.35);
+    }
+
+    .primary-btn {
+      display: block; width: 100%; max-width: 260px; margin: 0 auto;
+      padding: 14px; background: var(--accent); color: #fff;
+      font-size: 1.1rem; font-weight: 700; border: none; border-radius: var(--radius);
+      cursor: pointer; transition: all 0.2s; text-align: center;
+    }
+    .primary-btn:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(236,72,153,0.4); }
+    .primary-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ── Game ── */
+    .game-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;
+    }
+    .stat-label { font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+    .stat-val { font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+
+    .progress-track {
+      width: 100%; height: 6px; background: rgba(255,255,255,0.1);
+      border-radius: 3px; overflow: hidden; margin-bottom: 24px;
+    }
+    #progress-bar {
+      height: 100%; background: linear-gradient(90deg, #ec4899, #a78bfa);
+      border-radius: 3px; transition: width 0.4s ease;
+    }
+
+    .cat-badge {
+      text-align: center; font-size: 0.78rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-dim); margin-bottom: 14px;
+    }
+
+    /* Note bubbles */
+    .notes-stage {
+      background: rgba(0,0,0,0.25); border-radius: 16px;
+      padding: 22px 16px; margin-bottom: 22px;
+      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+      min-height: 100px; align-items: center;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .note-bubble {
+      width: 52px; height: 52px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 900; color: #fff;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+      animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+      flex-shrink: 0;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+    .note-bubble.rest {
+      background: rgba(255,255,255,0.12) !important;
+      box-shadow: none;
+      color: rgba(255,255,255,0.3);
+      font-size: 1.4rem;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.5); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* Note colors */
+    .note-C  { background: radial-gradient(circle at 35% 35%, #f87171, #dc2626); }
+    .note-D  { background: radial-gradient(circle at 35% 35%, #fb923c, #ea580c); }
+    .note-E  { background: radial-gradient(circle at 35% 35%, #fbbf24, #d97706); }
+    .note-F  { background: radial-gradient(circle at 35% 35%, #4ade80, #16a34a); }
+    .note-G  { background: radial-gradient(circle at 35% 35%, #22d3ee, #0891b2); }
+    .note-A  { background: radial-gradient(circle at 35% 35%, #818cf8, #4f46e5); }
+    .note-B  { background: radial-gradient(circle at 35% 35%, #c084fc, #9333ea); }
+    .note-Cs { background: radial-gradient(circle at 35% 35%, #fca5a5, #f43f5e); }
+    .note-Ds { background: radial-gradient(circle at 35% 35%, #fdba74, #f97316); }
+    .note-Fs { background: radial-gradient(circle at 35% 35%, #86efac, #22c55e); }
+    .note-Gs { background: radial-gradient(circle at 35% 35%, #67e8f9, #06b6d4); }
+    .note-As { background: radial-gradient(circle at 35% 35%, #a5b4fc, #6366f1); }
+
+    /* Options */
+    .options-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-bottom: 16px;
+    }
+    .option-btn {
+      padding: 14px 12px; background: var(--bg-card);
+      border: 2px solid var(--border); color: var(--text);
+      border-radius: var(--radius); cursor: pointer;
+      font-size: 0.92rem; font-weight: 600; text-align: center;
+      transition: all 0.18s; line-height: 1.3;
+    }
+    .option-btn:hover:not(:disabled) { background: var(--bg-card-hover); border-color: var(--accent); transform: translateY(-2px); }
+    .option-btn:disabled { cursor: default; }
+    .option-btn.correct { background: rgba(34,197,94,0.18); border-color: var(--correct); color: #86efac; }
+    .option-btn.wrong   { background: rgba(239,68,68,0.18); border-color: var(--wrong); color: #fca5a5; }
+
+    #feedback {
+      text-align: center; font-size: 1rem; font-weight: 700;
+      min-height: 24px; margin-bottom: 4px;
+    }
+    #feedback.correct { color: var(--correct); }
+    #feedback.wrong   { color: var(--wrong); }
+
+    /* ── Result ── */
+    .result-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 18px; padding: 36px 28px; text-align: center;
+    }
+    .result-card h2 {
+      font-size: 2rem; font-weight: 800; margin-bottom: 6px;
+      background: linear-gradient(90deg, #ec4899, #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .result-stats { display: flex; justify-content: center; gap: 40px; margin: 28px 0; }
+    .res-stat { text-align: center; }
+    .res-stat .num { font-size: 3rem; font-weight: 900; color: var(--accent); line-height: 1; }
+    .res-stat .lbl { font-size: 0.8rem; color: var(--text-dim); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .result-actions { display: flex; gap: 14px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+    .sec-btn {
+      padding: 10px 22px; background: var(--bg-card); border: 1px solid var(--border);
+      color: var(--text); border-radius: var(--radius); cursor: pointer;
+      font-size: 0.95rem; font-weight: 600; transition: all 0.2s;
+    }
+    .sec-btn:hover { background: var(--bg-card-hover); border-color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a class="back-link" href="../index.html">← Back to Arcade</a>
+</div>
+
+<h1>🎵 Music Melodies</h1>
+<p class="subtitle">Guess the melody from the colored note bubbles!</p>
+
+<!-- MENU -->
+<div class="screen active" id="screen-menu">
+  <p class="section-label">Choose a category</p>
+  <div class="menu-grid">
+    <button class="menu-btn all-btn" onclick="selectCat('all')">All Categories</button>
+    <button class="menu-btn" onclick="selectCat('classical')">🎻 Classical</button>
+    <button class="menu-btn" onclick="selectCat('film')">🎬 Film &amp; TV</button>
+    <button class="menu-btn" onclick="selectCat('pop')">🎸 Pop &amp; Rock</button>
+  </div>
+  <button class="primary-btn" id="start-btn" disabled onclick="startGame()">▶ Start</button>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="screen-game">
+  <div class="game-header">
+    <div>
+      <div class="stat-label">Score</div>
+      <div class="stat-val" id="score-val">0</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="stat-label">Question</div>
+      <div class="stat-val" id="q-val">1 / 10</div>
+    </div>
+  </div>
+  <div class="progress-track"><div id="progress-bar" style="width:10%"></div></div>
+
+  <div class="cat-badge" id="cat-badge"></div>
+  <div class="notes-stage" id="notes-stage"></div>
+  <div id="feedback"></div>
+  <div class="options-grid" id="options-grid"></div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="screen-result">
+  <div class="result-card">
+    <h2 id="result-title">Well Done!</h2>
+    <p id="result-sub" style="color:var(--text-dim); margin-top:6px; font-size:0.95rem;"></p>
+    <div class="result-stats">
+      <div class="res-stat">
+        <div class="num" id="res-score">0</div>
+        <div class="lbl">Correct</div>
+      </div>
+      <div class="res-stat">
+        <div class="num" id="res-out-of">10</div>
+        <div class="lbl">Questions</div>
+      </div>
+    </div>
+    <div id="res-record" style="display:none; text-align:center; margin:8px 0; font-size:0.9rem; color:#f9a8d4; font-weight:700"></div>
+    <div class="result-actions">
+      <button class="primary-btn" style="max-width:160px;" onclick="startGame()">Play Again</button>
+      <button class="sec-btn" onclick="showMenu()">Menu</button>
+    </div>
+  </div>
+</div>
+
+<script src="../scores.js"></script>
+<script>
+// ── Note color map ────────────────────────────────────────────────────────────
+const NOTE_CLASS = {
+  'C': 'note-C', 'C#': 'note-Cs', 'Db': 'note-Cs',
+  'D': 'note-D', 'D#': 'note-Ds', 'Eb': 'note-Ds',
+  'E': 'note-E',
+  'F': 'note-F', 'F#': 'note-Fs', 'Gb': 'note-Fs',
+  'G': 'note-G', 'G#': 'note-Gs', 'Ab': 'note-Gs',
+  'A': 'note-A', 'A#': 'note-As', 'Bb': 'note-As',
+  'B': 'note-B',
+  '-': 'rest',
+};
+
+// ── Melody data ───────────────────────────────────────────────────────────────
+// notes: array of note names (use '-' for rest/space)
+const MELODIES = [
+  // ── Classical ────────────────────────────────────────────────────────────
+  {
+    title: 'Twinkle Twinkle',
+    cat: 'classical',
+    notes: ['C','C','G','G','A','A','G','-','F','F','E','E','D','D','C'],
+  },
+  {
+    title: 'Happy Birthday',
+    cat: 'classical',
+    notes: ['C','C','D','C','F','E','-','C','C','D','C','G','F'],
+  },
+  {
+    title: 'Mary Had a Little Lamb',
+    cat: 'classical',
+    notes: ['E','D','C','D','E','E','E','-','D','D','D','-','E','G','G'],
+  },
+  {
+    title: 'Ode to Joy',
+    cat: 'classical',
+    notes: ['E','E','F','G','G','F','E','D','C','C','D','E','E','D','D'],
+  },
+  {
+    title: 'Für Elise',
+    cat: 'classical',
+    notes: ['E','D#','E','D#','E','B','D','C','A'],
+  },
+  {
+    title: "Beethoven's 5th",
+    cat: 'classical',
+    notes: ['G','G','G','Eb','-','F','F','F','D'],
+  },
+  {
+    title: 'Frère Jacques',
+    cat: 'classical',
+    notes: ['C','D','E','C','-','C','D','E','C','-','E','F','G'],
+  },
+  {
+    title: 'Canon in D',
+    cat: 'classical',
+    notes: ['F#','E','D','C#','B','A','B','C#'],
+  },
+  {
+    title: 'Jingle Bells',
+    cat: 'classical',
+    notes: ['E','E','E','-','E','E','E','-','E','G','C','D','E'],
+  },
+  {
+    title: 'Moonlight Sonata',
+    cat: 'classical',
+    notes: ['G#','C#','E','-','A','C#','E','-','A','B','E'],
+  },
+  // ── Film & TV ─────────────────────────────────────────────────────────────
+  {
+    title: 'Star Wars Theme',
+    cat: 'film',
+    notes: ['G','G','G','C','G','-','F','E','D','C','G'],
+  },
+  {
+    title: 'Imperial March',
+    cat: 'film',
+    notes: ['G','G','G','Eb','Bb','G','Eb','Bb','G'],
+  },
+  {
+    title: 'Jaws',
+    cat: 'film',
+    notes: ['E','F','-','E','F','-','E','F','E','F','E','F'],
+  },
+  {
+    title: 'James Bond Theme',
+    cat: 'film',
+    notes: ['E','F','G#','A','-','G#','A','-','G#','A','D'],
+  },
+  {
+    title: 'Mission Impossible',
+    cat: 'film',
+    notes: ['E','F','-','F','E','-','E','F','-','F','E'],
+  },
+  {
+    title: 'The Godfather',
+    cat: 'film',
+    notes: ['E','A','B','-','E','A','-','B','C','B','A'],
+  },
+  {
+    title: 'Axel F',
+    cat: 'film',
+    notes: ['F','Ab','F','F','Ab','Bb','F','Bb','F'],
+  },
+  // ── Pop & Rock ────────────────────────────────────────────────────────────
+  {
+    title: 'Smoke on the Water',
+    cat: 'pop',
+    notes: ['G','Bb','B','-','G','Bb','C#','C','-','G','Bb','B','Bb','G'],
+  },
+  {
+    title: 'Seven Nation Army',
+    cat: 'pop',
+    notes: ['E','E','G','E','D','C','-','B','B','C','B','A'],
+  },
+  {
+    title: 'Sweet Child O\' Mine',
+    cat: 'pop',
+    notes: ['D','D','A','B','D','E','D','A','B'],
+  },
+  {
+    title: 'Super Mario Bros.',
+    cat: 'pop',
+    notes: ['E','E','-','E','-','C','E','-','G','-','-','-','G'],
+  },
+  {
+    title: 'Tetris Theme',
+    cat: 'pop',
+    notes: ['E','B','C','D','-','C','A','A','-','A','B','C'],
+  },
+];
+
+const CAT_LABELS = {
+  classical: '🎻 Classical',
+  film: '🎬 Film & TV',
+  pop: '🎸 Pop & Rock',
+};
+
+const TOTAL_Q = 10;
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let selectedCat = null;
+let pool = [], usedIndices = new Set();
+let questionNum = 0, score = 0;
+let answered = false;
+
+// ── Menu ──────────────────────────────────────────────────────────────────────
+function selectCat(c) {
+  selectedCat = c;
+  document.querySelectorAll('.menu-btn').forEach(b => {
+    const text = b.textContent;
+    const match = (c === 'all' && text.includes('All')) ||
+                  (c === 'classical' && text.includes('Classical')) ||
+                  (c === 'film' && text.includes('Film')) ||
+                  (c === 'pop' && text.includes('Pop'));
+    b.classList.toggle('selected', match);
+  });
+  document.getElementById('start-btn').disabled = false;
+}
+
+function showMenu() {
+  showScreen('menu');
+}
+
+function showScreen(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + n).classList.add('active');
+}
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── Game ──────────────────────────────────────────────────────────────────────
+function startGame() {
+  pool = selectedCat === 'all' ? MELODIES.slice() : MELODIES.filter(m => m.cat === selectedCat);
+  pool = shuffle(pool);
+  usedIndices = new Set();
+  questionNum = 0;
+  score = 0;
+  showScreen('game');
+  nextQuestion();
+}
+
+function nextQuestion() {
+  if (questionNum >= TOTAL_Q) { endGame(); return; }
+  answered = false;
+  questionNum++;
+  document.getElementById('score-val').textContent = score;
+  document.getElementById('q-val').textContent = questionNum + ' / ' + TOTAL_Q;
+  document.getElementById('progress-bar').style.width = ((questionNum - 1) / TOTAL_Q * 100) + '%';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = '';
+
+  // Pick correct melody
+  const available = pool.filter((_, i) => !usedIndices.has(i));
+  const correctIdx = Math.floor(Math.random() * available.length);
+  const correct = available[correctIdx];
+  usedIndices.add(pool.indexOf(correct));
+
+  // Category badge
+  document.getElementById('cat-badge').textContent = CAT_LABELS[correct.cat] || '';
+
+  // Render notes
+  const stage = document.getElementById('notes-stage');
+  stage.innerHTML = '';
+  const displayNotes = correct.notes.slice(0, 16); // max 16 bubbles
+  displayNotes.forEach((n, i) => {
+    const div = document.createElement('div');
+    div.className = 'note-bubble ' + (NOTE_CLASS[n] || 'note-C');
+    div.textContent = n === '-' ? '·' : n;
+    div.style.animationDelay = (i * 60) + 'ms';
+    stage.appendChild(div);
+  });
+
+  // Pick 3 wrong options from same pool
+  const others = shuffle(MELODIES.filter(m => m.title !== correct.title));
+  const wrongs = others.slice(0, 3);
+  const options = shuffle([correct, ...wrongs]);
+
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  options.forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = m.title;
+    btn.onclick = () => answer(btn, m.title === correct.title, correct.title);
+    grid.appendChild(btn);
+  });
+}
+
+function answer(btn, isCorrect, correctTitle) {
+  if (answered) return;
+  answered = true;
+
+  const grid = document.getElementById('options-grid');
+  grid.querySelectorAll('.option-btn').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correctTitle) b.classList.add('correct');
+  });
+
+  if (isCorrect) {
+    score++;
+    btn.classList.add('correct');
+    setFeedback('✓ Correct!', 'correct');
+  } else {
+    btn.classList.add('wrong');
+    setFeedback('✗ That was: ' + correctTitle, 'wrong');
+  }
+
+  setTimeout(nextQuestion, 1400);
+}
+
+function setFeedback(text, cls) {
+  const el = document.getElementById('feedback');
+  el.textContent = text;
+  el.className = cls;
+}
+
+function endGame() {
+  const isRecord = ArcadeScores.save('music-melodies', score, selectedCat || 'all');
+  const best = ArcadeScores.get('music-melodies', selectedCat || 'all');
+  const pct = Math.round(score / TOTAL_Q * 100);
+
+  document.getElementById('progress-bar').style.width = '100%';
+  showScreen('result');
+
+  const titles = ['Keep Practicing!', 'Not Bad!', 'Well Done!', 'Impressive!', 'Perfect Score!'];
+  const titleIdx = score <= 2 ? 0 : score <= 4 ? 1 : score <= 6 ? 2 : score <= 9 ? 3 : 4;
+  document.getElementById('result-title').textContent = titles[titleIdx];
+  document.getElementById('result-sub').textContent = pct + '% correct';
+  document.getElementById('res-score').textContent = score;
+  document.getElementById('res-out-of').textContent = TOTAL_Q;
+
+  const recEl = document.getElementById('res-record');
+  if (best) {
+    recEl.style.display = 'block';
+    recEl.textContent = isRecord ? '🏆 New Record!' : '🏆 Best: ' + best.score + ' / ' + TOTAL_Q;
+  }
+}
+</script>
+</body>
+</html>
